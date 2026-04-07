@@ -1,0 +1,148 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base Styles ─────────────────────────────────────────── */
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 font-sans antialiased;
+  }
+
+  button {
+    @apply rounded-none;
+  }
+
+  input:not([type="checkbox"]):not([type="radio"]),
+  textarea,
+  select {
+    @apply rounded-[26px];
+  }
+
+  h1 {
+    @apply text-3xl font-bold;
+  }
+
+  h2 {
+    @apply text-2xl font-semibold;
+  }
+
+  h3 {
+    @apply text-xl font-semibold;
+  }
+}
+
+/* ─── Component Utilities ─────────────────────────────────── */
+@layer components {
+  .btn-primary {
+    @apply bg-primary-600 text-white px-6 py-2.5 font-medium rounded-none
+           hover:bg-primary-700 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-200 text-gray-800 px-6 py-2.5 font-medium rounded-none
+           hover:bg-gray-300 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2;
+  }
+
+  .btn-danger {
+    @apply bg-red-600 text-white px-6 py-2.5 font-medium rounded-none
+           hover:bg-red-700 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2;
+  }
+
+  .btn-accent {
+    @apply bg-accent-500 text-white px-6 py-2.5 font-medium rounded-none
+           hover:bg-accent-600 transition-colors duration-200
+           focus:outline-none focus:ring-2 focus:ring-accent-400 focus:ring-offset-2;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-2.5 border border-gray-300 rounded-[26px]
+           focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500
+           placeholder-gray-400 transition-colors duration-200;
+  }
+
+  .card {
+    @apply bg-white rounded-xl shadow-sm border border-gray-100 p-6;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+}
+
+/* ─── Rich Text Editor (Tiptap) content styles ────────────── */
+.rich-editor-content:focus {
+  outline: none;
+}
+
+.rich-editor-content .ProseMirror {
+  outline: none;
+  min-height: inherit;
+}
+
+/* Placeholder */
+.rich-editor-content .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  @apply text-gray-400 pointer-events-none float-left h-0;
+}
+
+/* Headings */
+.rich-editor-content .ProseMirror h1 { @apply text-2xl font-bold text-gray-900 mt-4 mb-2; }
+.rich-editor-content .ProseMirror h2 { @apply text-xl font-semibold text-gray-800 mt-3 mb-2; }
+.rich-editor-content .ProseMirror h3 { @apply text-lg font-semibold text-gray-800 mt-2 mb-1; }
+
+/* Paragraphs & spacing */
+.rich-editor-content .ProseMirror p { @apply text-gray-700 leading-relaxed mb-2; }
+.rich-editor-content .ProseMirror p:last-child { @apply mb-0; }
+
+/* Lists */
+.rich-editor-content .ProseMirror ul { @apply list-disc list-inside mb-3 space-y-1; }
+.rich-editor-content .ProseMirror ol { @apply list-decimal list-inside mb-3 space-y-1; }
+.rich-editor-content .ProseMirror li { @apply text-gray-700; }
+
+/* Blockquote */
+.rich-editor-content .ProseMirror blockquote {
+  @apply border-l-4 border-primary-400 pl-4 italic text-gray-600 my-3;
+}
+
+/* Code */
+.rich-editor-content .ProseMirror code {
+  @apply bg-gray-100 text-red-600 px-1 py-0.5 rounded text-xs font-mono;
+}
+.rich-editor-content .ProseMirror pre {
+  @apply bg-gray-900 text-gray-100 p-4 rounded-lg overflow-auto my-3 text-sm font-mono;
+}
+.rich-editor-content .ProseMirror pre code {
+  @apply bg-transparent text-gray-100 p-0;
+}
+
+/* Horizontal rule */
+.rich-editor-content .ProseMirror hr { @apply border-gray-200 my-4; }
+
+/* Links */
+.rich-editor-content .ProseMirror a {
+  @apply text-primary-600 underline hover:text-primary-700;
+}
+
+/* ─── Rich text render (public pages) — prose-like display ────
+   Applied to containers showing HTML produced by the editor.    */
+.rich-prose h1 { @apply text-2xl font-bold text-gray-900 mt-4 mb-2; }
+.rich-prose h2 { @apply text-xl font-semibold text-gray-800 mt-3 mb-2; }
+.rich-prose h3 { @apply text-lg font-semibold text-gray-800 mt-2 mb-1; }
+.rich-prose p  { @apply text-gray-600 leading-relaxed mb-3; }
+.rich-prose p:last-child { @apply mb-0; }
+.rich-prose ul { @apply list-disc list-inside mb-3 space-y-1 text-gray-600; }
+.rich-prose ol { @apply list-decimal list-inside mb-3 space-y-1 text-gray-600; }
+.rich-prose li { @apply text-gray-600; }
+.rich-prose blockquote { @apply border-l-4 border-primary-400 pl-4 italic text-gray-600 my-3; }
+.rich-prose a  { @apply text-primary-600 underline hover:text-primary-700; }
+.rich-prose code { @apply bg-gray-100 text-red-600 px-1 py-0.5 rounded text-xs font-mono; }
+.rich-prose hr { @apply border-gray-200 my-4; }
+.rich-prose strong { @apply font-semibold text-gray-800; }
+.rich-prose em { @apply italic; }
+
+/* MukonoTalks */
+

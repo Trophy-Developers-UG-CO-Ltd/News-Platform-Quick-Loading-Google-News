@@ -1,0 +1,27 @@
+﻿{
+  "name": "MukonoTalks Dev",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+  "forwardPorts": [5000, 3000, 27017],
+  "portsAttributes": {
+    "5000": { "label": "API Server", "onAutoForward": "notify" },
+    "3000": { "label": "Vite Client", "onAutoForward": "openBrowser" },
+    "27017": { "label": "MongoDB", "onAutoForward": "silent" }
+  },
+  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postStartCommand": "bash .devcontainer/startup.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "mongodb.mongodb-vscode",
+        "ms-azuretools.vscode-docker",
+        "bradlc.vscode-tailwindcss",
+        "christian-kohler.path-intellisense"
+      ]
+    }
+  },
+  "remoteEnv": {
+    "NODE_ENV": "development"
+  }
+}

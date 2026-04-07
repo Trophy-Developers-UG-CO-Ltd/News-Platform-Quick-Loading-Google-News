@@ -1,0 +1,41 @@
+const Joi = require("joi")
+
+exports.createHeroSchema = Joi.object({
+  title: Joi.string().required(),
+  eyebrow: Joi.string().optional().allow(''),
+  description: Joi.string().required(),
+  ctaText: Joi.string().required(),
+  ctaLink: Joi.string().required(),
+  largeImage: Joi.string().required(),
+  mobileImage: Joi.string().required(),
+  textBgColor: Joi.string().optional(),
+  order: Joi.number().required(),
+  isActive: Joi.boolean().optional(),
+  showEyebrow: Joi.boolean().optional(),
+  showTitle: Joi.boolean().optional(),
+  showDescription: Joi.boolean().optional(),
+  showCta: Joi.boolean().optional(),
+  titleTag: Joi.string().valid('h1', 'h2').optional(),
+  overlayOpacity: Joi.number().min(0).max(80).optional(),
+  textAlign: Joi.string().valid('left', 'center').optional(),
+})
+
+exports.updateHeroSchema = Joi.object({
+  title: Joi.string().optional(),
+  eyebrow: Joi.string().optional().allow(''),
+  description: Joi.string().optional(),
+  ctaText: Joi.string().optional(),
+  ctaLink: Joi.string().optional(),
+  largeImage: Joi.string().optional(),
+  mobileImage: Joi.string().optional(),
+  textBgColor: Joi.string().optional(),
+  order: Joi.number().optional(),
+  isActive: Joi.boolean().optional(),
+  showEyebrow: Joi.boolean().optional(),
+  showTitle: Joi.boolean().optional(),
+  showDescription: Joi.boolean().optional(),
+  showCta: Joi.boolean().optional(),
+  titleTag: Joi.string().valid('h1', 'h2').optional(),
+  overlayOpacity: Joi.number().min(0).max(80).optional(),
+  textAlign: Joi.string().valid('left', 'center').optional(),
+})

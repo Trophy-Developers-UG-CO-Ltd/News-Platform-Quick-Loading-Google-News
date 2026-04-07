@@ -1,0 +1,42 @@
+﻿services:
+  - type: web
+    name: mukonotalks
+    runtime: node
+    region: oregon
+    plan: free
+    rootDir: .
+
+    buildCommand: |
+      npm install
+      npm install --prefix server
+      cd client && npm install && npx vite build && cd ..
+
+    startCommand: npm start --prefix server
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: MONGO_URI
+        sync: false
+
+      - key: JWT_SECRET
+        sync: false
+
+      - key: JWT_REFRESH_SECRET
+        sync: false
+
+      - key: STRIPE_SECRET_KEY
+        sync: false
+
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+
+      - key: EMAIL_USER
+        sync: false
+
+      - key: EMAIL_PASSWORD
+        sync: false
+
+      - key: CLIENT_URL
+        sync: false

@@ -1,0 +1,28 @@
+# ENV (NEVER TRACK)
+.env
+.env.*
+server/.env*
+client/.env*
+
+# Dependencies
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Builds
+client/dist/
+client/build/
+server/dist/
+
+# Runtime
+server/uploads/
+server/logs/
+logs/
+*.log
+
+# Backup files
+*.tar.gz
+
+# OS / misc
+.DS_Store
+Thumbs.db

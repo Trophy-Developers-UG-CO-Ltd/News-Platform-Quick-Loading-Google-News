@@ -1,0 +1,10 @@
+services:
+  server:
+    image: mcr.microsoft.com/devcontainers/javascript-node:20
+    volumes:
+      - ..:/workspace:cached
+    working_dir: /workspace
+    command: sleep infinity   # keeps container alive; postCreateCommand does the rest
+  client:
+    volumes:
+      - ..:/workspace:cached

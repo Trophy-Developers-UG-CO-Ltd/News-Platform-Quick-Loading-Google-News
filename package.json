@@ -1,0 +1,28 @@
+﻿{
+  "name": "mukonotalks",
+  "version": "1.0.0",
+  "description": "MukonoTalks - Lean high-performance digital publishing platform",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "npm run dev --prefix server",
+    "client": "npm run dev --prefix client",
+    "install:all": "npm install && npm install --prefix server && npm install --prefix client",
+    "build": "npm run build --prefix client",
+    "start": "npm start --prefix server",
+    "test": "npm test --prefix server"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "MukonoTalks",
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@tanstack/react-query": "^5.90.21",
+    "motion": "^12.34.1"
+  }
+}
+

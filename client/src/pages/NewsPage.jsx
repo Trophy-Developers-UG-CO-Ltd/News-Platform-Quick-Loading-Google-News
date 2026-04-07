@@ -1,0 +1,119 @@
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
+import api from '../app/axios';
+import SchemaInjector from '../seo/components/SchemaInjector';
+import BannerAdSlot from '../components/ads/BannerAdSlot';
+
+const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://mukonotalks.ug';
+const LANGS = ['en', 'sw', 'zh'];
+
+const resolveLocalized = (value) => {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  return value.en || value.sw || value.zh || '';
+};
+
+const NewsPage = () => {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadArticles = async () => {
+      try {
+        const { data } = await api.get('/articles', { params: { page: 1, limit: 20 } });
+        if (mounted) {
+          setArticles(Array.isArray(data.articles) ? data.articles : []);
+        }
+      } catch (_) {
+        if (mounted) setArticles([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    loadArticles();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const itemListSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name: 'Mukono News',
+    url: `${BASE_URL}/news`,
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: articles
+        .filter((a) => a?.localizedSlug?.en)
+        .map((article, index) => ({
+          '@type': 'ListItem',
+          position: index + 1,
+          url: `${BASE_URL}/news/${article.localizedSlug.en}`,
+          name: resolveLocalized(article.title),
+        })),
+    },
+  };
+
+  return (
+    <div className="mx-auto w-full max-w-6xl px-4 py-8">
+      <Helmet>
+        <title>Mukono News | MukonoTalks</title>
+        <meta name="description" content="Latest news stories from Mukono and surrounding communities." />
+        <link rel="canonical" href={`${BASE_URL}/news`} />
+        {LANGS.map((lang) => (
+          <link key={lang} rel="alternate" hrefLang={lang} href={`${BASE_URL}/news?lang=${lang}`} />
+        ))}
+        <link rel="alternate" hrefLang="x-default" href={`${BASE_URL}/news`} />
+      </Helmet>
+
+      <SchemaInjector schemas={itemListSchema} />
+
+      <div className="mb-8 rounded-3xl bg-gray-900 p-6 text-white sm:p-8">
+        <h1 className="text-3xl font-bold">Latest News</h1>
+        <p className="mt-2 max-w-2xl text-sm text-gray-200 sm:text-base">
+          Fast-loading, SEO-friendly stories designed for discoverability and daily publishing.
+        </p>
+      </div>
+
+      <BannerAdSlot slotKey="newsTop" className="mb-6" />
+
+      {loading ? (
+        <p className="text-gray-600">Loading news...</p>
+      ) : articles.length === 0 ? (
+        <p className="text-gray-600">No published stories yet.</p>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {articles.map((article) => {
+            const title = resolveLocalized(article?.title) || 'Untitled story';
+            const slug = article?.localizedSlug?.en;
+            const excerpt = resolveLocalized(article?.excerpt) || 'No summary available.';
+
+            if (!slug) return null;
+
+            return (
+              <article key={article._id} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
+                <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">News</p>
+                <h2 className="mt-2 line-clamp-2 text-xl font-semibold text-gray-900">{title}</h2>
+                <p className="mt-3 line-clamp-3 text-sm text-gray-600">{excerpt}</p>
+                <Link
+                  to={`/news/${slug}`}
+                  className="mt-4 inline-block text-sm font-semibold text-primary-700 hover:text-primary-900"
+                >
+                  Read story
+                </Link>
+              </article>
+            );
+          })}
+        </div>
+      )}
+
+      <BannerAdSlot slotKey="newsInFeed" className="mt-6" />
+    </div>
+  );
+};
+
+export default NewsPage;

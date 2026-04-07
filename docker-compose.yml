@@ -1,0 +1,43 @@
+﻿version: '3.8'
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: mukonotalks-mongo
+    ports:
+      - '27017:27017'
+    volumes:
+      - mongo_data:/data/db
+    restart: unless-stopped
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: mukonotalks-server
+    ports:
+      - '5000:5000'
+    env_file:
+      - ./server/.env
+    depends_on:
+      - mongo
+    restart: unless-stopped
+
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: mukonotalks-client
+    ports:
+      - '3000:3000'
+    env_file:
+      - ./client/.env
+    depends_on:
+      - server
+    restart: unless-stopped
+
+volumes:
+  mongo_data:
+
+# MukonoTalks
+
