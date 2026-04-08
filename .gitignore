@@ -19,7 +19,7 @@ server/uploads/
 server/logs/
 logs/
 *.log
-
+deploy.sh
 # Backup files
 *.tar.gz
 
