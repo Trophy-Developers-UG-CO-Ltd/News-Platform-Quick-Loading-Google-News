@@ -28,7 +28,7 @@ const SOCIAL_LINKS = [
   },
   {
     label: 'YouTube',
-    href: 'https://www.youtube.com/mukonotalks',
+    href: 'https://www.youtube.com/@mukonotalks',
     Icon: FaYoutube,
   },
   {
