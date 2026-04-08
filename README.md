@@ -1,5 +1,5 @@
 # MukonoTalks
-
+# MukonoTalks -  Designed by Trophy Developers Uganda : https://www.trophydevelopers.com/uganda-web-designers/
 MukonoTalks is a lean MERN digital publishing platform focused on:
 
 - News articles
@@ -765,3 +765,4 @@ Engineer-level architecture
 Production-ready thinking
 Scalable to 100K+ users/day
 Cleanly aligned with your vision
+# MukonoTalks -  Designed by Trophy Developers Uganda : https://www.trophydevelopers.com/uganda-web-designers/

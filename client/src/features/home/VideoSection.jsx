@@ -16,9 +16,14 @@ const DEFAULT = {
     title: "Industrial Chemical Manufacturing",
     description: "See how industrial pigments, resins, and specialty chemical materials are sourced, quality-tested, and supplied to manufacturers across Africa.",
   },
-  videoUrl:     "https://www.youtube.com/embed/dQw4w9WgXcQ",
+  videoUrl:     "https://www.youtube.com/watch?v=ETOSTwqrFyU",
   thumbnailUrl: "https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=1280&q=80",
   videoCaption: "MukonoTalks · Manufacturing Process Overview",
+};
+
+const withAutoplay = (url) => {
+  if (!url) return '';
+  return `${url}${url.includes('?') ? '&' : '?'}autoplay=1`;
 };
 
 const fetchSection = async () => {
@@ -95,7 +100,7 @@ const VideoSection = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <iframe
-                src={`${videoUrl}?autoplay=1`}
+                src={withAutoplay(videoUrl)}
                 title={title || "Video"}
                 className="w-full h-full rounded-xl"
                 frameBorder="0"

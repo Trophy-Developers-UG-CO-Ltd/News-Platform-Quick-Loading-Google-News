@@ -242,3 +242,4 @@ const FeaturedProductsGrid = ({ headingless = false }) => {
 };
 
 export default FeaturedProductsGrid;
+// MukonoTalks:  //  Designed by Trophy Developers Uganda : https://www.trophydevelopers.com/uganda-web-designers/

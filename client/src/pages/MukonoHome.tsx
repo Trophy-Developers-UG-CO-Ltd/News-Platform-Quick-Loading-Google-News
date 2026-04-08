@@ -1,8 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
   Search,
+  X,
   Flame,
   PlayCircle,
   Briefcase,
@@ -14,7 +15,9 @@ import ThemeToggle from '../components/ui/ThemeToggle';
 import useThemeMode from '../hooks/useThemeMode';
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/800x500';
-const FALLBACK_VIDEO = 'https://www.youtube.com/embed/dQw4w9WgXcQ';
+const FALLBACK_VIDEO = 'https://www.youtube.com/watch?v=ETOSTwqrFyU';
+const TOP_STORY_IMAGE = 'https://i0.wp.com/mbu.ug/wp-content/uploads/2023/08/Bajjo-X-Abtex.webp?resize=800%2C600&ssl=1&w=370';
+const WHATSAPP_PHONE = '+256755303076';
 
 const getLocalized = (value: any) => {
   if (!value) return '';
@@ -45,13 +48,34 @@ const getArticleSlug = (article: any) => article?.localizedSlug?.en || '';
 const getArticleTitle = (article: any) => getLocalized(article?.title) || 'Untitled story';
 const getArticleExcerpt = (article: any) => stripHtml(getLocalized(article?.excerpt)) || 'No summary available.';
 
+const MOBILE_MENU_LINKS = [
+  { label: 'Home', to: '/' },
+  { label: 'News', to: '/news' },
+  { label: 'Entertainment', to: '/entertainment' },
+  { label: 'Politics', to: '/local' },
+  { label: 'Lifestyle', to: '/entertainment' },
+  { label: 'Opportunities', to: '/applications' },
+  { label: 'Videos', to: '/videos' },
+  { label: 'About', to: '/about' },
+  { label: 'Advertise', to: '/advertise' },
+  { label: 'Contact', to: '/contact' },
+];
+
 const MukonoHome = () => {
   const { isDarkMode, toggleTheme } = useThemeMode();
   const { pathname } = useLocation();
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
+  const mobileSearchInputRef = useRef<HTMLInputElement | null>(null);
   const [heroSlides, setHeroSlides] = useState<any[]>([]);
   const [articles, setArticles] = useState<any[]>([]);
   const [trending, setTrending] = useState<any[]>([]);
   const [videoSection, setVideoSection] = useState<any>(null);
+  const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [articleSearchResults, setArticleSearchResults] = useState<any[]>([]);
+  const [pageSearchResults, setPageSearchResults] = useState<any[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -79,6 +103,53 @@ const MukonoHome = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!mobilePanelOpen) return;
+    const timeoutId = window.setTimeout(() => {
+      mobileSearchInputRef.current?.focus();
+    }, 130);
+    return () => window.clearTimeout(timeoutId);
+  }, [mobilePanelOpen]);
+
+  useEffect(() => {
+    const trimmed = searchTerm.trim();
+
+    if (!mobilePanelOpen || trimmed.length < 2) {
+      setSearchLoading(false);
+      setSearchError('');
+      setArticleSearchResults([]);
+      setPageSearchResults([]);
+      return;
+    }
+
+    const requestId = window.setTimeout(async () => {
+      setSearchLoading(true);
+      setSearchError('');
+
+      try {
+        const [articleRes, pageRes] = await Promise.all([
+          api.get('/articles', {
+            params: { search: trimmed, page: 1, limit: 6, sort: 'publishedAt' },
+          }),
+          api.get('/pages/search', {
+            params: { query: trimmed, lang: 'en', limit: 5 },
+          }),
+        ]);
+
+        setArticleSearchResults(Array.isArray(articleRes?.data?.articles) ? articleRes.data.articles : []);
+        setPageSearchResults(Array.isArray(pageRes?.data?.pages) ? pageRes.data.pages : []);
+      } catch (_error) {
+        setSearchError('Search is temporarily unavailable. Please try again.');
+        setArticleSearchResults([]);
+        setPageSearchResults([]);
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 260);
+
+    return () => window.clearTimeout(requestId);
+  }, [searchTerm, mobilePanelOpen]);
+
   const mainHero = useMemo(() => {
     const activeHero = heroSlides?.[0];
     const leadStory = articles?.[0];
@@ -90,7 +161,7 @@ const MukonoHome = () => {
         getArticleTitle(leadStory) ||
         'Major national headline with strong engagement hook',
       category: leadStory?.category?.toUpperCase() || 'NEWS',
-      image: activeHero?.largeImage || activeHero?.mobileImage || getArticleImage(leadStory),
+      image: TOP_STORY_IMAGE,
       meta: leadStory ? `${new Date(leadStory?.publishedAt || Date.now()).toLocaleDateString('en-UG')} • ${leadStory?.viewCount || 0} views` : 'Top story',
       link: getArticleSlug(leadStory) ? `/news/${getArticleSlug(leadStory)}` : activeHero?.ctaLink || '/news',
     };
@@ -105,6 +176,31 @@ const MukonoHome = () => {
   const featuredVideoCaption = videoSection?.videoCaption || 'Featured video headline';
   const videoTiles = (videoSection?.items || []).slice(0, 4);
   const isHomePage = pathname === '/';
+  const whatsappHref = useMemo(() => {
+    const pageUrl = typeof window !== 'undefined'
+      ? window.location.href
+      : `https://mukonotalks.ug${pathname}`;
+    const pageOrArticleTitle = (mainHero?.title || (typeof document !== 'undefined' ? document.title : '') || 'this page').trim();
+    const message = `Hi, I love your articles please, I need your help on ${pageUrl} its about ${pageOrArticleTitle}`;
+    const whatsappApiPhone = WHATSAPP_PHONE.replace(/\D/g, '');
+    return `https://wa.me/${whatsappApiPhone}?text=${encodeURIComponent(message)}`;
+  }, [mainHero?.title, pathname]);
+
+  const handleSearchActivate = () => {
+    searchInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    window.setTimeout(() => {
+      searchInputRef.current?.focus();
+    }, 180);
+  };
+
+  const toggleMobilePanel = () => {
+    setMobilePanelOpen((current) => !current);
+    setSearchError('');
+  };
+
+  const closeMobilePanel = () => {
+    setMobilePanelOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-light-body text-text-light-primary dark:bg-dark-charcoal dark:text-text-dark-primary">
@@ -142,16 +238,129 @@ const MukonoHome = () => {
             <Link to="/videos" className="transition hover:text-white/70">Videos</Link>
           </nav>
 
-          <div className="flex items-center gap-4 text-white">
-            <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} />
-            <button type="button" className="cursor-pointer hover:text-white/70" aria-label="Search">
+          <div className="flex items-center gap-2 text-white md:gap-4">
+            <button
+              type="button"
+              onClick={toggleMobilePanel}
+              className={`order-2 inline-flex h-[42px] w-[42px] items-center justify-center rounded-full border transition md:hidden ${isDarkMode ? 'border-white/25 bg-black/45' : 'border-black/15 bg-[#ffffff]'}`}
+              aria-label="Open menu and search"
+            >
+              {mobilePanelOpen ? (
+                <X className={`h-6 w-6 ${isDarkMode ? 'text-brand-white' : 'text-black'}`} />
+              ) : (
+                <img
+                  src={isDarkMode ? '/menuSearchWhiteIcon.svg' : '/menuSearchBlack.svg'}
+                  alt=""
+                  className="h-6 w-6"
+                />
+              )}
+            </button>
+            <div className="order-1">
+              <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} compactOnMobile />
+            </div>
+            <button
+              type="button"
+              onClick={handleSearchActivate}
+              className="hidden cursor-pointer hover:text-white/70 md:inline-flex"
+              aria-label="Search"
+            >
               <Search size={18} />
             </button>
-            <button type="button" className="cursor-pointer hover:text-white/70" aria-label="Trending">
+            <button type="button" className="hidden cursor-pointer hover:text-white/70 md:inline-flex" aria-label="Trending">
               <Flame size={18} />
             </button>
           </div>
         </div>
+
+        {mobilePanelOpen && (
+          <div className="border-t border-white/10 bg-gradient-to-b from-black via-black/95 to-black/90 px-4 pb-5 pt-3 md:hidden">
+            <div className="mx-auto w-full max-w-7xl">
+              <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-white/95 p-3 shadow-[0_24px_60px_rgba(0,0,0,0.35)]">
+                <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-black/8 blur-2xl" aria-hidden="true" />
+
+                <div className="relative">
+                  <Search size={16} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" />
+                  <input
+                    ref={mobileSearchInputRef}
+                    type="search"
+                    value={searchTerm}
+                    onChange={(event) => setSearchTerm(event.target.value)}
+                    placeholder="Search articles and page content..."
+                    className="w-full rounded-2xl border border-black/15 bg-white px-4 py-3 pl-10 text-sm font-medium text-black outline-none ring-0 transition focus:border-black"
+                  />
+                </div>
+
+                <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] font-semibold uppercase tracking-wide text-gray-600">
+                  <span>Menu</span>
+                  <span className="text-right">Discover</span>
+                </div>
+
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  {MOBILE_MENU_LINKS.map((item) => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      onClick={closeMobilePanel}
+                      className="rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm font-semibold text-black transition hover:bg-black hover:text-brand-white"
+                    >
+                      {item.label}
+                    </Link>
+                  ))}
+                </div>
+
+                {searchTerm.trim().length >= 2 && (
+                  <div className="mt-4 rounded-2xl border border-black/10 bg-black/[0.03] p-3">
+                    <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-700">Search Results</p>
+
+                    {searchLoading && <p className="text-sm text-gray-700">Searching...</p>}
+
+                    {!searchLoading && searchError && (
+                      <p className="text-sm text-red-600">{searchError}</p>
+                    )}
+
+                    {!searchLoading && !searchError && articleSearchResults.length === 0 && pageSearchResults.length === 0 && (
+                      <p className="text-sm text-gray-700">No results found for this keyword.</p>
+                    )}
+
+                    {!searchLoading && !searchError && pageSearchResults.length > 0 && (
+                      <div className="mb-3 space-y-2">
+                        <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Pages</p>
+                        {pageSearchResults.map((page) => (
+                          <Link
+                            key={page._id || page.pageKey || page.slug}
+                            to={`/${page.slug || page.pageKey}`}
+                            onClick={closeMobilePanel}
+                            className="block rounded-xl border border-black/10 bg-white px-3 py-2 transition hover:bg-black hover:text-brand-white"
+                          >
+                            <p className="line-clamp-1 text-sm font-semibold">{page.title || page.pageKey || 'Page'}</p>
+                            {!!page.excerpt && <p className="line-clamp-1 text-xs opacity-80">{page.excerpt}</p>}
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+
+                    {!searchLoading && !searchError && articleSearchResults.length > 0 && (
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold uppercase tracking-wide text-gray-500">Articles</p>
+                        {articleSearchResults.map((story) => (
+                          <Link
+                            key={story._id}
+                            to={`/news/${getArticleSlug(story)}`}
+                            onClick={closeMobilePanel}
+                            className="block rounded-xl border border-black/10 bg-white px-3 py-2 transition hover:bg-black hover:text-brand-white"
+                          >
+                            <p className="line-clamp-1 text-sm font-semibold">{getArticleTitle(story)}</p>
+                            <p className="line-clamp-1 text-xs opacity-80">{getArticleExcerpt(story)}</p>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="home-trending-ticker border-t border-white/10 bg-black px-4 py-2 text-xs text-white/75">
           <div className="home-trending-ticker__fade" aria-hidden="true" />
@@ -171,6 +380,7 @@ const MukonoHome = () => {
         <div className="relative">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
+            ref={searchInputRef}
             type="text"
             placeholder="Search news, topics, videos..."
             className="w-full rounded-2xl border border-dark-border bg-white px-4 py-3 pl-10 text-black outline-none focus:border-black dark:bg-dark-slate dark:text-text-dark-primary dark:focus:border-white"
@@ -359,30 +569,21 @@ const MukonoHome = () => {
             <MessageCircle size={20} className="text-black dark:text-white" />
           </div>
 
-          <h3 className="text-lg font-semibold">Join our WhatsApp Channel</h3>
+          <h3 className="text-lg font-semibold">Inquire</h3>
 
-          <button
-            type="button"
-            className="mt-4 rounded-xl bg-black px-6 py-2 font-semibold text-white transition hover:opacity-90 dark:bg-white dark:text-black"
+          <a
+            href={whatsappHref}
+            target="_blank"
+            rel="noreferrer"
+            className="mt-4 inline-flex rounded-xl bg-black px-6 py-2 font-semibold text-white transition hover:opacity-90 dark:bg-white dark:text-black"
           >
             Join Now
-          </button>
+          </a>
         </div>
       </section>
 
       </main>
 
-      <footer className="mt-10 border-t border-dark-border">
-        <div className="mx-auto flex w-full max-w-7xl flex-col justify-between px-4 py-6 text-sm text-text-muted md:flex-row">
-          <p>© Mukono Talks</p>
-
-          <div className="flex gap-4">
-            <Link to="/about" className="hover:text-text-primary">About</Link>
-            <Link to="/advertise" className="hover:text-text-primary">Advertise</Link>
-            <Link to="/contact" className="hover:text-text-primary">Contact</Link>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

@@ -164,11 +164,23 @@ const getPublicPageSchema = {
   }),
 };
 
+/**
+ * Search published pages (public)
+ */
+const searchPublicPagesSchema = {
+  query: Joi.object({
+    query: Joi.string().trim().min(2).max(120).required(),
+    lang: Joi.string().valid(...SUPPORTED_LANGS).default('en'),
+    limit: Joi.number().integer().min(1).max(20).default(6),
+  }),
+};
+
 module.exports = {
   createPageSchema,
   updatePageSchema,
   publishPageSchema,
   getPublicPageSchema,
+  searchPublicPagesSchema,
   BLOCK_TYPES,
   SUPPORTED_LANGS,
 };

@@ -1,20 +1,58 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
+import api from '../app/axios';
 
-const videos = [
-  {
-    platform: 'YouTube',
-    title: 'Mukono community story',
-    embedUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-  },
-  {
-    platform: 'TikTok',
-    title: 'Mukono quick update',
-    embedUrl: 'https://www.tiktok.com/embed/v2/7231832812999999999',
-  },
-];
+const FALLBACK_YOUTUBE = 'https://www.youtube.com/watch?v=ETOSTwqrFyU';
+
+const toEmbedUrl = (url) => {
+  if (!url) return '';
+
+  const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+
+  return url;
+};
 
 const VideosPage = () => {
+  const [cmsVideoUrl, setCmsVideoUrl] = useState('');
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadVideoSection = async () => {
+      try {
+        const { data } = await api.get('/homepage-sections/video');
+        if (!mounted) return;
+        setCmsVideoUrl(data?.videoUrl || '');
+      } catch (_error) {
+        if (!mounted) return;
+        setCmsVideoUrl('');
+      }
+    };
+
+    loadVideoSection();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const videos = useMemo(() => {
+    const youtubeSource = cmsVideoUrl || FALLBACK_YOUTUBE;
+    return [
+      {
+        platform: 'YouTube',
+        title: 'Mukono community story',
+        embedUrl: toEmbedUrl(youtubeSource),
+      },
+      {
+        platform: 'TikTok',
+        title: 'Mukono quick update',
+        embedUrl: 'https://www.tiktok.com/embed/v2/7231832812999999999',
+      },
+    ];
+  }, [cmsVideoUrl]);
+
   return (
     <section className="mx-auto w-full max-w-6xl px-4 py-8">
       <Helmet>

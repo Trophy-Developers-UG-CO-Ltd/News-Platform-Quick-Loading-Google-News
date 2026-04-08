@@ -204,7 +204,7 @@ const AdminFooter = () => {
               className="input w-full"
               value={form.contactPhone || ''}
               onChange={(e) => patch('contactPhone', e.target.value)}
-              placeholder="+256 700 000 000"
+              placeholder="+256755303076"
             />
           </div>
 

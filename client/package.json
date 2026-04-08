@@ -58,6 +58,7 @@
     "build:preview": "vite build --mode preview",
     "preview": "vite preview",
     "preview:hosted": "vite preview --mode preview",
+    "smoke:routes": "node scripts/route-smoke.cjs",
     "translate:check": "node scripts/translate-sync.js",
     "translate:fix": "node scripts/translate-sync.js --fix",
     "translate:ci": "node scripts/translate-sync.js --ci"

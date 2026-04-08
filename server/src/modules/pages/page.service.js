@@ -14,6 +14,28 @@ const translationService = require('../../services/translationService');
 
 const SUPPORTED_LANGS = ['en', 'zh', 'sw'];
 
+const escapeRegExp = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const collectTextFromUnknown = (input) => {
+  if (input == null) return '';
+  if (typeof input === 'string') return input;
+  if (typeof input === 'number' || typeof input === 'boolean') return String(input);
+  if (Array.isArray(input)) return input.map(collectTextFromUnknown).filter(Boolean).join(' ');
+  if (typeof input === 'object') {
+    return Object.values(input)
+      .map(collectTextFromUnknown)
+      .filter(Boolean)
+      .join(' ');
+  }
+  return '';
+};
+
+const normalizeSnippet = (value = '') =>
+  String(value)
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
 /**
  * Auto-translate page text fields and content blocks.
  * Translates: title, seo title/description, and translatable content blocks.
@@ -384,6 +406,54 @@ const getPublicPage = async (lang, slug) => {
 };
 
 /**
+ * Search published pages by title, slug, page key, and content block text
+ */
+const searchPublicPages = async (queryText, options = {}) => {
+  const raw = String(queryText || '').trim();
+  if (!raw) return [];
+
+  const lang = SUPPORTED_LANGS.includes(options.lang) ? options.lang : 'en';
+  const limit = Math.min(Math.max(parseInt(options.limit, 10) || 6, 1), 20);
+  const regex = new RegExp(escapeRegExp(raw), 'i');
+
+  const pages = await Page.find({ publishStatus: 'published' })
+    .select('pageKey title localizedSlug contentBlocks publishedAt updatedAt')
+    .sort({ publishedAt: -1, updatedAt: -1 })
+    .limit(80)
+    .lean();
+
+  const ranked = pages
+    .map((page) => {
+      const localizedTitle = page?.title?.[lang] || page?.title?.en || '';
+      const localizedSlug = page?.localizedSlug?.[lang] || page?.localizedSlug?.en || '';
+      const contentText = collectTextFromUnknown(page?.contentBlocks || []);
+      const searchBlob = `${page?.pageKey || ''} ${localizedTitle} ${localizedSlug} ${contentText}`;
+
+      if (!regex.test(searchBlob)) {
+        return null;
+      }
+
+      const snippetSource = normalizeSnippet(contentText);
+      const matchedFromContent = regex.test(snippetSource)
+        ? snippetSource
+        : normalizeSnippet(localizedTitle || page?.pageKey || localizedSlug);
+
+      return {
+        _id: page._id,
+        pageKey: page.pageKey,
+        title: localizedTitle || page.pageKey,
+        slug: localizedSlug,
+        excerpt: matchedFromContent.slice(0, 180),
+        publishedAt: page.publishedAt,
+      };
+    })
+    .filter(Boolean)
+    .slice(0, limit);
+
+  return ranked;
+};
+
+/**
  * Get all pages (admin)
  */
 const getAllPages = async (query = {}) => {
@@ -523,6 +593,7 @@ module.exports = {
   deletePage,
   publishPage,
   getPublicPage,
+  searchPublicPages,
   getPageForPreview,
   getAllPages,
   getPageById,

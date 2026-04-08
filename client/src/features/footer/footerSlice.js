@@ -23,7 +23,7 @@ const DEFAULT = {
     { label: 'Contact Us',    href: '/contact' },
   ],
   contactEmail:   'info@mukonotalks.ug',
-  contactPhone:   '+256 (0) 700 000 000',
+  contactPhone:   '+256755303076',
   contactAddress: 'Mukono, Uganda',
   copyrightName:  'MukonoTalks',
 };

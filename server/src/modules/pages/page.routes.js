@@ -18,6 +18,7 @@ const {
   updatePageSchema,
   publishPageSchema,
   getPublicPageSchema,
+  searchPublicPagesSchema,
 } = require('./page.validation');
 
 // ─── Admin Routes (Protected — admin only) ─────────────────────
@@ -86,6 +87,13 @@ router.delete(
 );
 
 // ─── Public Route ──────────────────────────────────────────────
+router.get(
+  '/search',
+  validate(searchPublicPagesSchema),
+  cacheResponse(120),
+  pageController.searchPublicPages
+);
+
 router.get(
   '/:lang/:slug',
   validate(getPublicPageSchema),

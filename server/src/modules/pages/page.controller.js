@@ -87,6 +87,23 @@ const getPublicPage = asyncHandler(async (req, res) => {
 });
 
 /**
+ * Search published pages (public)
+ * GET /api/pages/search
+ */
+const searchPublicPages = asyncHandler(async (req, res) => {
+  try {
+    const { query, lang = 'en', limit = 6 } = req.query;
+    const pages = await pageService.searchPublicPages(query, {
+      lang,
+      limit: Number(limit),
+    });
+    res.status(200).json({ success: true, pages });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
+  }
+});
+
+/**
  * Get all pages (Admin)
  * GET /api/pages/admin/all
  */
@@ -131,6 +148,7 @@ module.exports = {
   deletePage,
   publishPage,
   getPublicPage,
+  searchPublicPages,
   previewPage,
   getAllPages,
   getPageById,
