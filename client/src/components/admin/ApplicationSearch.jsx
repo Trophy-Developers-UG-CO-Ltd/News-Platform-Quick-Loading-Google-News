@@ -112,14 +112,14 @@ const ApplicationSearch = ({ selectedApplications = [], onChange }) => {
           {selectedApplications.map((app) => (
             <span
               key={app._id}
-              className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary-50 border border-primary-200 text-primary-700 text-sm rounded-full"
+              className="inline-flex items-center gap-1.5 rounded-full border border-accent-blue/30 bg-accent-blue/10 px-3 py-1 text-sm text-accent-blue"
             >
               <FiTag className="h-3 w-3 flex-shrink-0" />
               {app.title}
               <button
                 type="button"
                 onClick={() => handleRemove(app._id)}
-                className="text-primary-400 hover:text-primary-700 ml-0.5"
+                className="ml-0.5 text-accent-blue/70 transition-colors hover:text-accent-blue"
                 aria-label={`Remove ${app.title}`}
               >
                 <FiX className="h-3.5 w-3.5" />
@@ -132,7 +132,7 @@ const ApplicationSearch = ({ selectedApplications = [], onChange }) => {
       {/* ── Search input ───────────────────────────────────────────────────── */}
       <div ref={wrapperRef} className="relative">
         <div className="relative">
-          <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+          <FiSearch className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
             value={query}
@@ -143,26 +143,26 @@ const ApplicationSearch = ({ selectedApplications = [], onChange }) => {
           />
           {searching && (
             <div className="absolute right-3 top-1/2 -translate-y-1/2">
-              <div className="h-4 w-4 border-2 border-primary-500 border-t-transparent rounded-full animate-spin" />
+              <div className="h-4 w-4 animate-spin rounded-full border-2 border-accent-blue border-t-transparent" />
             </div>
           )}
         </div>
 
         {/* ── Dropdown ─────────────────────────────────────────────────────── */}
         {showResults && (
-          <div className="absolute z-50 mt-1 w-full bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden">
+          <div className="absolute z-50 mt-1 w-full overflow-hidden rounded-xl border border-dark-border bg-dark-slate shadow-card">
             {results.map((app) => (
               <button
                 key={app._id}
                 type="button"
                 onClick={() => handleSelect(app)}
-                className="w-full text-left px-4 py-3 hover:bg-primary-50 transition-colors border-b border-gray-100 last:border-0"
+                className="w-full border-b border-dark-border px-4 py-3 text-left transition-colors hover:bg-dark-hover last:border-0"
               >
-                <p className="text-sm font-medium text-gray-800">{app.title}</p>
+                <p className="text-sm font-medium text-text-primary">{app.title}</p>
                 {app.industryUse && (
-                  <p className="text-xs text-gray-500 mt-0.5">{app.industryUse}</p>
+                  <p className="mt-0.5 text-xs text-text-secondary">{app.industryUse}</p>
                 )}
-                <p className="text-xs text-gray-400 mt-0.5 font-mono">{app.slug}</p>
+                <p className="mt-0.5 font-mono text-xs text-text-muted">{app.slug}</p>
               </button>
             ))}
 
@@ -180,7 +180,7 @@ const ApplicationSearch = ({ selectedApplications = [], onChange }) => {
                   <p className="text-sm font-medium text-green-700">
                     {creating ? 'Creating…' : `Create "${query.trim()}"`}
                   </p>
-                  <p className="text-xs text-gray-400 font-mono">
+                  <p className="font-mono text-xs text-text-muted">
                     slug: {slugify(query.trim())}
                   </p>
                 </div>
@@ -190,7 +190,7 @@ const ApplicationSearch = ({ selectedApplications = [], onChange }) => {
         )}
       </div>
 
-      <p className="text-xs text-gray-400">
+      <p className="text-xs text-text-muted">
         Type 3+ characters to search existing applications. No match? A new one will be created instantly.
       </p>
     </div>

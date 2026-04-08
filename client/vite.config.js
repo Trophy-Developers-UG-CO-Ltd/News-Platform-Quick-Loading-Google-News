@@ -90,6 +90,21 @@ const runtimeCaching = [
 
 export default defineConfig(({ mode }) => {
   const isDev = mode === "development";
+  const isProduction = mode === "production";
+  const pwaEnv = process.env.VITE_ENABLE_PWA;
+  const enablePwa = pwaEnv ? pwaEnv === "true" : isProduction;
+  const hmrHost = process.env.VITE_HMR_HOST;
+  const hmrProtocol = process.env.VITE_HMR_PROTOCOL;
+  const hmrClientPort = process.env.VITE_HMR_CLIENT_PORT
+    ? Number(process.env.VITE_HMR_CLIENT_PORT)
+    : undefined;
+  const hmrConfig = hmrHost || hmrProtocol || hmrClientPort
+    ? {
+        ...(hmrHost ? { host: hmrHost } : {}),
+        ...(hmrProtocol ? { protocol: hmrProtocol } : {}),
+        ...(hmrClientPort ? { clientPort: hmrClientPort } : {}),
+      }
+    : undefined;
 
   return {
     base: "/",
@@ -162,7 +177,7 @@ export default defineConfig(({ mode }) => {
           type: "module",
         },
 
-        disable: false,
+        disable: !enablePwa,
       }),
     ],
 
@@ -171,10 +186,7 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       strictPort: true,
 
-      hmr: {
-        protocol: "wss",
-        clientPort: 443,
-      },
+      ...(hmrConfig ? { hmr: hmrConfig } : {}),
 
       watch: {
         usePolling: true,
@@ -207,25 +219,74 @@ export default defineConfig(({ mode }) => {
       rollupOptions: {
         output: {
           manualChunks: {
+            // ── Core React stack ──────────────────────────────────────────
             "vendor-react": [
               "react",
               "react-dom",
               "react-router-dom",
             ],
+
+            // ── State management ──────────────────────────────────────────
             "vendor-redux": [
               "@reduxjs/toolkit",
               "react-redux",
+              "redux-persist",
             ],
+
+            // ── Internationalisation ──────────────────────────────────────
             "vendor-i18n": [
               "i18next",
               "react-i18next",
               "i18next-browser-languagedetector",
+              "i18next-http-backend",
+            ],
+
+            // ── Icon libraries  (~554 KB without splitting) ───────────────
+            "vendor-icons": [
+              "lucide-react",
+              "react-icons",
+            ],
+
+            // ── Rich-text editor (tiptap + ProseMirror) ───────────────────
+            "vendor-editor": [
+              "@tiptap/react",
+              "@tiptap/starter-kit",
+              "@tiptap/extension-color",
+              "@tiptap/extension-link",
+              "@tiptap/extension-placeholder",
+              "@tiptap/extension-text-align",
+              "@tiptap/extension-text-style",
+            ],
+
+            // ── Charting / analytics ──────────────────────────────────────
+            "vendor-charts": [
+              "recharts",
+            ],
+
+            // ── Animation ─────────────────────────────────────────────────
+            "vendor-motion": [
+              "framer-motion",
+            ],
+
+            // ── Data-fetching ─────────────────────────────────────────────
+            "vendor-query": [
+              "@tanstack/react-query",
+              "@tanstack/react-query-persist-client",
+              "@tanstack/query-async-storage-persister",
+            ],
+
+            // ── UI utilities ──────────────────────────────────────────────
+            "vendor-ui": [
+              "clsx",
+              "tailwind-merge",
+              "class-variance-authority",
+              "dompurify",
             ],
           },
         },
       },
 
-      chunkSizeWarningLimit: 500,
+      chunkSizeWarningLimit: 600,
       cssCodeSplit: true,
       minify: "terser",
       sourcemap: false,
@@ -239,3 +300,4 @@ export default defineConfig(({ mode }) => {
     },
   };
 });
+//  Designed by Trophy Developers Uganda : https://www.trophydevelopers.com/uganda-web-designers/

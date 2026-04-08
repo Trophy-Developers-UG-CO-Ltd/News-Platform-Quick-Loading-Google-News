@@ -36,7 +36,7 @@ const LanguageSwitcher = () => {
       <select
         value={currentLang}
         onChange={handleChange}
-        className="bg-transparent border border-gray-300 rounded-[48px] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 cursor-pointer"
+        className="cursor-pointer rounded-[48px] border border-dark-border bg-dark-slate px-2 py-1 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-accent-blue"
         aria-label="Select language"
       >
         {SUPPORTED_LANGUAGES.map((code) => (

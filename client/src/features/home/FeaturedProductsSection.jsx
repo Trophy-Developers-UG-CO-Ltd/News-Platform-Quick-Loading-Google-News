@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import api from "../../app/axios";
 import Reveal from "../../components/ui/Reveal";
 import FeaturedProductsGrid from "../../components/home/FeaturedProductsGrid";
+import SafeRichText from "../../components/ui/SafeRichText";
 
 const DEFAULT = {
   heading: {
@@ -51,7 +52,7 @@ const FeaturedProductsSection = () => {
               </h2>
             )}
             {description && (
-              <p className="text-sm text-gray-500 mt-2">{description}</p>
+              <SafeRichText className="prose prose-sm mt-2 max-w-none text-gray-500" html={description} />
             )}
           </div>
         </Reveal>

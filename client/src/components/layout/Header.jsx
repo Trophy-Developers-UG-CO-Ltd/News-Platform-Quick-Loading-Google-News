@@ -40,8 +40,8 @@ const Header = () => {
   const navLinks = navItems && navItems.length > 0 ? navItems : FALLBACK_NAV;
 
   const navLinkClass =
-    'text-gray-700 hover:text-primary-600 font-medium text-[15px] tracking-wide transition-colors relative ' +
-    'after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-primary-600 ' +
+    'text-text-secondary hover:text-accent-blue font-medium text-[15px] tracking-wide transition-colors relative ' +
+    'after:absolute after:bottom-[-4px] after:left-0 after:w-0 after:h-[2px] after:bg-accent-blue ' +
     'hover:after:w-full after:transition-all after:duration-300';
 
   const handleLogout = () => {
@@ -52,7 +52,7 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-white sticky top-0 z-50 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <header className="sticky top-0 z-50 border-b border-dark-border bg-dark-black shadow-[0_1px_3px_rgba(0,0,0,0.3)]">
       <div className="mx-auto px-4 lg:px-20">
         <div className="flex items-center justify-between h-16 lg:h-24">
           {/* Logo */}
@@ -88,26 +88,26 @@ const Header = () => {
             {isAuthenticated ? (
               <>
                 <div className="relative group">
-                  <button className="flex items-center space-x-1 text-gray-700 hover:text-primary-600 transition-colors">
+                  <button className="flex items-center space-x-1 text-text-secondary transition-colors hover:text-accent-blue">
                     <FiUser className="h-5 w-5" />
                     <span className="font-medium text-sm">{user?.name?.split(' ')[0]}</span>
                   </button>
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                    <LocalizedLink to="/dashboard" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                  <div className="invisible absolute right-0 z-50 mt-2 w-48 rounded-lg border border-dark-border bg-dark-slate py-2 opacity-0 shadow-card transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                    <LocalizedLink to="/dashboard" className="flex items-center px-4 py-2 text-sm text-text-secondary transition-colors hover:bg-dark-hover hover:text-text-primary">
                       <FiGrid className="mr-2 h-4 w-4" /> {t('nav.dashboard')}
                     </LocalizedLink>
-                    <LocalizedLink to="/editor" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                    <LocalizedLink to="/editor" className="flex items-center px-4 py-2 text-sm text-text-secondary transition-colors hover:bg-dark-hover hover:text-text-primary">
                       <FiEdit3 className="mr-2 h-4 w-4" /> Editorial CMS
                     </LocalizedLink>
                     {(user?.role === 'admin' || user?.role === 'developer') && (
-                      <Link to="/admin" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                      <Link to="/admin" className="flex items-center px-4 py-2 text-sm text-text-secondary transition-colors hover:bg-dark-hover hover:text-text-primary">
                         <FiGrid className="mr-2 h-4 w-4" /> {t('nav.admin')}
                       </Link>
                     )}
-                    <hr className="my-1" />
+                    <hr className="my-1 border-dark-border" />
                     <button
                       onClick={handleLogout}
-                      className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      className="flex w-full items-center px-4 py-2 text-sm text-accent-red transition-colors hover:bg-accent-red/10"
                     >
                       <FiLogOut className="mr-2 h-4 w-4" /> {t('nav.logout')}
                     </button>
@@ -116,10 +116,10 @@ const Header = () => {
               </>
             ) : (
               <div className="flex items-center space-x-3">
-                <LocalizedLink to="/login" className="text-gray-700 hover:text-primary-600 font-medium text-sm transition-colors">
+                <LocalizedLink to="/login" className="text-sm font-medium text-text-secondary transition-colors hover:text-accent-blue">
                   {t('nav.signin', 'Sign in')}
                 </LocalizedLink>
-                <LocalizedLink to="/register" className="bg-primary-600 hover:bg-primary-700 text-white font-semibold text-sm px-4 py-2 rounded-none transition-colors">
+                <LocalizedLink to="/register" className="rounded-none bg-accent-blue px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-category-news">
                   {t('nav.signup', 'Sign up')}
                 </LocalizedLink>
               </div>
@@ -128,7 +128,7 @@ const Header = () => {
 
           {/* Mobile menu button */}
           <button
-            className="md:hidden text-gray-700"
+            className="text-text-secondary md:hidden"
             onClick={() => setMenuOpen(!menuOpen)}
             aria-label="Toggle menu"
           >
@@ -138,7 +138,7 @@ const Header = () => {
 
         {/* Mobile Navigation */}
         {menuOpen && (
-          <div className="md:hidden pb-4 border-t border-gray-100">
+          <div className="border-t border-dark-border pb-4 md:hidden">
             <nav className="flex flex-col space-y-2 pt-4">
               {/* <div className="px-2 py-2"><LanguageSwitcher /></div> — on hold, using Google Translate */}
               <div className="px-2 py-2">
@@ -151,7 +151,7 @@ const Header = () => {
                     href={item.href}
                     target={item.openInNewTab ? '_blank' : '_self'}
                     rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
-                    className="px-2 py-2 text-gray-700 hover:text-primary-600"
+                    className="px-2 py-2 text-text-secondary transition-colors hover:text-accent-blue"
                     onClick={() => setMenuOpen(false)}
                   >
                     {item.label}
@@ -160,7 +160,7 @@ const Header = () => {
                   <LocalizedLink
                     key={item._id}
                     to={item.href}
-                    className="px-2 py-2 text-gray-700 hover:text-primary-600"
+                    className="px-2 py-2 text-text-secondary transition-colors hover:text-accent-blue"
                     onClick={() => setMenuOpen(false)}
                   >
                     {item.label}
@@ -169,14 +169,14 @@ const Header = () => {
               )}
               {isAuthenticated ? (
                 <>
-                  <LocalizedLink to="/editor" className="px-2 py-2 text-gray-700 hover:text-primary-600" onClick={() => setMenuOpen(false)}>
+                  <LocalizedLink to="/editor" className="px-2 py-2 text-text-secondary transition-colors hover:text-accent-blue" onClick={() => setMenuOpen(false)}>
                     Editorial CMS
                   </LocalizedLink>
-                  <LocalizedLink to="/dashboard" className="px-2 py-2 text-gray-700 hover:text-primary-600" onClick={() => setMenuOpen(false)}>
+                  <LocalizedLink to="/dashboard" className="px-2 py-2 text-text-secondary transition-colors hover:text-accent-blue" onClick={() => setMenuOpen(false)}>
                     {t('nav.dashboard')}
                   </LocalizedLink>
                   {(user?.role === 'admin' || user?.role === 'developer') && (
-                    <Link to="/admin" className="px-2 py-2 text-gray-700 hover:text-primary-600" onClick={() => setMenuOpen(false)}>
+                    <Link to="/admin" className="px-2 py-2 text-text-secondary transition-colors hover:text-accent-blue" onClick={() => setMenuOpen(false)}>
                       {t('nav.admin')}
                     </Link>
                   )}
@@ -186,10 +186,10 @@ const Header = () => {
                 </>
               ) : (
                 <>
-                  <LocalizedLink to="/login" className="px-2 py-2 text-gray-700 hover:text-primary-600 font-medium" onClick={() => setMenuOpen(false)}>
+                  <LocalizedLink to="/login" className="px-2 py-2 font-medium text-text-secondary transition-colors hover:text-accent-blue" onClick={() => setMenuOpen(false)}>
                     {t('nav.signin', 'Sign in')}
                   </LocalizedLink>
-                  <LocalizedLink to="/register" className="px-2 py-2 text-primary-600 hover:text-primary-700 font-semibold" onClick={() => setMenuOpen(false)}>
+                  <LocalizedLink to="/register" className="px-2 py-2 font-semibold text-accent-blue transition-colors hover:text-category-news" onClick={() => setMenuOpen(false)}>
                     {t('nav.signup', 'Sign up')}
                   </LocalizedLink>
                 </>

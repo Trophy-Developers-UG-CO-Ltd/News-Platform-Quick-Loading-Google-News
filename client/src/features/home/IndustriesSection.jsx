@@ -7,6 +7,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import { getLucideIcon } from "../../utils/getLucideIcon";
 import api from '../../app/axios';
+import SafeRichText from "../../components/ui/SafeRichText";
 
 /* ── Default copy (fallback when API is unavailable) ── */
 const DEFAULT = {
@@ -56,7 +57,7 @@ const IndustriesSection = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">{title}</h2>
           )}
           {description && (
-            <p className="text-gray-500 max-w-xl mx-auto">{description}</p>
+            <SafeRichText className="prose mx-auto max-w-xl text-gray-500" html={description} />
           )}
         </div>
 
@@ -74,9 +75,7 @@ const IndustriesSection = () => {
                 <h3 className="font-semibold text-gray-800 text-lg mb-2">
                   {item.title}
                 </h3>
-                <p className="text-gray-500 text-sm leading-relaxed">
-                  {item.description || item.desc}
-                </p>
+                <SafeRichText className="prose prose-sm max-w-none text-gray-500" html={item.description || item.desc} />
               </div>
             );
           })}

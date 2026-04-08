@@ -46,15 +46,15 @@ const Login = () => {
     <div className="min-h-[70vh] flex items-center justify-center py-12 px-4">
       <div className="card max-w-md w-full p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">Welcome Back</h1>
-          <p className="text-gray-500 mt-1">Sign in to your MukonoTalks account</p>
+          <h1 className="font-display text-2xl font-bold text-text-primary">Welcome Back</h1>
+          <p className="mt-1 text-text-muted">Sign in to your MukonoTalks account</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Email Address</label>
             <div className="relative">
-              <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <FiMail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-muted" />
               <input
                 type="email"
                 value={email}
@@ -67,9 +67,9 @@ const Login = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label className="mb-1 block text-sm font-medium text-text-secondary">Password</label>
             <div className="relative">
-              <FiLock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <FiLock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-text-muted" />
               <input
                 type="password"
                 value={password}
@@ -91,9 +91,9 @@ const Login = () => {
           </button>
         </form>
 
-        <p className="text-center mt-6 text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm text-text-muted">
           Don&apos;t have an account?{' '}
-          <Link to="/register" className="text-primary-600 hover:text-primary-700 font-medium">
+          <Link to="/register" className="font-medium text-accent-blue transition-colors hover:text-category-news">
             Register here
           </Link>
         </p>

@@ -11,7 +11,7 @@
     />
 
     <!-- PWA / Theme -->
-    <meta name="theme-color" content="#1a56db" />
+    <meta name="theme-color" content="#0A0A0A" />
     <meta name="color-scheme" content="light" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -26,12 +26,32 @@
       rel="stylesheet"
     />
     <title>MukonoTalks | News, Entertainment, Local Updates</title>
+    <script>
+      (function () {
+        try {
+          var key = 'mukonotalks-theme';
+          var stored = window.localStorage.getItem(key);
+          var isDark = stored === 'dark';
+          var root = document.documentElement;
+
+          if (isDark) {
+            root.classList.add('dark');
+          } else {
+            root.classList.remove('dark');
+          }
+
+          root.style.colorScheme = isDark ? 'dark' : 'light';
+        } catch (error) {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.style.colorScheme = 'light';
+        }
+      })();
+    </script>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
-<!-- MukonoTalks -->
+<!-- Designed by Trophy Developers Uganda : https://www.trophydevelopers.com/uganda-web-designers/ -->
 

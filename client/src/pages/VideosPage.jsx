@@ -22,15 +22,15 @@ const VideosPage = () => {
         <meta name="description" content="Watch MukonoTalks videos from YouTube and TikTok." />
       </Helmet>
 
-      <h1 className="text-3xl font-bold text-gray-900">Video Desk</h1>
-      <p className="mt-2 max-w-2xl text-gray-600">
+      <h1 className="font-display text-3xl font-bold text-text-primary">Video Desk</h1>
+      <p className="mt-2 max-w-2xl text-text-secondary">
         Curated YouTube and TikTok embeds for local reporting and entertainment.
       </p>
 
       <div className="mt-8 grid gap-6 md:grid-cols-2">
         {videos.map((video) => (
-          <article key={video.embedUrl} className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-            <div className="aspect-video w-full bg-black">
+          <article key={video.embedUrl} className="overflow-hidden rounded-2xl border border-dark-border bg-dark-slate shadow-card">
+            <div className="aspect-video w-full bg-dark-black">
               <iframe
                 className="h-full w-full"
                 src={video.embedUrl}
@@ -41,8 +41,8 @@ const VideosPage = () => {
               />
             </div>
             <div className="p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">{video.platform}</p>
-              <h2 className="mt-1 text-base font-semibold text-gray-900">{video.title}</h2>
+              <p className="text-xs font-semibold uppercase tracking-wide text-accent-blue">{video.platform}</p>
+              <h2 className="mt-1 text-base font-semibold text-text-primary">{video.title}</h2>
             </div>
           </article>
         ))}

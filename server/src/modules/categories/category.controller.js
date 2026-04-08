@@ -15,6 +15,15 @@ const getAllCategories = asyncHandler(async (req, res) => {
   }
 });
 
+const getAllCategoriesAdmin = asyncHandler(async (req, res) => {
+  try {
+    const categories = await categoryService.getAllCategoriesAdmin();
+    res.status(200).json({ success: true, categories });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
+  }
+});
+
 const getCategoryTree = asyncHandler(async (req, res) => {
   try {
     const tree = await categoryService.getCategoryTree();
@@ -60,7 +69,15 @@ const deleteCategory = asyncHandler(async (req, res) => {
   }
 });
 
-module.exports = { getAllCategories, getCategoryTree, getCategoryBySlug, createCategory, updateCategory, deleteCategory };
+module.exports = {
+  getAllCategories,
+  getAllCategoriesAdmin,
+  getCategoryTree,
+  getCategoryBySlug,
+  createCategory,
+  updateCategory,
+  deleteCategory,
+};
 
 // MukonoTalks
 

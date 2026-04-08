@@ -43,7 +43,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       >
         <Provider store={store}>
           <HelmetProvider>
-            <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+            <BrowserRouter>
               <App />
               <Toaster position="top-right" toastOptions={{ duration: 4_000 }} />
             </BrowserRouter>

@@ -17,15 +17,15 @@ const PrivacyPolicy = () => {
   const lastUpdated = 'January 15, 2026';
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-dark-charcoal">
       {/* Header */}
-      <div className="bg-primary-600 text-white py-12">
+      <div className="bg-dark-black py-12 text-text-primary">
         <div className="container mx-auto px-4">
           <div className="flex items-center space-x-3 mb-4">
-            <FiShield className="h-8 w-8" />
-            <h1 className="text-3xl font-bold">{t('privacy.title', 'Privacy Policy')}</h1>
+            <FiShield className="h-8 w-8 text-accent-blue" />
+            <h1 className="font-display text-3xl font-bold">{t('privacy.title', 'Privacy Policy')}</h1>
           </div>
-          <p className="text-primary-100">
+          <p className="text-text-secondary">
             {t('privacy.lastUpdated', 'Last updated')}: {lastUpdated}
           </p>
         </div>
@@ -33,16 +33,16 @@ const PrivacyPolicy = () => {
 
       {/* Content */}
       <div className="container mx-auto px-4 py-12">
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-sm p-8 md:p-12">
+        <div className="mx-auto max-w-4xl rounded-lg border border-dark-border bg-dark-slate p-8 shadow-card md:p-12">
           {/* Introduction */}
           <section className="mb-10">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <h2 className="mb-4 text-xl font-semibold text-text-primary">
               {t('privacy.intro.title', 'Introduction')}
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-4">
+            <p className="mb-4 leading-relaxed text-text-secondary">
               {t('privacy.intro.p1', 'MukonoTalks Ltd ("we", "us", or "our") is committed to protecting the privacy and security of your personal information. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website or use our B2B e-commerce platform.')}
             </p>
-            <p className="text-gray-600 leading-relaxed">
+            <p className="leading-relaxed text-text-secondary">
               {t('privacy.intro.p2', 'This policy complies with applicable data protection regulations including GDPR and other relevant privacy laws.')}
             </p>
           </section>
@@ -50,14 +50,14 @@ const PrivacyPolicy = () => {
           {/* Information We Collect */}
           <section className="mb-10">
             <div className="flex items-center space-x-2 mb-4">
-              <FiDatabase className="h-5 w-5 text-primary-600" />
-              <h2 className="text-xl font-semibold text-gray-900">
+              <FiDatabase className="h-5 w-5 text-accent-blue" />
+              <h2 className="text-xl font-semibold text-text-primary">
                 {t('privacy.collect.title', 'Information We Collect')}
               </h2>
             </div>
-            <div className="space-y-4 text-gray-600">
+            <div className="space-y-4 text-text-secondary">
               <div>
-                <h3 className="font-medium text-gray-900 mb-2">
+                <h3 className="mb-2 font-medium text-text-primary">
                   {t('privacy.collect.businessInfo', 'Business Information')}
                 </h3>
                 <ul className="list-disc list-inside space-y-1 ml-4">
@@ -68,7 +68,7 @@ const PrivacyPolicy = () => {
                 </ul>
               </div>
               <div>
-                <h3 className="font-medium text-gray-900 mb-2">
+                <h3 className="mb-2 font-medium text-text-primary">
                   {t('privacy.collect.transactional', 'Transactional Information')}
                 </h3>
                 <ul className="list-disc list-inside space-y-1 ml-4">
@@ -79,7 +79,7 @@ const PrivacyPolicy = () => {
                 </ul>
               </div>
               <div>
-                <h3 className="font-medium text-gray-900 mb-2">
+                <h3 className="mb-2 font-medium text-text-primary">
                   {t('privacy.collect.technical', 'Technical Information')}
                 </h3>
                 <ul className="list-disc list-inside space-y-1 ml-4">
@@ -93,32 +93,32 @@ const PrivacyPolicy = () => {
 
           {/* How We Use Information */}
           <section className="mb-10">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <h2 className="mb-4 text-xl font-semibold text-text-primary">
               {t('privacy.use.title', 'How We Use Your Information')}
             </h2>
-            <ul className="text-gray-600 space-y-2">
+            <ul className="space-y-2 text-text-secondary">
               <li className="flex items-start space-x-2">
-                <span className="text-primary-600 mt-1">•</span>
+                <span className="mt-1 text-accent-blue">•</span>
                 <span>{t('privacy.use.item1', 'Processing and fulfilling your orders')}</span>
               </li>
               <li className="flex items-start space-x-2">
-                <span className="text-primary-600 mt-1">•</span>
+                <span className="mt-1 text-accent-blue">•</span>
                 <span>{t('privacy.use.item2', 'Providing customer support and responding to inquiries')}</span>
               </li>
               <li className="flex items-start space-x-2">
-                <span className="text-primary-600 mt-1">•</span>
+                <span className="mt-1 text-accent-blue">•</span>
                 <span>{t('privacy.use.item3', 'Generating quotes and managing B2B relationships')}</span>
               </li>
               <li className="flex items-start space-x-2">
-                <span className="text-primary-600 mt-1">•</span>
+                <span className="mt-1 text-accent-blue">•</span>
                 <span>{t('privacy.use.item4', 'Sending transactional emails (order confirmations, shipping updates)')}</span>
               </li>
               <li className="flex items-start space-x-2">
-                <span className="text-primary-600 mt-1">•</span>
+                <span className="mt-1 text-accent-blue">•</span>
                 <span>{t('privacy.use.item5', 'Improving our website and services')}</span>
               </li>
               <li className="flex items-start space-x-2">
-                <span className="text-primary-600 mt-1">•</span>
+                <span className="mt-1 text-accent-blue">•</span>
                 <span>{t('privacy.use.item6', 'Complying with legal obligations and regulatory requirements')}</span>
               </li>
             </ul>
@@ -127,15 +127,15 @@ const PrivacyPolicy = () => {
           {/* Data Security */}
           <section className="mb-10">
             <div className="flex items-center space-x-2 mb-4">
-              <FiLock className="h-5 w-5 text-primary-600" />
-              <h2 className="text-xl font-semibold text-gray-900">
+              <FiLock className="h-5 w-5 text-accent-blue" />
+              <h2 className="text-xl font-semibold text-text-primary">
                 {t('privacy.security.title', 'Data Security')}
               </h2>
             </div>
-            <p className="text-gray-600 leading-relaxed mb-4">
+            <p className="mb-4 leading-relaxed text-text-secondary">
               {t('privacy.security.p1', 'We implement appropriate technical and organizational measures to protect your personal information, including:')}
             </p>
-            <ul className="text-gray-600 space-y-2 ml-4">
+            <ul className="ml-4 space-y-2 text-text-secondary">
               <li>• {t('privacy.security.item1', 'SSL/TLS encryption for all data transmission')}</li>
               <li>• {t('privacy.security.item2', 'Secure password hashing using bcrypt')}</li>
               <li>• {t('privacy.security.item3', 'HTTP-only cookies for authentication')}</li>
@@ -147,15 +147,15 @@ const PrivacyPolicy = () => {
           {/* Data Retention */}
           <section className="mb-10">
             <div className="flex items-center space-x-2 mb-4">
-              <FiTrash2 className="h-5 w-5 text-primary-600" />
-              <h2 className="text-xl font-semibold text-gray-900">
+              <FiTrash2 className="h-5 w-5 text-accent-blue" />
+              <h2 className="text-xl font-semibold text-text-primary">
                 {t('privacy.retention.title', 'Data Retention')}
               </h2>
             </div>
-            <p className="text-gray-600 leading-relaxed mb-4">
+            <p className="mb-4 leading-relaxed text-text-secondary">
               {t('privacy.retention.p1', 'We retain your personal information for as long as necessary to fulfill the purposes outlined in this policy:')}
             </p>
-            <ul className="text-gray-600 space-y-2 ml-4">
+            <ul className="ml-4 space-y-2 text-text-secondary">
               <li>• {t('privacy.retention.item1', 'Account information: Until account deletion or 2 years of inactivity')}</li>
               <li>• {t('privacy.retention.item2', 'Order records: 7 years for tax and legal compliance')}</li>
               <li>• {t('privacy.retention.item3', 'Download logs: 3 years for audit compliance')}</li>
@@ -165,13 +165,13 @@ const PrivacyPolicy = () => {
 
           {/* Your Rights */}
           <section className="mb-10">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <h2 className="mb-4 text-xl font-semibold text-text-primary">
               {t('privacy.rights.title', 'Your Data Protection Rights')}
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-4">
+            <p className="mb-4 leading-relaxed text-text-secondary">
               {t('privacy.rights.intro', 'Under applicable data protection law, you have the right to:')}
             </p>
-            <ul className="text-gray-600 space-y-2 ml-4">
+            <ul className="ml-4 space-y-2 text-text-secondary">
               <li>• {t('privacy.rights.item1', 'Access your personal information we hold')}</li>
               <li>• {t('privacy.rights.item2', 'Request correction of inaccurate information')}</li>
               <li>• {t('privacy.rights.item3', 'Request deletion of your personal information')}</li>
@@ -183,13 +183,13 @@ const PrivacyPolicy = () => {
 
           {/* Cookies */}
           <section className="mb-10">
-            <h2 className="text-xl font-semibold text-gray-900 mb-4">
+            <h2 className="mb-4 text-xl font-semibold text-text-primary">
               {t('privacy.cookies.title', 'Cookies and Tracking')}
             </h2>
-            <p className="text-gray-600 leading-relaxed mb-4">
+            <p className="mb-4 leading-relaxed text-text-secondary">
               {t('privacy.cookies.p1', 'We use cookies and similar technologies to improve your experience. You can manage your cookie preferences at any time. We use:')}
             </p>
-            <ul className="text-gray-600 space-y-2 ml-4">
+            <ul className="ml-4 space-y-2 text-text-secondary">
               <li>• <strong>{t('privacy.cookies.essential', 'Essential cookies')}:</strong> {t('privacy.cookies.essentialDesc', 'Required for basic site functionality (authentication)')}</li>
               <li>• <strong>{t('privacy.cookies.analytics', 'Analytics cookies')}:</strong> {t('privacy.cookies.analyticsDesc', 'Help us understand how visitors use our site (Google Analytics)')}</li>
               <li>• <strong>{t('privacy.cookies.preferences', 'Preference cookies')}:</strong> {t('privacy.cookies.preferencesDesc', 'Remember your language and other settings')}</li>
@@ -199,15 +199,15 @@ const PrivacyPolicy = () => {
           {/* Contact */}
           <section className="mb-10">
             <div className="flex items-center space-x-2 mb-4">
-              <FiMail className="h-5 w-5 text-primary-600" />
-              <h2 className="text-xl font-semibold text-gray-900">
+              <FiMail className="h-5 w-5 text-accent-blue" />
+              <h2 className="text-xl font-semibold text-text-primary">
                 {t('privacy.contact.title', 'Contact Us')}
               </h2>
             </div>
-            <p className="text-gray-600 leading-relaxed mb-4">
+            <p className="mb-4 leading-relaxed text-text-secondary">
               {t('privacy.contact.p1', 'For any privacy-related questions or to exercise your rights, please contact our Information Officer:')}
             </p>
-            <div className="bg-gray-50 rounded-lg p-4 text-gray-600">
+            <div className="rounded-lg bg-dark-charcoal p-4 text-text-secondary">
               <p><strong>Data Protection Officer</strong></p>
               <p>MukonoTalks Ltd</p>
               <p>Email: privacy@mukonotalks.ug</p>
@@ -217,14 +217,14 @@ const PrivacyPolicy = () => {
           </section>
 
           {/* Footer Navigation */}
-          <div className="pt-6 border-t border-gray-200 flex flex-wrap gap-4 text-sm">
-            <LocalizedLink to="/terms" className="text-primary-600 hover:text-primary-700 font-medium">
+          <div className="flex flex-wrap gap-4 border-t border-dark-border pt-6 text-sm">
+            <LocalizedLink to="/terms" className="font-medium text-accent-blue transition-colors hover:text-category-news">
               {t('footer.termsConditions', 'Terms & Conditions')} →
             </LocalizedLink>
-            <LocalizedLink to="/" className="text-gray-500 hover:text-gray-700">
+            <LocalizedLink to="/" className="text-text-muted transition-colors hover:text-text-primary">
               {t('nav.home', 'Home')}
             </LocalizedLink>
-            <LocalizedLink to="/products" className="text-gray-500 hover:text-gray-700">
+            <LocalizedLink to="/products" className="text-text-muted transition-colors hover:text-text-primary">
               {t('nav.products', 'Products')}
             </LocalizedLink>
           </div>

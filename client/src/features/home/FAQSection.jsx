@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import api from '../../app/axios';
+import SafeRichText from "../../components/ui/SafeRichText";
 
 /* ── Default copy (fallback when API is unavailable) ── */
 const DEFAULT = {
@@ -47,7 +48,7 @@ const FAQItem = ({ question, answer }) => {
       </button>
       {open && (
         <div className="px-6 pb-5 bg-white text-gray-500 text-sm leading-relaxed border-t border-gray-100">
-          {answer}
+          <SafeRichText className="prose prose-sm max-w-none text-gray-500" html={answer} />
         </div>
       )}
     </div>
@@ -81,7 +82,7 @@ const FAQSection = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">{title}</h2>
           )}
           {description && (
-            <p className="text-gray-500">{description}</p>
+            <SafeRichText className="prose mx-auto max-w-none text-gray-500" html={description} />
           )}
         </div>
 

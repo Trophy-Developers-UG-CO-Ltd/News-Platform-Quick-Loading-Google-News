@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import LocalizedLink from "../../components/i18n/LocalizedLink";
 import { getLucideIcon } from "../../utils/getLucideIcon";
 import api from '../../app/axios';
+import SafeRichText from "../../components/ui/SafeRichText";
 
 /* ── Default copy (fallback when API is unavailable) ── */
 const DEFAULT = {
@@ -60,7 +61,7 @@ const CTASection = () => {
           <h2 className="text-3xl font-bold mb-4">{title}</h2>
         )}
         {description && (
-          <p className="max-w-xl mx-auto mb-8 text-primary-100">{description}</p>
+          <SafeRichText className="prose mx-auto mb-8 max-w-xl text-primary-100" html={description} />
         )}
 
         {/* Perk icons */}
@@ -71,7 +72,7 @@ const CTASection = () => {
               return (
                 <div key={perk._id || i} className="flex items-center gap-2 text-primary-200 text-sm font-medium">
                   <Icon size={16} />
-                  {perk.label || perk.title}
+                  <SafeRichText className="prose prose-sm max-w-none text-primary-200" html={perk.label || perk.title} />
                 </div>
               );
             })}

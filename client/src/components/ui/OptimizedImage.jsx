@@ -43,7 +43,7 @@ const OptimizedImage = ({
     return (
       fallback || (
         <div
-          className={`flex items-center justify-center bg-gray-100 text-gray-300 ${className}`}
+          className={`flex items-center justify-center bg-dark-slate text-text-muted ${className}`}
           style={{ width, height }}
           {...rest}
         >
@@ -59,7 +59,7 @@ const OptimizedImage = ({
     <div ref={imgRef} className={`relative overflow-hidden ${className}`} style={{ width, height }}>
       {/* Blur placeholder */}
       {!loaded && (
-        <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+        <div className="absolute inset-0 bg-dark-slate animate-pulse" />
       )}
       {inView && (
         <img

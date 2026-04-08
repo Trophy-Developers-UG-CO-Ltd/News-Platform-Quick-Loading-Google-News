@@ -32,7 +32,7 @@ const Footer = () => {
   } = settings || {};
 
   return (
-    <footer className="text-gray-300" style={{ backgroundColor: '#283B8F' }}>
+    <footer className="bg-dark-black text-text-secondary">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -40,21 +40,21 @@ const Footer = () => {
             <div className="flex items-center mb-4">
               <img src="/mukonotalks.png" alt="MukonoTalks" className="h-12 w-auto" />
             </div>
-            <p className="text-sm text-gray-400 mb-4">
+            <p className="mb-4 text-sm text-text-muted">
                 {tagline || t('footer.tagline', 'MukonoTalks publishes local news, entertainment, community updates, and video stories for Mukono audiences.')}
             </p>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-white font-semibold mb-4">{t('footer.quickLinks', 'Quick Links')}</h3>
+            <h3 className="mb-4 font-semibold text-text-primary">{t('footer.quickLinks', 'Quick Links')}</h3>
             <ul className="space-y-2 text-sm">
               {quickLinks.length > 0
                 ? quickLinks.map((link) => (
                     <li key={link.href + link.label}>
                       <LocalizedLink
                         to={link.href}
-                        className="hover:text-white transition-colors"
+                        className="transition-colors hover:text-text-primary"
                         {...(link.openInNewTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                       >
                         {link.label}
@@ -63,13 +63,13 @@ const Footer = () => {
                   ))
                 : (
                   <>
-                    <li><LocalizedLink to="/" className="hover:text-white transition-colors">{t('nav.home', 'Home')}</LocalizedLink></li>
-                    <li><LocalizedLink to="/news" className="hover:text-white transition-colors">News</LocalizedLink></li>
-                    <li><LocalizedLink to="/local" className="hover:text-white transition-colors">Local Updates</LocalizedLink></li>
-                    <li><LocalizedLink to="/entertainment" className="hover:text-white transition-colors">Entertainment</LocalizedLink></li>
-                    <li><LocalizedLink to="/videos" className="hover:text-white transition-colors">Videos</LocalizedLink></li>
-                    <li><LocalizedLink to="/privacy" className="hover:text-white transition-colors">{t('footer.privacyPolicy', 'Privacy Policy')}</LocalizedLink></li>
-                    <li><LocalizedLink to="/terms" className="hover:text-white transition-colors">{t('footer.termsConditions', 'Terms & Conditions')}</LocalizedLink></li>
+                    <li><LocalizedLink to="/" className="transition-colors hover:text-text-primary">{t('nav.home', 'Home')}</LocalizedLink></li>
+                    <li><LocalizedLink to="/news" className="transition-colors hover:text-text-primary">News</LocalizedLink></li>
+                    <li><LocalizedLink to="/local" className="transition-colors hover:text-text-primary">Local Updates</LocalizedLink></li>
+                    <li><LocalizedLink to="/entertainment" className="transition-colors hover:text-text-primary">Entertainment</LocalizedLink></li>
+                    <li><LocalizedLink to="/videos" className="transition-colors hover:text-text-primary">Videos</LocalizedLink></li>
+                    <li><LocalizedLink to="/privacy" className="transition-colors hover:text-text-primary">{t('footer.privacyPolicy', 'Privacy Policy')}</LocalizedLink></li>
+                    <li><LocalizedLink to="/terms" className="transition-colors hover:text-text-primary">{t('footer.termsConditions', 'Terms & Conditions')}</LocalizedLink></li>
                   </>
                 )
               }
@@ -78,14 +78,14 @@ const Footer = () => {
 
           {/* Customer Service */}
           <div>
-            <h3 className="text-white font-semibold mb-4">{t('footer.customerService', 'Customer Service')}</h3>
+            <h3 className="mb-4 font-semibold text-text-primary">{t('footer.customerService', 'Customer Service')}</h3>
             <ul className="space-y-2 text-sm">
               {serviceLinks.length > 0
                 ? serviceLinks.map((link) => (
                     <li key={link.href + link.label}>
                       <LocalizedLink
                         to={link.href}
-                        className="hover:text-white transition-colors"
+                        className="transition-colors hover:text-text-primary"
                         {...(link.openInNewTab ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
                       >
                         {link.label}
@@ -94,8 +94,8 @@ const Footer = () => {
                   ))
                 : (
                   <>
-                    <li><LocalizedLink to="/editor" className="hover:text-white transition-colors">Editorial CMS</LocalizedLink></li>
-                    <li><LocalizedLink to="/contact" className="hover:text-white transition-colors">{t('footer.contactUs', 'Contact Us')}</LocalizedLink></li>
+                    <li><LocalizedLink to="/editor" className="transition-colors hover:text-text-primary">Editorial CMS</LocalizedLink></li>
+                    <li><LocalizedLink to="/contact" className="transition-colors hover:text-text-primary">{t('footer.contactUs', 'Contact Us')}</LocalizedLink></li>
                   </>
                 )
               }
@@ -104,23 +104,23 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h3 className="text-white font-semibold mb-4">{t('footer.contactUs', 'Contact Us')}</h3>
+            <h3 className="mb-4 font-semibold text-text-primary">{t('footer.contactUs', 'Contact Us')}</h3>
             <ul className="space-y-3 text-sm">
               {contactEmail && (
                 <li className="flex items-center space-x-2">
-                  <FiMail className="h-4 w-4 text-accent-400 shrink-0" />
+                  <FiMail className="h-4 w-4 shrink-0 text-accent-orange" />
                   <span>{contactEmail}</span>
                 </li>
               )}
               {contactPhone && (
                 <li className="flex items-center space-x-2">
-                  <FiPhone className="h-4 w-4 text-accent-400 shrink-0" />
+                  <FiPhone className="h-4 w-4 shrink-0 text-accent-orange" />
                   <span>{contactPhone}</span>
                 </li>
               )}
               {contactAddress && (
                 <li className="flex items-start space-x-2">
-                  <FiMapPin className="h-4 w-4 text-accent-400 mt-0.5 shrink-0" />
+                  <FiMapPin className="mt-0.5 h-4 w-4 shrink-0 text-accent-orange" />
                   <span>{contactAddress}</span>
                 </li>
               )}
@@ -129,11 +129,11 @@ const Footer = () => {
         </div>
 
         {/* Bottom bar */}
-       <div className="border-t border-gray-800 mt-10 pt-6 flex flex-col md:flex-row justify-between items-center text-sm">
+       <div className="mt-10 flex flex-col items-center justify-between border-t border-dark-border pt-6 text-sm md:flex-row">
   <p>&copy; {currentYear} {copyrightName || 'MukonoTalks'}. {t('footer.allRights', 'All rights reserved.')}</p>
-  <p className="mt-2 md:mt-0 text-gray-500">
+  <p className="mt-2 text-text-muted md:mt-0">
     Developed and Designed by{' '}
-      <span className="text-accent-400 font-medium" title="TrophyDevelopers">
+      <span className="font-medium text-accent-orange" title="TrophyDevelopers">
         Trophy Developers
       </span>
   </p>

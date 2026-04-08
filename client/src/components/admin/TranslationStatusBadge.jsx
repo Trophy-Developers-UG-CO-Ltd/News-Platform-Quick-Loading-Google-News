@@ -50,9 +50,9 @@ const STATUS_CONFIG = {
   pending: {
     label: 'Pending',
     Icon: Clock,
-    colors: 'bg-gray-50 text-gray-500 border-gray-200',
-    iconColor: 'text-gray-400',
-    dot: 'bg-gray-300',
+    colors: 'bg-dark-slate text-text-secondary border-dark-border',
+    iconColor: 'text-text-muted',
+    dot: 'bg-dark-border',
   },
 };
 
@@ -109,7 +109,7 @@ const TranslationStatusBadge = ({
 
   if (!langs.some((l) => translationStatus[l])) {
     return (
-      <span className="text-xs text-gray-400 italic">No translation data</span>
+      <span className="text-xs italic text-text-muted">No translation data</span>
     );
   }
 

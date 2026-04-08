@@ -7,6 +7,7 @@ import React, { useState } from "react";
 import { PlayCircle, X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import api from '../../app/axios';
+import SafeRichText from "../../components/ui/SafeRichText";
 
 /* ── Default copy (fallback when API is unavailable) ── */
 const DEFAULT = {
@@ -56,7 +57,7 @@ const VideoSection = () => {
             <h2 className="text-3xl font-bold text-gray-900 mb-4">{title}</h2>
           )}
           {description && (
-            <p className="text-gray-500 max-w-2xl mx-auto">{description}</p>
+            <SafeRichText className="prose mx-auto max-w-2xl text-gray-500" html={description} />
           )}
         </div>
 
@@ -78,7 +79,7 @@ const VideoSection = () => {
           </div>
           {caption && (
             <div className="absolute bottom-6 left-6 right-6">
-              <p className="text-white font-semibold text-sm tracking-wide">{caption}</p>
+              <SafeRichText className="prose prose-sm max-w-none text-white" html={caption} />
             </div>
           )}
         </div>

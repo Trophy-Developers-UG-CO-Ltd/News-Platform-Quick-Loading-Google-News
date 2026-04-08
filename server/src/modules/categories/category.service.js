@@ -66,6 +66,18 @@ const getAllCategories = async () => {
 };
 
 /**
+ * Returns all categories (active + inactive) for admin management.
+ */
+const getAllCategoriesAdmin = async () => {
+  const categories = await Category.find({})
+    .populate('products')
+    .populate('parent', 'name slug')
+    .sort({ sortOrder: 1, name: 1 });
+
+  return categories;
+};
+
+/**
  * Returns the full category tree rooted at the top level.
  * Each node: { ...category, children: [...] }
  */
@@ -140,6 +152,7 @@ const deleteCategory = async (id) => {
 
 module.exports = {
   getAllCategories,
+  getAllCategoriesAdmin,
   getCategoryTree,
   getCategoryBySlug,
   createCategory,

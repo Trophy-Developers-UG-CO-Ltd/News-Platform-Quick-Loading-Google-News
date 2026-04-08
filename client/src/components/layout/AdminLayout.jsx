@@ -38,9 +38,11 @@ import {
   LogOut,
   User,
   Palette,
+  Tag,
   Layers,
   FileCode2,
   Wrench,
+  Shapes,
 } from 'lucide-react';
 
 /* ── Nav data ──────────────────────────────────────────────────── */
@@ -64,6 +66,7 @@ const NAV = [
     label: 'EDITORIAL',
     items: [
       { to: '/admin/users',      icon: Users,       label: 'Users' },
+      { to: '/admin/categories', icon: Shapes,      label: 'Categories' },
     ],
   },
   {
@@ -118,8 +121,8 @@ const SidebarItem = ({ item, collapsed, onClick }) => {
         className={[
           'flex items-center gap-3 px-3 py-2 rounded-lg mx-2 text-sm font-medium transition-colors',
           active
-            ? 'bg-primary-600 text-white'
-            : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+            ? 'bg-accent-blue text-text-primary'
+            : 'text-slate-300 hover:bg-slate-800 hover:text-text-primary',
         ].join(' ')}
       >
         <Icon className="w-[18px] h-[18px] flex-shrink-0" />
@@ -131,7 +134,7 @@ const SidebarItem = ({ item, collapsed, onClick }) => {
         <div
           className="
             pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3
-            py-1 px-2.5 bg-slate-700 text-white text-xs rounded-md shadow-lg
+            py-1 px-2.5 bg-slate-700 text-text-primary text-xs rounded-md shadow-lg
             opacity-0 group-hover:opacity-100 transition-opacity z-[60]
             whitespace-nowrap
           "
@@ -183,12 +186,12 @@ const SidebarContent = ({ collapsed, onNavClick }) => {
         >
           {logoUrl
             ? <img src={logoUrl} alt="logo" className="w-6 h-6 object-contain" />
-            : <span className="text-white font-bold text-sm">{initial}</span>
+            : <span className="font-bold text-sm text-text-primary">{initial}</span>
           }
         </div>
         {!collapsed && (
           <div className="min-w-0">
-            <p className="text-white font-bold text-sm truncate leading-tight">{platformName}</p>
+            <p className="text-text-primary font-bold text-sm truncate leading-tight">{platformName}</p>
             <p className="text-slate-400 text-xs truncate">{platformTagline}</p>
           </div>
         )}
@@ -223,13 +226,13 @@ const SidebarContent = ({ collapsed, onNavClick }) => {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-400 hover:bg-slate-800 hover:text-white text-sm transition-colors"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400 transition-colors hover:bg-slate-800 hover:text-text-primary"
           >
             <ExternalLink className="w-[18px] h-[18px] flex-shrink-0" />
             {!collapsed && <span>View Site</span>}
           </a>
           {collapsed && (
-            <div className="pointer-events-none absolute left-full top-1/2 -translate-y-1/2 ml-3 py-1 px-2.5 bg-slate-700 text-white text-xs rounded-md shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-[60] whitespace-nowrap">
+            <div className="pointer-events-none absolute left-full top-1/2 z-[60] ml-3 -translate-y-1/2 whitespace-nowrap rounded-md bg-slate-700 px-2.5 py-1 text-xs text-text-primary opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
               View Site
             </div>
           )}
@@ -247,11 +250,11 @@ const SidebarContent = ({ collapsed, onNavClick }) => {
               className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
               style={{ backgroundColor: accentColor }}
             >
-              <User className="w-3.5 h-3.5 text-white" />
+              <User className="h-3.5 w-3.5 text-text-primary" />
             </div>
             {!collapsed && (
               <div className="min-w-0 flex-1">
-                <p className="text-white text-xs font-semibold truncate">{user.name}</p>
+                <p className="truncate text-xs font-semibold text-text-primary">{user.name}</p>
                 <p className={`text-[10px] truncate font-medium ${user.role === 'developer' ? 'text-purple-400' : 'text-slate-400'}`}>
                   {user.role}
                 </p>
@@ -282,7 +285,7 @@ const AdminLayout = () => {
   const closeMobile = useCallback(() => setMobileOpen(false), []);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-gray-100">
+    <div className="flex h-screen overflow-hidden bg-dark-charcoal">
 
       {/* ── Desktop sidebar ──────────────────────────────────────── */}
       <aside
@@ -300,7 +303,7 @@ const AdminLayout = () => {
             absolute -right-3 top-[72px]
             w-6 h-6 rounded-none bg-slate-700 border-2 border-slate-900
             flex items-center justify-center
-            text-slate-300 hover:text-white hover:bg-primary-600
+            text-slate-300 hover:text-text-primary hover:bg-accent-blue
             transition-colors z-10 shadow-md
           "
           title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -331,18 +334,18 @@ const AdminLayout = () => {
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
 
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-gray-200 flex-shrink-0">
+        <div className="flex-shrink-0 items-center gap-3 border-b border-dark-border bg-dark-black px-4 py-3 md:hidden flex">
           <button
             onClick={() => setMobileOpen(true)}
-            className="p-2 rounded-none hover:bg-gray-100 text-gray-600 transition-colors"
+            className="p-2 text-text-secondary transition-colors hover:bg-dark-hover hover:text-text-primary rounded-none"
           >
             <Menu className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-primary-600 flex items-center justify-center">
-              <span className="text-white font-bold text-xs">A</span>
+            <div className="flex h-6 w-6 items-center justify-center rounded-md bg-accent-blue">
+              <span className="text-xs font-bold text-text-primary">A</span>
             </div>
-            <span className="font-semibold text-gray-800 text-sm">Admin Panel</span>
+            <span className="text-sm font-semibold text-text-primary">Admin Panel</span>
           </div>
         </div>
 

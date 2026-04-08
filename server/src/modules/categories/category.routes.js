@@ -17,6 +17,10 @@ const { createCategorySchema, updateCategorySchema } = require('./category.valid
 // Public (cached 10 min — categories change infrequently)
 router.get('/', cacheResponse(600), categoryController.getAllCategories);
 router.get('/tree', cacheResponse(600), categoryController.getCategoryTree);
+
+// Admin listing (includes inactive)
+router.get('/admin/all', protect, authorize('admin'), categoryController.getAllCategoriesAdmin);
+
 router.get('/:slug', cacheResponse(600), categoryController.getCategoryBySlug);
 
 // Admin (with cache invalidation)

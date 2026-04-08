@@ -95,21 +95,21 @@ const MediaUploadField = ({
 
       {/* Label */}
       {label && (
-        <label className="flex items-center gap-1.5 text-sm font-semibold text-gray-700">
-          <ImageIcon className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+        <label className="flex items-center gap-1.5 text-sm font-semibold text-text-secondary">
+          <ImageIcon className="h-3.5 w-3.5 shrink-0 text-text-muted" />
           {label}
-          {required && <span className="text-red-500">*</span>}
-          {hint && <span className="ml-1 font-normal text-xs text-gray-400">{hint}</span>}
+          {required && <span className="text-accent-red">*</span>}
+          {hint && <span className="ml-1 text-xs font-normal text-text-muted">{hint}</span>}
         </label>
       )}
 
       {value ? (
         /* ── Preview state ── */
-        <div className="relative rounded-xl overflow-hidden border border-gray-200 shadow-sm group">
+        <div className="group relative overflow-hidden rounded-xl border border-dark-border shadow-card">
           <img
             src={value}
             alt="Preview"
-            className="w-full h-48 object-cover bg-gray-100"
+            className="h-48 w-full bg-dark-slate object-cover"
             onError={(e) => { e.target.style.opacity = '0.3'; }}
           />
 
@@ -119,7 +119,7 @@ const MediaUploadField = ({
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={uploading}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-800 rounded-lg text-xs font-semibold shadow-md hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg bg-dark-slate px-3 py-1.5 text-xs font-semibold text-text-primary shadow-md transition-colors hover:bg-dark-hover"
             >
               <Upload className="w-3.5 h-3.5" />
               Replace
@@ -127,7 +127,7 @@ const MediaUploadField = ({
             <button
               type="button"
               onClick={() => setShowUrl(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white text-gray-800 rounded-lg text-xs font-semibold shadow-md hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-1.5 rounded-lg bg-dark-slate px-3 py-1.5 text-xs font-semibold text-text-primary shadow-md transition-colors hover:bg-dark-hover"
             >
               <Link className="w-3.5 h-3.5" />
               Use URL
@@ -135,7 +135,7 @@ const MediaUploadField = ({
             <button
               type="button"
               onClick={() => onChange('')}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-semibold shadow-md hover:bg-red-600 transition-colors ml-auto"
+              className="ml-auto flex items-center gap-1.5 rounded-lg bg-accent-red px-3 py-1.5 text-xs font-semibold text-text-primary shadow-md transition-colors hover:opacity-90"
             >
               <X className="w-3.5 h-3.5" />
               Remove
@@ -153,10 +153,10 @@ const MediaUploadField = ({
       ) : (
         /* ── Drop zone ── */
         <div
-          className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer select-none transition-all duration-200 ${
+          className={`relative cursor-pointer select-none rounded-xl border-2 border-dashed p-8 text-center transition-all duration-200 ${
             dragOver
-              ? 'border-primary-400 bg-primary-50 scale-[1.01]'
-              : 'border-gray-200 hover:border-primary-300 hover:bg-primary-50/40'
+              ? 'scale-[1.01] border-accent-blue bg-accent-blue/10'
+              : 'border-dark-border hover:border-accent-blue hover:bg-dark-slate'
           }`}
           onDrop={onDrop}
           onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -165,28 +165,28 @@ const MediaUploadField = ({
         >
           {uploading ? (
             <div className="flex flex-col items-center gap-3">
-              <Loader2 className="w-12 h-12 text-primary-500 animate-spin" />
-              <p className="text-sm font-semibold text-gray-600">Uploading to R2…</p>
+              <Loader2 className="h-12 w-12 animate-spin text-accent-blue" />
+              <p className="text-sm font-semibold text-text-secondary">Uploading to R2…</p>
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3">
-              <div className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-colors ${
-                dragOver ? 'bg-primary-100' : 'bg-gray-100'
+              <div className={`flex h-16 w-16 items-center justify-center rounded-2xl transition-colors ${
+                dragOver ? 'bg-accent-blue/15' : 'bg-dark-slate'
               }`}>
-                <CloudUpload className={`w-8 h-8 transition-colors ${
-                  dragOver ? 'text-primary-500' : 'text-gray-400'
+                <CloudUpload className={`h-8 w-8 transition-colors ${
+                  dragOver ? 'text-accent-blue' : 'text-text-muted'
                 }`} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-700">
+                <p className="text-sm font-semibold text-text-secondary">
                   Drop an image here or{' '}
-                  <span className="text-primary-600 underline underline-offset-2 decoration-dashed cursor-pointer">
+                  <span className="cursor-pointer text-accent-blue underline decoration-dashed underline-offset-2">
                     browse
                   </span>
                 </p>
                 {recommendedSize
-                  ? <p className="text-xs text-gray-400 mt-1">{recommendedSize} recommended · PNG, JPG, WebP · max 10 MB</p>
-                  : <p className="text-xs text-gray-400 mt-1">PNG, JPG, WebP, GIF · max 10 MB</p>
+                  ? <p className="mt-1 text-xs text-text-muted">{recommendedSize} recommended · PNG, JPG, WebP · max 10 MB</p>
+                  : <p className="mt-1 text-xs text-text-muted">PNG, JPG, WebP, GIF · max 10 MB</p>
                 }
               </div>
             </div>
@@ -204,19 +204,19 @@ const MediaUploadField = ({
             onKeyDown={(e) => e.key === 'Enter' && applyUrl()}
             placeholder="https://…"
             autoFocus
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-[48px] text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none"
+            className="flex-1 rounded-[48px] border border-dark-border bg-dark-charcoal px-3 py-2 text-sm text-text-primary outline-none focus:border-accent-blue focus:ring-2 focus:ring-accent-blue"
           />
           <button
             type="button"
             onClick={applyUrl}
-            className="px-4 py-2 bg-primary-600 text-white rounded-[48px] text-sm font-semibold hover:bg-primary-700 transition-colors"
+            className="rounded-[48px] bg-accent-blue px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-category-news"
           >
             <CheckCircle2 className="w-4 h-4" />
           </button>
           <button
             type="button"
             onClick={() => { setShowUrl(false); setUrlInput(''); }}
-            className="px-3 py-2 border border-gray-200 rounded-[48px] text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+            className="rounded-[48px] border border-dark-border px-3 py-2 text-sm text-text-secondary transition-colors hover:bg-dark-hover hover:text-text-primary"
           >
             <X className="w-4 h-4" />
           </button>
@@ -225,7 +225,7 @@ const MediaUploadField = ({
         <button
           type="button"
           onClick={(e) => { e.stopPropagation(); setShowUrl(true); }}
-          className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-primary-600 transition-colors"
+          className="flex items-center gap-1.5 text-xs text-text-muted transition-colors hover:text-accent-blue"
         >
           <Link className="w-3 h-3" />
           Or paste an image URL

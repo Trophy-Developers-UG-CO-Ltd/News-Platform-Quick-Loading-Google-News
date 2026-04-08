@@ -15,15 +15,15 @@ const LocalUpdatesPage = () => {
         <meta name="description" content="Hyper-local Mukono updates on civic activity, schools, roads, and community events." />
       </Helmet>
 
-      <h1 className="text-3xl font-bold text-gray-900">Mukono Local Updates</h1>
-      <p className="mt-2 max-w-2xl text-gray-600">
+      <h1 className="font-display text-3xl font-bold text-text-primary">Mukono Local Updates</h1>
+      <p className="mt-2 max-w-2xl text-text-secondary">
         Real-time neighborhood and district updates to keep residents informed.
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {updates.map((item) => (
-          <article key={item} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-            <p className="text-sm leading-6 text-gray-700">{item}</p>
+          <article key={item} className="rounded-2xl border border-dark-border bg-dark-slate p-5 shadow-card">
+            <p className="text-sm leading-6 text-text-secondary">{item}</p>
           </article>
         ))}
       </div>

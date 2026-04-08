@@ -2,6 +2,7 @@
 const router = express.Router();
 
 const contactRoutes = require('./modules/contact/contact.routes');
+const categoryRoutes = require('./modules/categories/category.routes');
 const pageRoutes = require('./modules/pages/page.routes');
 const articleRoutes = require('./modules/articles/article.routes');
 const homepageSectionRoutes = require('./modules/homepageSection/homepageSection.routes');
@@ -27,6 +28,7 @@ const siteSettingsRoutes  = require('./modules/site-settings/siteSettings.routes
 const maintenanceRoutes   = require('./modules/maintenance/maintenance.routes');
 
 router.use('/contact', contactRoutes);
+router.use('/categories', categoryRoutes);
 router.use('/pages', pageRoutes);
 router.use('/articles', articleRoutes);
 router.use('/homepage-sections', homepageSectionRoutes);

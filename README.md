@@ -45,6 +45,20 @@ npm run build
 npm start
 ```
 
+## Environment Split (Dev / Preview / Production)
+
+- Local dev (`npm run dev`) runs without service worker registration.
+- Hosted preview build (`npm run build:preview`) is isolated from production PWA behavior.
+- Production build (`npm run build`) enables PWA by default.
+
+Optional override for CI or hosting:
+
+```bash
+# Force-enable or disable PWA regardless of mode
+VITE_ENABLE_PWA=true npm run build
+VITE_ENABLE_PWA=false npm run build
+```
+
 ## Next Cleanup Targets
 
 📄 MukonoTalks — Media Platform Scalability & Production Deployment Guide

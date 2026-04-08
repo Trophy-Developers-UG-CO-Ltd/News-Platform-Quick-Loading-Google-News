@@ -8,7 +8,6 @@
 const Joi = require('joi');
 
 const BLOCK_TYPES = ['text', 'image', 'quote', 'code', 'list', 'video'];
-const CATEGORIES = ['blog', 'insight', 'knowledge-base', 'case-study', 'announcement'];
 const SUPPORTED_LANGS = ['en', 'zh', 'sw'];
 const SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
@@ -92,9 +91,9 @@ const createArticleSchema = {
       .messages({ 'custom.duplicateOrder': 'Content blocks must have unique order values' }),
 
     category: Joi.string()
-      .valid(...CATEGORIES)
+      .pattern(SLUG_PATTERN)
       .required()
-      .messages({ 'any.only': `Category must be one of: ${CATEGORIES.join(', ')}` }),
+      .messages({ 'string.pattern.base': 'Category must be a URL-safe slug (lowercase, hyphens only)' }),
 
     tags: Joi.array().items(Joi.string().max(50)).max(20).default([]),
 
@@ -158,8 +157,8 @@ const updateArticleSchema = {
       .messages({ 'custom.duplicateOrder': 'Content blocks must have unique order values' }),
 
     category: Joi.string()
-      .valid(...CATEGORIES)
-      .messages({ 'any.only': `Category must be one of: ${CATEGORIES.join(', ')}` }),
+      .pattern(SLUG_PATTERN)
+      .messages({ 'string.pattern.base': 'Category must be a URL-safe slug (lowercase, hyphens only)' }),
 
     tags: Joi.array().items(Joi.string().max(50)).max(20),
 
@@ -225,7 +224,7 @@ const getPublicArticleSchema = {
  */
 const listArticlesQuerySchema = {
   query: Joi.object({
-    category: Joi.string().valid(...CATEGORIES).allow('', null),
+    category: Joi.string().pattern(SLUG_PATTERN).allow('', null),
     tag: Joi.string().max(50).allow('', null),
     search: Joi.string().max(200).allow('', null),
     status: Joi.string().valid('draft', 'scheduled', 'published').allow('', null),
@@ -244,7 +243,6 @@ module.exports = {
   getPublicArticleSchema,
   listArticlesQuerySchema,
   BLOCK_TYPES,
-  CATEGORIES,
   SUPPORTED_LANGS,
 };
 

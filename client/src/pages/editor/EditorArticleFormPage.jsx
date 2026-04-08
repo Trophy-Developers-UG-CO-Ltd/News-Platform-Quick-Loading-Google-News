@@ -1,8 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import articleService from '../../features/articles/articleService';
+import categoryService from '../../features/articles/categoryService';
+import RichTextEditor from '../../components/ui/RichTextEditor';
 
-const CATEGORIES = ['blog', 'insight', 'knowledge-base', 'case-study', 'announcement'];
+const FALLBACK_CATEGORIES = [
+  { value: 'news', label: 'News' },
+  { value: 'entertainment', label: 'Entertainment' },
+  { value: 'politics', label: 'Politics' },
+  { value: 'lifestyle', label: 'Lifestyle' },
+  { value: 'opportunities', label: 'Opportunities' },
+];
 
 const slugify = (value) =>
   value
@@ -11,6 +19,12 @@ const slugify = (value) =>
     .replace(/[^a-z0-9\s-]/g, '')
     .replace(/\s+/g, '-')
     .replace(/-+/g, '-');
+
+const stripHtml = (html = '') =>
+  html
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
 const EditorArticleFormPage = () => {
   const { id } = useParams();
@@ -21,12 +35,39 @@ const EditorArticleFormPage = () => {
   const [slug, setSlug] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [body, setBody] = useState('');
-  const [category, setCategory] = useState('blog');
+  const [category, setCategory] = useState('news');
   const [tags, setTags] = useState('');
   const [featuredImage, setFeaturedImage] = useState('');
+  const [categoryOptions, setCategoryOptions] = useState(FALLBACK_CATEGORIES);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [savedStatus, setSavedStatus] = useState('');
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCategories = async () => {
+      try {
+        const result = await categoryService.listCategories();
+        const options = categoryService.normalizeCategoryOptions(result?.categories || []);
+        if (mounted && options.length) {
+          setCategoryOptions(options);
+          setCategory((current) => (
+            options.some((option) => option.value === current) ? current : options[0].value
+          ));
+        }
+      } catch (_) {
+        if (mounted) {
+          setCategoryOptions(FALLBACK_CATEGORIES);
+        }
+      }
+    };
+
+    loadCategories();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -39,12 +80,12 @@ const EditorArticleFormPage = () => {
         setSlug(article?.localizedSlug?.en || '');
         setExcerpt(article?.excerpt?.en || '');
         const textBlock = (article?.contentBlocks || []).find((b) => b?.type === 'text');
-        const initialBody =
-          textBlock?.data?.en?.body ||
-          textBlock?.data?.en?.text ||
-          '';
-        setBody(initialBody.replace(/<[^>]+>/g, ''));
-        setCategory(article?.category || 'blog');
+        const initialBodyRaw = textBlock?.data?.en?.body || textBlock?.data?.en?.text || '';
+        const initialBody = Array.isArray(initialBodyRaw)
+          ? initialBodyRaw.map((part) => `<p>${part}</p>`).join('')
+          : initialBodyRaw;
+        setBody(initialBody);
+        setCategory(article?.category || 'news');
         setTags((article?.tags || []).join(', '));
         setFeaturedImage(article?.featuredImage || '');
       } catch (err) {
@@ -65,7 +106,7 @@ const EditorArticleFormPage = () => {
     return {
       title: { en: title, zh: '', sw: '' },
       localizedSlug: { en: slug, zh: '', sw: '' },
-      excerpt: { en: excerpt, zh: '', sw: '' },
+      excerpt: { en: stripHtml(excerpt).slice(0, 500), zh: '', sw: '' },
       category,
       tags: tagList,
       featuredImage: featuredImage || '',
@@ -73,7 +114,7 @@ const EditorArticleFormPage = () => {
       seo: {
         en: {
           title: title.slice(0, 60),
-          description: (excerpt || body).slice(0, 150),
+          description: stripHtml(excerpt || body).slice(0, 150),
         },
         zh: {},
         sw: {},
@@ -83,7 +124,7 @@ const EditorArticleFormPage = () => {
           type: 'text',
           order: 0,
           data: {
-            en: { body: `<p>${body.replace(/\n/g, '</p><p>')}</p>` },
+            en: { body },
             zh: null,
             sw: null,
           },
@@ -121,8 +162,8 @@ const EditorArticleFormPage = () => {
   return (
     <section className="mx-auto w-full max-w-4xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-900">{isEdit ? 'Edit Article' : 'Create Article'}</h1>
-        <Link to="/editor" className="text-sm font-semibold text-primary-700 hover:text-primary-900">
+        <h1 className="font-display text-3xl font-bold text-text-primary">{isEdit ? 'Edit Article' : 'Create Article'}</h1>
+        <Link to="/editor" className="text-sm font-semibold text-accent-blue transition-colors hover:text-category-news">
           Back to CMS
         </Link>
       </div>
@@ -130,9 +171,9 @@ const EditorArticleFormPage = () => {
       {error ? <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
       {savedStatus ? <p className="mb-4 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-700">{savedStatus}</p> : null}
 
-      <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="space-y-4 rounded-2xl border border-dark-border bg-dark-slate p-6 shadow-card">
         <label className="block">
-          <span className="text-sm font-medium text-gray-700">Title</span>
+          <span className="text-sm font-medium text-text-secondary">Title</span>
           <input
             value={title}
             onChange={(e) => {
@@ -141,84 +182,84 @@ const EditorArticleFormPage = () => {
                 setSlug(slugify(e.target.value));
               }
             }}
-            className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2"
+            className="mt-1 w-full rounded-xl border border-dark-border bg-dark-charcoal px-3 py-2 text-text-primary placeholder:text-text-muted"
           />
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-gray-700">Slug</span>
+          <span className="text-sm font-medium text-text-secondary">Slug</span>
           <input
             value={slug}
             onChange={(e) => setSlug(slugify(e.target.value))}
-            className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2"
+            className="mt-1 w-full rounded-xl border border-dark-border bg-dark-charcoal px-3 py-2 text-text-primary placeholder:text-text-muted"
           />
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-gray-700">Excerpt</span>
-          <textarea
+          <span className="text-sm font-medium text-text-secondary">Excerpt</span>
+          <RichTextEditor
             value={excerpt}
-            onChange={(e) => setExcerpt(e.target.value)}
-            rows={3}
-            className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2"
+            onChange={setExcerpt}
+            minHeight={140}
+            placeholder="Write a short excerpt..."
           />
         </label>
 
         <label className="block">
-          <span className="text-sm font-medium text-gray-700">Body</span>
-          <textarea
+          <span className="text-sm font-medium text-text-secondary">Body</span>
+          <RichTextEditor
             value={body}
-            onChange={(e) => setBody(e.target.value)}
-            rows={12}
-            className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2"
+            onChange={setBody}
+            minHeight={340}
+            placeholder="Write article body content..."
           />
         </label>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <label className="block">
-            <span className="text-sm font-medium text-gray-700">Category</span>
+            <span className="text-sm font-medium text-text-secondary">Category</span>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2"
+              className="mt-1 w-full rounded-xl border border-dark-border bg-dark-charcoal px-3 py-2 text-text-primary"
             >
-              {CATEGORIES.map((item) => (
-                <option key={item} value={item}>{item}</option>
+              {categoryOptions.map((item) => (
+                <option key={item.value} value={item.value}>{item.label}</option>
               ))}
             </select>
           </label>
 
           <label className="block">
-            <span className="text-sm font-medium text-gray-700">Tags (comma separated)</span>
+            <span className="text-sm font-medium text-text-secondary">Tags (comma separated)</span>
             <input
               value={tags}
               onChange={(e) => setTags(e.target.value)}
-              className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2"
+              className="mt-1 w-full rounded-xl border border-dark-border bg-dark-charcoal px-3 py-2 text-text-primary placeholder:text-text-muted"
             />
           </label>
         </div>
 
         <label className="block">
-          <span className="text-sm font-medium text-gray-700">Featured image URL (optional)</span>
+          <span className="text-sm font-medium text-text-secondary">Featured image URL (optional)</span>
           <input
             value={featuredImage}
             onChange={(e) => setFeaturedImage(e.target.value)}
-            className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2"
+            className="mt-1 w-full rounded-xl border border-dark-border bg-dark-charcoal px-3 py-2 text-text-primary placeholder:text-text-muted"
           />
         </label>
 
         <div className="flex flex-wrap gap-2 pt-2">
           <button
             onClick={() => save(false)}
-            disabled={loading || !title || !slug || !body}
-            className="rounded-full border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+            disabled={loading || !title || !slug || !stripHtml(body)}
+            className="rounded-full border border-dark-border bg-dark-charcoal px-4 py-2 text-sm font-semibold text-text-secondary transition-colors hover:bg-dark-hover hover:text-text-primary disabled:opacity-50"
           >
             Save Draft
           </button>
           <button
             onClick={() => save(true)}
-            disabled={loading || !title || !slug || !body}
-            className="rounded-full bg-primary-700 px-4 py-2 text-sm font-semibold text-white hover:bg-primary-800 disabled:opacity-50"
+            disabled={loading || !title || !slug || !stripHtml(body)}
+            className="rounded-full bg-accent-blue px-4 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-category-news disabled:opacity-50"
           >
             Save and Publish
           </button>

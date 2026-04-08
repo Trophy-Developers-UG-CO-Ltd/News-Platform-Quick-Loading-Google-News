@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import api from '../../app/axios';
 import Spinner from '../../components/ui/Spinner';
+import RichTextEditor from '../../components/ui/RichTextEditor';
 import useDocTitle from '../../hooks/useDocTitle';
 import { getLucideIcon, ICON_GROUPS } from '../../utils/getLucideIcon';
 
@@ -254,11 +255,10 @@ const HeadingEditor = ({ heading, onChange }) => (
       <label className="block text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1">
         Description
       </label>
-      <textarea
-        rows={3}
+      <RichTextEditor
         value={heading.description || ''}
-        onChange={(e) => onChange({ ...heading, description: e.target.value })}
-        className="w-full px-3 py-2 text-sm border rounded-[48px] focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+        onChange={(value) => onChange({ ...heading, description: value })}
+        minHeight={160}
         placeholder="Short paragraph below the title"
       />
     </div>
@@ -343,11 +343,11 @@ const ItemEditor = ({ item, index, config, total, onChange, onDelete, onMove }) 
         {itemFields.includes('description') && (
           <div>
             <label className="block text-xs font-semibold text-gray-500 mb-1">{itemDescLabel}</label>
-            <textarea
-              rows={3}
+            <RichTextEditor
               value={item.description || ''}
-              onChange={(e) => onChange(index, { ...item, description: e.target.value })}
-              className="w-full px-3 py-2 text-sm border rounded-[48px] focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+              onChange={(value) => onChange(index, { ...item, description: value })}
+              minHeight={160}
+              placeholder="Write details..."
             />
           </div>
         )}

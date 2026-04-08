@@ -111,39 +111,39 @@ const CookieConsent = () => {
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 p-4">
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-2xl border border-gray-200">
+      <div className="mx-auto max-w-4xl rounded-lg border border-dark-border bg-dark-slate shadow-card">
         {/* Main Banner */}
         {!showSettings ? (
           <div className="p-6">
             <div className="flex items-start justify-between">
               <div className="flex-1 pr-4">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <h3 className="mb-2 text-lg font-semibold text-text-primary">
                   {t('cookies.title', 'We value your privacy')}
                 </h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <p className="mb-4 text-sm text-text-secondary">
                   {t('cookies.description', 'We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. By clicking "Accept All", you consent to our use of cookies.')}
                   {' '}
-                  <LocalizedLink to="/privacy" className="text-primary-600 hover:underline">
+                  <LocalizedLink to="/privacy" className="text-accent-blue hover:underline">
                     {t('cookies.learnMore', 'Learn more')}
                   </LocalizedLink>
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <button
                     onClick={handleAcceptAll}
-                    className="px-5 py-2 bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors flex items-center space-x-2"
+                    className="flex items-center space-x-2 bg-accent-blue px-5 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-category-news"
                   >
                     <FiCheck className="h-4 w-4" />
                     <span>{t('cookies.acceptAll', 'Accept All')}</span>
                   </button>
                   <button
                     onClick={handleRejectNonEssential}
-                    className="px-5 py-2 bg-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-300 transition-colors"
+                    className="bg-dark-charcoal px-5 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-dark-hover hover:text-text-primary"
                   >
                     {t('cookies.rejectNonEssential', 'Essential Only')}
                   </button>
                   <button
                     onClick={() => setShowSettings(true)}
-                    className="px-5 py-2 border border-gray-300 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors flex items-center space-x-2"
+                    className="flex items-center space-x-2 border border-dark-border px-5 py-2 text-sm font-medium text-text-secondary transition-colors hover:bg-dark-hover hover:text-text-primary"
                   >
                     <FiSettings className="h-4 w-4" />
                     <span>{t('cookies.customize', 'Customize')}</span>
@@ -152,7 +152,7 @@ const CookieConsent = () => {
               </div>
               <button
                 onClick={handleRejectNonEssential}
-                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-1 text-text-muted transition-colors hover:text-text-primary"
                 aria-label="Close"
               >
                 <FiX className="h-5 w-5" />
@@ -163,12 +163,12 @@ const CookieConsent = () => {
           /* Settings Panel */
           <div className="p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">
+              <h3 className="text-lg font-semibold text-text-primary">
                 {t('cookies.settingsTitle', 'Cookie Preferences')}
               </h3>
               <button
                 onClick={() => setShowSettings(false)}
-                className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-1 text-text-muted transition-colors hover:text-text-primary"
               >
                 <FiX className="h-5 w-5" />
               </button>
@@ -176,12 +176,12 @@ const CookieConsent = () => {
 
             <div className="space-y-4 mb-6">
               {/* Essential Cookies */}
-              <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-start justify-between rounded-lg bg-dark-charcoal p-4">
                 <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">
+                  <h4 className="font-medium text-text-primary">
                     {t('cookies.essential.title', 'Essential Cookies')}
                   </h4>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="mt-1 text-sm text-text-muted">
                     {t('cookies.essential.description', 'Required for basic website functionality including authentication and security. Cannot be disabled.')}
                   </p>
                 </div>
@@ -193,19 +193,19 @@ const CookieConsent = () => {
               </div>
 
               {/* Analytics Cookies */}
-              <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-start justify-between rounded-lg bg-dark-charcoal p-4">
                 <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">
+                  <h4 className="font-medium text-text-primary">
                     {t('cookies.analytics.title', 'Analytics Cookies')}
                   </h4>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="mt-1 text-sm text-text-muted">
                     {t('cookies.analytics.description', 'Help us understand how visitors interact with our website using Google Analytics. Data is anonymized.')}
                   </p>
                 </div>
                 <button
                   onClick={() => toggleConsent('analytics')}
                   className={`ml-4 relative w-12 h-6 rounded-none transition-colors ${
-                    consent.analytics ? 'bg-primary-600' : 'bg-gray-300'
+                    consent.analytics ? 'bg-accent-blue' : 'bg-dark-border'
                   }`}
                 >
                   <span
@@ -217,19 +217,19 @@ const CookieConsent = () => {
               </div>
 
               {/* Preference Cookies */}
-              <div className="flex items-start justify-between p-4 bg-gray-50 rounded-lg">
+              <div className="flex items-start justify-between rounded-lg bg-dark-charcoal p-4">
                 <div className="flex-1">
-                  <h4 className="font-medium text-gray-900">
+                  <h4 className="font-medium text-text-primary">
                     {t('cookies.preferences.title', 'Preference Cookies')}
                   </h4>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="mt-1 text-sm text-text-muted">
                     {t('cookies.preferences.description', 'Remember your language selection and other site preferences for a better experience.')}
                   </p>
                 </div>
                 <button
                   onClick={() => toggleConsent('preferences')}
                   className={`ml-4 relative w-12 h-6 rounded-none transition-colors ${
-                    consent.preferences ? 'bg-primary-600' : 'bg-gray-300'
+                    consent.preferences ? 'bg-accent-blue' : 'bg-dark-border'
                   }`}
                 >
                   <span
@@ -244,13 +244,13 @@ const CookieConsent = () => {
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowSettings(false)}
-                className="px-4 py-2 text-gray-600 text-sm font-medium hover:text-gray-800 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
               >
                 {t('common.cancel', 'Cancel')}
               </button>
               <button
                 onClick={handleSavePreferences}
-                className="px-5 py-2 bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
+                className="bg-accent-blue px-5 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-category-news"
               >
                 {t('cookies.savePreferences', 'Save Preferences')}
               </button>

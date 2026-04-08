@@ -27,8 +27,8 @@ const ToolBtn = ({ onClick, active, disabled, title, children }) => (
     className={[
       'p-1.5 rounded transition-colors text-sm',
       active
-        ? 'bg-primary-600 text-white'
-        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900',
+        ? 'bg-accent-blue text-text-primary'
+        : 'text-text-secondary hover:bg-dark-hover hover:text-text-primary',
       disabled ? 'opacity-40 cursor-not-allowed' : '',
     ].join(' ')}
   >
@@ -37,7 +37,7 @@ const ToolBtn = ({ onClick, active, disabled, title, children }) => (
 );
 
 // ─── Divider ──────────────────────────────────────────────────────────────────
-const Divider = () => <span className="w-px h-5 bg-gray-200 mx-0.5 self-center" />;
+const Divider = () => <span className="mx-0.5 h-5 w-px self-center bg-dark-border" />;
 
 // ─── Toolbar ─────────────────────────────────────────────────────────────────
 const Toolbar = ({ editor }) => {
@@ -52,7 +52,7 @@ const Toolbar = ({ editor }) => {
   if (!editor) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-0.5 px-3 py-2 border-b border-gray-200 bg-gray-50 rounded-t-lg">
+    <div className="flex flex-wrap items-center gap-0.5 rounded-t-lg border-b border-dark-border bg-dark-charcoal px-3 py-2">
       {/* History */}
       <ToolBtn title="Undo" onClick={() => editor.chain().focus().undo().run()} disabled={!editor.can().undo()}>
         <Undo2 className="h-4 w-4" />
@@ -172,12 +172,12 @@ const RichTextEditor = ({
   });
 
   return (
-    <div className={`border border-gray-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-primary-500 focus-within:border-primary-500 transition-shadow bg-white ${disabled ? 'opacity-60' : ''}`}>
+    <div className={`overflow-hidden rounded-lg border border-dark-border bg-dark-slate transition-shadow focus-within:border-accent-blue focus-within:ring-2 focus-within:ring-accent-blue ${disabled ? 'opacity-60' : ''}`}>
       <Toolbar editor={editor} />
 
       <EditorContent
         editor={editor}
-        className="rich-editor-content px-4 py-3 text-gray-700 text-sm"
+        className="rich-editor-content px-4 py-3 text-sm text-text-secondary"
         style={{ minHeight }}
       />
     </div>

@@ -11,9 +11,10 @@ const ArticleQuoteBlock = ({ data }) => {
 
   return (
     <blockquote className="article-quote-block border-l-4 border-accent-500 pl-6 py-4 my-6 bg-gray-50 rounded-r-lg">
-      <p className="text-xl italic text-gray-700 leading-relaxed">
-        &ldquo;{data.quote}&rdquo;
-      </p>
+      <div
+        className="prose prose-lg max-w-none text-xl italic text-gray-700 leading-relaxed"
+        dangerouslySetInnerHTML={{ __html: data.quote }}
+      />
       {data.attribution && (
         <footer className="mt-3 text-sm text-gray-500 font-medium">
           — {data.attribution}

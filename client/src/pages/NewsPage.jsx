@@ -72,9 +72,9 @@ const NewsPage = () => {
 
       <SchemaInjector schemas={itemListSchema} />
 
-      <div className="mb-8 rounded-3xl bg-gray-900 p-6 text-white sm:p-8">
-        <h1 className="text-3xl font-bold">Latest News</h1>
-        <p className="mt-2 max-w-2xl text-sm text-gray-200 sm:text-base">
+      <div className="mb-8 rounded-3xl bg-dark-black p-6 text-text-primary shadow-card sm:p-8">
+        <h1 className="font-display text-3xl font-bold">Latest News</h1>
+        <p className="mt-2 max-w-2xl text-sm text-text-secondary sm:text-base">
           Fast-loading, SEO-friendly stories designed for discoverability and daily publishing.
         </p>
       </div>
@@ -82,9 +82,9 @@ const NewsPage = () => {
       <BannerAdSlot slotKey="newsTop" className="mb-6" />
 
       {loading ? (
-        <p className="text-gray-600">Loading news...</p>
+        <p className="text-text-secondary">Loading news...</p>
       ) : articles.length === 0 ? (
-        <p className="text-gray-600">No published stories yet.</p>
+        <p className="text-text-secondary">No published stories yet.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {articles.map((article) => {
@@ -95,13 +95,13 @@ const NewsPage = () => {
             if (!slug) return null;
 
             return (
-              <article key={article._id} className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
-                <p className="text-xs font-semibold uppercase tracking-wide text-primary-700">News</p>
-                <h2 className="mt-2 line-clamp-2 text-xl font-semibold text-gray-900">{title}</h2>
-                <p className="mt-3 line-clamp-3 text-sm text-gray-600">{excerpt}</p>
+              <article key={article._id} className="rounded-2xl border border-dark-border bg-dark-slate p-5 shadow-card">
+                <p className="text-xs font-semibold uppercase tracking-wide text-category-news">News</p>
+                <h2 className="mt-2 line-clamp-2 text-xl font-semibold text-text-primary">{title}</h2>
+                <p className="mt-3 line-clamp-3 text-sm text-text-secondary">{excerpt}</p>
                 <Link
                   to={`/news/${slug}`}
-                  className="mt-4 inline-block text-sm font-semibold text-primary-700 hover:text-primary-900"
+                  className="mt-4 inline-block text-sm font-semibold text-accent-blue transition-colors hover:text-category-news"
                 >
                   Read story
                 </Link>

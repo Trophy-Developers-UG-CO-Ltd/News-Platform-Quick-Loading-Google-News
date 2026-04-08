@@ -64,10 +64,10 @@ const GeoRedirect = () => {
   // Show loading spinner while detecting
   if (isDetecting) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-white">
+      <div className="flex min-h-screen items-center justify-center bg-dark-charcoal">
         <div className="text-center">
           <Spinner size="lg" />
-          <p className="mt-4 text-gray-500 text-sm">Detecting your location...</p>
+          <p className="mt-4 text-sm text-text-muted">Detecting your location...</p>
         </div>
       </div>
     );

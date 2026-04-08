@@ -116,5 +116,5 @@ export const getLanguageFromPath = (path) => {
 
 export default i18n;
 
-// MukonoTalks
+// MukonoTalks -  Designed by Trophy Developers Uganda : https://www.trophydevelopers.com/uganda-web-designers/
 

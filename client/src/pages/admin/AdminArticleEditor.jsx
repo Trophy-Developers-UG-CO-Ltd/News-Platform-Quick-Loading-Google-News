@@ -8,9 +8,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import articleService from '../../features/articles/articleService';
+import categoryService from '../../features/articles/categoryService';
 import Spinner from '../../components/ui/Spinner';
 import SlugChangeDialog from '../../components/admin/SlugChangeDialog';
 import toast from 'react-hot-toast';
+import RichTextEditor from '../../components/ui/RichTextEditor';
 import {
   FiSave,
   FiEye,
@@ -33,12 +35,13 @@ const BLOCK_TYPES = [
   { value: 'list', label: 'List' },
   { value: 'video', label: 'Video' },
 ];
-const CATEGORIES = [
-  { value: 'blog', label: 'Blog' },
-  { value: 'insight', label: 'Industry Insight' },
+const FALLBACK_CATEGORIES = [
+  { value: 'news', label: 'News' },
+  { value: 'entertainment', label: 'Entertainment' },
+  { value: 'politics', label: 'Politics' },
+  { value: 'lifestyle', label: 'Lifestyle' },
+  { value: 'opportunities', label: 'Opportunities' },
   { value: 'knowledge-base', label: 'Knowledge Base' },
-  { value: 'case-study', label: 'Case Study' },
-  { value: 'announcement', label: 'Announcement' },
 ];
 
 const emptyArticle = {
@@ -46,7 +49,7 @@ const emptyArticle = {
   localizedSlug: { en: '', zh: '', sw: '' },
   excerpt: { en: '', zh: '', sw: '' },
   contentBlocks: [],
-  category: 'blog',
+  category: 'news',
   tags: [],
   author: { name: '', role: '' },
   featuredImage: '',
@@ -81,6 +84,7 @@ const AdminArticleEditor = () => {
   const [activeLang, setActiveLang] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [categoryOptions, setCategoryOptions] = useState(FALLBACK_CATEGORIES);
   const [tagInput, setTagInput] = useState('');
   const [showSchedule, setShowSchedule] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
@@ -88,6 +92,33 @@ const AdminArticleEditor = () => {
   // Slug-change detection
   const originalSlugRef = useRef(null);
   const [slugDialog, setSlugDialog] = useState({ open: false, oldPath: '', newPath: '' });
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCategories = async () => {
+      try {
+        const result = await categoryService.listCategories();
+        const options = categoryService.normalizeCategoryOptions(result?.categories || []);
+        if (mounted && options.length) {
+          setCategoryOptions(options);
+          setArticle((prev) => ({
+            ...prev,
+            category: options.some((option) => option.value === prev.category)
+              ? prev.category
+              : options[0].value,
+          }));
+        }
+      } catch (_) {
+        if (mounted) setCategoryOptions(FALLBACK_CATEGORIES);
+      }
+    };
+
+    loadCategories();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (isEditing) {
@@ -101,7 +132,7 @@ const AdminArticleEditor = () => {
             localizedSlug: a.localizedSlug || { en: '', zh: '', sw: '' },
             excerpt: a.excerpt || { en: '', zh: '', sw: '' },
             contentBlocks: a.contentBlocks || [],
-            category: a.category || 'blog',
+            category: a.category || 'news',
             tags: a.tags || [],
             author: a.author || { name: '', role: '' },
             featuredImage: a.featuredImage || '',
@@ -424,7 +455,7 @@ const AdminArticleEditor = () => {
               onChange={(e) => updateField('category', e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 text-sm bg-white"
             >
-              {CATEGORIES.map((c) => (
+              {categoryOptions.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
@@ -433,11 +464,10 @@ const AdminArticleEditor = () => {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Excerpt ({LANG_LABELS[activeLang]})
             </label>
-            <textarea
+            <RichTextEditor
               value={article.excerpt[activeLang] || ''}
-              onChange={(e) => updateField(`excerpt.${activeLang}`, e.target.value)}
-              rows={3}
-              className="w-full px-3 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 text-sm"
+              onChange={(html) => updateField(`excerpt.${activeLang}`, html)}
+              minHeight={140}
               placeholder="Brief summary..."
             />
           </div>
@@ -765,12 +795,11 @@ const TextBlockEditor = ({ data, onChange }) => (
       placeholder="Subheading (optional)"
       className="w-full px-3 py-2 border border-gray-300 rounded-[48px] text-sm"
     />
-    <textarea
-      value={Array.isArray(data.body) ? data.body.join('\n\n') : data.body || ''}
-      onChange={(e) => onChange('body', e.target.value.split('\n\n').filter(Boolean))}
-      rows={5}
-      placeholder="Body paragraphs (separate with blank lines)"
-      className="w-full px-3 py-2 border border-gray-300 rounded-[48px] text-sm"
+    <RichTextEditor
+      value={Array.isArray(data.body) ? data.body.map((part) => `<p>${part}</p>`).join('') : data.body || ''}
+      onChange={(html) => onChange('body', html)}
+      minHeight={220}
+      placeholder="Write body content..."
     />
     <input
       type="text"
@@ -827,12 +856,11 @@ const ImageBlockEditor = ({ data, onChange }) => (
 
 const QuoteBlockEditor = ({ data, onChange }) => (
   <div className="space-y-3">
-    <textarea
+    <RichTextEditor
       value={data.quote || ''}
-      onChange={(e) => onChange('quote', e.target.value)}
-      rows={3}
+      onChange={(html) => onChange('quote', html)}
+      minHeight={140}
       placeholder="Quote text"
-      className="w-full px-3 py-2 border border-gray-300 rounded-[48px] text-sm"
     />
     <div className="grid grid-cols-2 gap-3">
       <input

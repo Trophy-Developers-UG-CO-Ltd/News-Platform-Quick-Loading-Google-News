@@ -15,7 +15,7 @@ const sizeMap = {
 const Spinner = ({ size = 'md', className = '' }) => {
   return (
     <div
-      className={`animate-spin rounded-full border-4 border-gray-200 border-t-primary-600 ${sizeMap[size] || sizeMap.md} ${className}`}
+      className={`animate-spin rounded-full border-4 border-dark-border border-t-accent-blue ${sizeMap[size] || sizeMap.md} ${className}`}
       role="status"
       aria-label="Loading"
     >

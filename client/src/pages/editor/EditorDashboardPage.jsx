@@ -57,28 +57,36 @@ const EditorDashboardPage = () => {
     <section className="mx-auto w-full max-w-6xl px-4 py-8">
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Editorial CMS</h1>
-          <p className="mt-1 text-sm text-gray-600">Create, edit, and publish article content.</p>
+          <h1 className="font-display text-3xl font-bold text-text-primary">Editorial CMS</h1>
+          <p className="mt-1 text-sm text-text-secondary">Create, edit, and publish article content.</p>
         </div>
-        <Link
-          to="/editor/articles/new"
-          className="rounded-full bg-primary-700 px-5 py-2 text-sm font-semibold text-white hover:bg-primary-800"
-        >
-          New Article
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            to="/editor/categories"
+            className="rounded-full border border-dark-border bg-dark-slate px-5 py-2 text-sm font-semibold text-text-secondary transition-colors hover:bg-dark-hover hover:text-text-primary"
+          >
+            Manage Categories
+          </Link>
+          <Link
+            to="/editor/articles/new"
+            className="rounded-full bg-accent-blue px-5 py-2 text-sm font-semibold text-text-primary transition-colors hover:bg-category-news"
+          >
+            New Article
+          </Link>
+        </div>
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2 text-xs">
-        <span className="rounded-full bg-gray-100 px-3 py-1 font-semibold text-gray-700">All: {grouped.all}</span>
-        <span className="rounded-full bg-amber-100 px-3 py-1 font-semibold text-amber-900">Draft: {grouped.draft}</span>
-        <span className="rounded-full bg-blue-100 px-3 py-1 font-semibold text-blue-900">Scheduled: {grouped.scheduled}</span>
-        <span className="rounded-full bg-emerald-100 px-3 py-1 font-semibold text-emerald-900">Published: {grouped.published}</span>
+        <span className="rounded-full bg-dark-slate px-3 py-1 font-semibold text-text-secondary">All: {grouped.all}</span>
+        <span className="rounded-full bg-accent-orange/15 px-3 py-1 font-semibold text-accent-orange">Draft: {grouped.draft}</span>
+        <span className="rounded-full bg-accent-blue/15 px-3 py-1 font-semibold text-accent-blue">Scheduled: {grouped.scheduled}</span>
+        <span className="rounded-full bg-accent-green/15 px-3 py-1 font-semibold text-accent-green">Published: {grouped.published}</span>
       </div>
 
       <div className="mb-5">
-        <label className="text-sm font-medium text-gray-700">Filter</label>
+        <label className="text-sm font-medium text-text-secondary">Filter</label>
         <select
-          className="ml-2 rounded-full border border-gray-300 px-3 py-1.5 text-sm"
+          className="ml-2 rounded-full border border-dark-border bg-dark-slate px-3 py-1.5 text-sm text-text-primary"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -90,30 +98,30 @@ const EditorDashboardPage = () => {
       </div>
 
       {error ? <p className="mb-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p> : null}
-      {loading ? <p className="text-gray-600">Loading editorial content...</p> : null}
+      {loading ? <p className="text-text-secondary">Loading editorial content...</p> : null}
 
       {!loading && articles.length === 0 ? (
-        <p className="text-gray-600">No articles found for this filter.</p>
+        <p className="text-text-secondary">No articles found for this filter.</p>
       ) : (
         <div className="space-y-3">
           {articles.map((article) => (
-            <article key={article._id} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+            <article key={article._id} className="rounded-xl border border-dark-border bg-dark-slate p-4 shadow-card">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">{resolveLocalized(article.title) || 'Untitled'}</h2>
-                  <p className="mt-1 text-sm text-gray-600">Slug: {article.localizedSlug?.en || 'n/a'}</p>
-                  <p className="mt-1 text-xs uppercase tracking-wide text-gray-500">Status: {article.publishStatus}</p>
+                  <h2 className="text-lg font-semibold text-text-primary">{resolveLocalized(article.title) || 'Untitled'}</h2>
+                  <p className="mt-1 text-sm text-text-secondary">Slug: {article.localizedSlug?.en || 'n/a'}</p>
+                  <p className="mt-1 text-xs uppercase tracking-wide text-text-muted">Status: {article.publishStatus}</p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <Link
                     to={`/editor/articles/${article._id}/edit`}
-                    className="rounded-full border border-gray-300 px-3 py-1.5 text-xs font-semibold text-gray-700 hover:bg-gray-100"
+                    className="rounded-full border border-dark-border bg-dark-charcoal px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:bg-dark-hover hover:text-text-primary"
                   >
                     Edit
                   </Link>
                   <button
                     onClick={() => togglePublish(article)}
-                    className="rounded-full bg-primary-700 px-3 py-1.5 text-xs font-semibold text-white hover:bg-primary-800"
+                    className="rounded-full bg-accent-blue px-3 py-1.5 text-xs font-semibold text-text-primary transition-colors hover:bg-category-news"
                   >
                     {article.publishStatus === 'published' ? 'Unpublish' : 'Publish'}
                   </button>

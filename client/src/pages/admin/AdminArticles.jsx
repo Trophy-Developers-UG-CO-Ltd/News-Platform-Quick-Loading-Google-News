@@ -10,6 +10,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllArticles } from '../../features/articles/articleSlice';
 import articleService from '../../features/articles/articleService';
+import categoryService from '../../features/articles/categoryService';
 import Spinner from '../../components/ui/Spinner';
 import toast from 'react-hot-toast';
 import {
@@ -23,13 +24,14 @@ import {
   FiBarChart2,
 } from 'react-icons/fi';
 
-const CATEGORIES = [
+const FALLBACK_CATEGORIES = [
   { value: '', label: 'All Categories' },
-  { value: 'blog', label: 'Blog' },
-  { value: 'insight', label: 'Industry Insight' },
+  { value: 'news', label: 'News' },
+  { value: 'entertainment', label: 'Entertainment' },
+  { value: 'politics', label: 'Politics' },
+  { value: 'lifestyle', label: 'Lifestyle' },
+  { value: 'opportunities', label: 'Opportunities' },
   { value: 'knowledge-base', label: 'Knowledge Base' },
-  { value: 'case-study', label: 'Case Study' },
-  { value: 'announcement', label: 'Announcement' },
 ];
 
 const STATUS_COLORS = {
@@ -46,7 +48,29 @@ const AdminArticles = () => {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
+  const [categoryOptions, setCategoryOptions] = useState(FALLBACK_CATEGORIES);
   const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadCategoryOptions = async () => {
+      try {
+        const result = await categoryService.listCategories();
+        const options = categoryService.normalizeCategoryOptions(result?.categories || []);
+        if (mounted && options.length) {
+          setCategoryOptions([{ value: '', label: 'All Categories' }, ...options]);
+        }
+      } catch (_) {
+        if (mounted) setCategoryOptions(FALLBACK_CATEGORIES);
+      }
+    };
+
+    loadCategoryOptions();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const loadArticles = useCallback(() => {
     dispatch(
@@ -150,7 +174,7 @@ const AdminArticles = () => {
               onChange={(e) => { setCategoryFilter(e.target.value); setCurrentPage(1); }}
               className="px-4 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 text-sm appearance-none bg-white"
             >
-              {CATEGORIES.map((c) => (
+              {categoryOptions.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>

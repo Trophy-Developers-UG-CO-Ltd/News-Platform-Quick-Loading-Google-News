@@ -121,8 +121,9 @@ const articleSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: ['blog', 'insight', 'knowledge-base', 'case-study', 'announcement'],
       required: [true, 'Category is required'],
+      trim: true,
+      lowercase: true,
     },
 
     tags: {

@@ -9,6 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getLucideIcon } from "../../utils/getLucideIcon";
 import api from "../../app/axios";
 import Reveal, { StaggerReveal } from "../../components/ui/Reveal";
+import SafeRichText from "../../components/ui/SafeRichText";
 
 const DEFAULT = {
   heading: {
@@ -52,7 +53,7 @@ const ValuesSection = () => {
               <h2 className="text-2xl font-semibold text-gray-900">{title}</h2>
             )}
             {description && (
-              <p className="text-gray-500 mt-3">{description}</p>
+              <SafeRichText className="prose mt-3 max-w-none text-gray-500" html={description} />
             )}
           </div>
         </Reveal>
@@ -72,9 +73,7 @@ const ValuesSection = () => {
                   <h3 className="font-semibold text-gray-900 mb-2">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">
-                    {item.description || item.desc}
-                  </p>
+                  <SafeRichText className="prose prose-sm max-w-none text-gray-500" html={item.description || item.desc} />
                 </div>
               );
             })}

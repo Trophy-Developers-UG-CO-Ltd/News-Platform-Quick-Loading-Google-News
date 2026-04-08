@@ -8,6 +8,7 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import api from "../../app/axios";
 import Reveal from "../../components/ui/Reveal";
+import SafeRichText from "../../components/ui/SafeRichText";
 
 const DEFAULT = {
   heading: {
@@ -45,9 +46,7 @@ const IntroSection = () => {
             </h1>
           )}
           {description && (
-            <p className="text-lg text-gray-600 leading-relaxed">
-              {description}
-            </p>
+            <SafeRichText className="prose prose-lg mx-auto max-w-none text-gray-600" html={description} />
           )}
         </Reveal>
       </div>

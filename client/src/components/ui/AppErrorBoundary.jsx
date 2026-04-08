@@ -15,24 +15,24 @@ import { TriangleAlert, RotateCcw } from 'lucide-react';
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-10 text-center">
-        <div className="flex justify-center mb-5 text-amber-400">
+    <div className="flex min-h-screen items-center justify-center bg-dark-charcoal px-4">
+      <div className="w-full max-w-md rounded-2xl border border-dark-border bg-dark-slate p-10 text-center shadow-card">
+        <div className="mb-5 flex justify-center text-accent-orange">
           <TriangleAlert size={64} strokeWidth={1.5} />
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">
+        <h2 className="mb-3 font-display text-2xl font-bold text-text-primary">
           Something went wrong
         </h2>
-        <p className="text-gray-500 text-sm mb-2 leading-relaxed">
+        <p className="mb-2 text-sm leading-relaxed text-text-secondary">
           {error?.message || 'An unexpected error occurred. Please try again.'}
         </p>
-        <p className="text-gray-400 text-xs mb-8">
+        <p className="mb-8 text-xs text-text-muted">
           If you are offline, reconnect and try again. Your unsaved work may
           have been preserved in the local cache.
         </p>
         <button
           onClick={resetErrorBoundary}
-          className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold py-3 px-8 rounded-none transition-all"
+          className="inline-flex items-center justify-center gap-2 rounded-none bg-accent-blue px-8 py-3 font-semibold text-text-primary transition-all hover:bg-category-news active:scale-95"
         >
           <RotateCcw size={16} /> Try Again
         </button>
