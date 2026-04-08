@@ -252,6 +252,16 @@ const permanentlyDeleteContactMessage = async (messageId) => {
   return response.data;
 };
 
+const getAdvertiseInquiries = async (params) => {
+  const response = await api.get('/advertise/admin/all', { params });
+  return response.data;
+};
+
+const updateAdvertiseInquiryStatus = async (inquiryId, data) => {
+  const response = await api.patch(`/advertise/admin/${inquiryId}/status`, data);
+  return response.data;
+};
+
 // ─── Documents ─────────────────────────────────────────────────
 const getAllDocuments = async (params) => {
   const response = await api.get('/documents/admin/all', { params });
@@ -479,6 +489,8 @@ const adminService = {
   updateContactMessageStatus,
   trashContactMessage,
   permanentlyDeleteContactMessage,
+  getAdvertiseInquiries,
+  updateAdvertiseInquiryStatus,
   getAllDocuments,
   createDocument,
   deleteDocument: deleteDocument,

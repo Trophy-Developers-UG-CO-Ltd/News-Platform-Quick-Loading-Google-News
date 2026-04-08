@@ -1,8 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { FaFacebookF, FaInstagram, FaTiktok, FaXTwitter, FaYoutube } from 'react-icons/fa6';
+import { FaFacebookF, FaInstagram, FaTiktok, FaXTwitter, FaYoutube, FaWhatsapp } from 'react-icons/fa6';
+
+const WHATSAPP_HREF =
+  'https://wa.me/256755303076?text=Hi%2C%20I%20love%20your%20articles%20please%2C%20I%20need%20your%20help%20on%20http%3A%2F%2Flocalhost%3A3000%2F%20its%20about%20Untitled%20story';
 
 const SOCIAL_LINKS = [
+  {
+    label: 'WhatsApp',
+    href: WHATSAPP_HREF,
+    Icon: FaWhatsapp,
+  },
   {
     label: 'TikTok',
     href: 'https://www.tiktok.com/@mukonotalks',

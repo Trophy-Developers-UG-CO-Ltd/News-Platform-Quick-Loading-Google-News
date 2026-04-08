@@ -730,6 +730,13 @@ MONGO_URI=
 REDIS_URL=
 JWT_SECRET=
 CDN_URL=
+ADVERTISE_INQUIRY_WEBHOOK_URL=
+ADVERTISE_INQUIRY_WEBHOOK_TOKEN=
+ADVERTISE_INQUIRY_NOTIFICATION_PHONE=
+
+Optional advertise inquiry webhook:
+Set `ADVERTISE_INQUIRY_WEBHOOK_URL` to any automation endpoint such as Make, Zapier, a Twilio Function, or your Meta WhatsApp Cloud API bridge.
+Each new advertise inquiry posts a JSON payload containing the inquiry details, an admin review URL, and a prebuilt WhatsApp reply link for the lead.
 
 
 ---

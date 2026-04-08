@@ -28,6 +28,8 @@ const Hero     = require('../modules/hero/hero.model');
 const Page     = require('../modules/pages/page.model');
 const Article  = require('../modules/articles/article.model');
 const Document = require('../modules/documents/document.model');
+const HomepageSection = require('../modules/homepageSection/homepageSection.model');
+const { getHomepageSectionsSeed, getAboutPageSeed } = require('./data/cmsSeedData');
 
 // ─── DB Connect ────────────────────────────────────────────────
 const connectDB = async () => {
@@ -102,15 +104,114 @@ const buildUsers = async () => {
 
 // CATEGORIES
 const categoriesData = [
-  { name: 'Organic Pigments',      description: 'High-performance organic pigments for coatings, inks, and plastics.',                         isActive: true },
-  { name: 'Inorganic Pigments',    description: 'Durable inorganic pigments including iron oxides and titanium dioxide.',                      isActive: true },
-  { name: 'Fluorescent Pigments',  description: 'Bright, daylight-fluorescent pigments for high-visibility marking and decoration.',           isActive: true },
-  { name: 'Alkyd Resins',          description: 'Solvent-based alkyd resin systems for decorative and protective coatings.',                   isActive: true },
-  { name: 'Epoxy Resins',          description: 'High-performance epoxy resin systems for industrial and marine coatings.',                    isActive: true },
-  { name: 'Polyurethane Systems',  description: 'Two-component and single-component PU systems for durable finishes.',                        isActive: true },
-  { name: 'Coating Additives',     description: 'Wetting agents, defoamers, dispersants, and rheology modifiers.',                            isActive: true },
-  { name: 'Specialty Chemicals',   description: 'Custom-engineered specialty chemicals for niche industrial applications.',                    isActive: true },
+  {
+    name: 'Organic Pigments',
+    description: 'High-performance organic pigments for coatings, inks, and plastics.',
+    localizedName: { en: 'Organic Pigments', zh: null, sw: null },
+    localizedDescription: { en: 'High-performance organic pigments for coatings, inks, and plastics.', zh: null, sw: null },
+    seoTitle: 'Organic Pigments | MukonoTalks',
+    seoDescription: 'Shop industrial organic pigments for coatings, inks, and plastics.',
+    seoKeywords: ['organic pigments', 'industrial pigments', 'coatings pigments'],
+    ogTitle: 'Organic Pigments | MukonoTalks',
+    ogDescription: 'Trusted industrial organic pigments for B2B manufacturing.',
+    sortOrder: 1,
+    isActive: true,
+  },
+  {
+    name: 'Inorganic Pigments',
+    description: 'Durable inorganic pigments including iron oxides and titanium dioxide.',
+    localizedName: { en: 'Inorganic Pigments', zh: null, sw: null },
+    localizedDescription: { en: 'Durable inorganic pigments including iron oxides and titanium dioxide.', zh: null, sw: null },
+    seoTitle: 'Inorganic Pigments | MukonoTalks',
+    seoDescription: 'Durable inorganic pigments for industrial coatings and construction use.',
+    seoKeywords: ['inorganic pigments', 'iron oxide pigments', 'titanium dioxide'],
+    ogTitle: 'Inorganic Pigments | MukonoTalks',
+    ogDescription: 'Industrial-grade inorganic pigments with high weather resistance.',
+    sortOrder: 2,
+    isActive: true,
+  },
+  {
+    name: 'Fluorescent Pigments',
+    description: 'Bright, daylight-fluorescent pigments for high-visibility marking and decoration.',
+    localizedName: { en: 'Fluorescent Pigments', zh: null, sw: null },
+    localizedDescription: { en: 'Bright, daylight-fluorescent pigments for high-visibility marking and decoration.', zh: null, sw: null },
+    seoTitle: 'Fluorescent Pigments | MukonoTalks',
+    seoDescription: 'High-visibility fluorescent pigments for safety, signage, and specialty coatings.',
+    seoKeywords: ['fluorescent pigments', 'daylight pigments', 'safety coatings'],
+    ogTitle: 'Fluorescent Pigments | MukonoTalks',
+    ogDescription: 'Premium fluorescent pigments for industrial and safety applications.',
+    sortOrder: 3,
+    isActive: true,
+  },
+  {
+    name: 'Alkyd Resins',
+    description: 'Solvent-based alkyd resin systems for decorative and protective coatings.',
+    localizedName: { en: 'Alkyd Resins', zh: null, sw: null },
+    localizedDescription: { en: 'Solvent-based alkyd resin systems for decorative and protective coatings.', zh: null, sw: null },
+    seoTitle: 'Alkyd Resins | MukonoTalks',
+    seoDescription: 'Industrial alkyd resin systems for decorative and protective coating lines.',
+    seoKeywords: ['alkyd resins', 'coatings resin', 'industrial resin'],
+    ogTitle: 'Alkyd Resins | MukonoTalks',
+    ogDescription: 'Reliable alkyd resin supply for manufacturing operations.',
+    sortOrder: 4,
+    isActive: true,
+  },
+  {
+    name: 'Epoxy Resins',
+    description: 'High-performance epoxy resin systems for industrial and marine coatings.',
+    localizedName: { en: 'Epoxy Resins', zh: null, sw: null },
+    localizedDescription: { en: 'High-performance epoxy resin systems for industrial and marine coatings.', zh: null, sw: null },
+    seoTitle: 'Epoxy Resins | MukonoTalks',
+    seoDescription: 'Industrial epoxy resins for high adhesion and chemical resistance.',
+    seoKeywords: ['epoxy resin', 'industrial epoxy', 'marine coatings resin'],
+    ogTitle: 'Epoxy Resins | MukonoTalks',
+    ogDescription: 'High-performance epoxy systems for demanding environments.',
+    sortOrder: 5,
+    isActive: true,
+  },
+  {
+    name: 'Polyurethane Systems',
+    description: 'Two-component and single-component PU systems for durable finishes.',
+    localizedName: { en: 'Polyurethane Systems', zh: null, sw: null },
+    localizedDescription: { en: 'Two-component and single-component PU systems for durable finishes.', zh: null, sw: null },
+    seoTitle: 'Polyurethane Systems | MukonoTalks',
+    seoDescription: 'Polyurethane systems designed for durable industrial finishes.',
+    seoKeywords: ['polyurethane systems', 'PU coatings', 'durable industrial finishes'],
+    ogTitle: 'Polyurethane Systems | MukonoTalks',
+    ogDescription: 'Professional-grade polyurethane systems for industrial applications.',
+    sortOrder: 6,
+    isActive: true,
+  },
+  {
+    name: 'Coating Additives',
+    description: 'Wetting agents, defoamers, dispersants, and rheology modifiers.',
+    localizedName: { en: 'Coating Additives', zh: null, sw: null },
+    localizedDescription: { en: 'Wetting agents, defoamers, dispersants, and rheology modifiers.', zh: null, sw: null },
+    seoTitle: 'Coating Additives | MukonoTalks',
+    seoDescription: 'Advanced coating additives for stability, flow control, and performance.',
+    seoKeywords: ['coating additives', 'defoamers', 'dispersants', 'rheology modifiers'],
+    ogTitle: 'Coating Additives | MukonoTalks',
+    ogDescription: 'Specialty additives to optimize coating line performance.',
+    sortOrder: 7,
+    isActive: true,
+  },
+  {
+    name: 'Specialty Chemicals',
+    description: 'Custom-engineered specialty chemicals for niche industrial applications.',
+    localizedName: { en: 'Specialty Chemicals', zh: null, sw: null },
+    localizedDescription: { en: 'Custom-engineered specialty chemicals for niche industrial applications.', zh: null, sw: null },
+    seoTitle: 'Specialty Chemicals | MukonoTalks',
+    seoDescription: 'Specialty industrial chemicals engineered for unique manufacturing requirements.',
+    seoKeywords: ['specialty chemicals', 'industrial chemicals', 'custom formulations'],
+    ogTitle: 'Specialty Chemicals | MukonoTalks',
+    ogDescription: 'Tailored specialty chemical supply for demanding industries.',
+    sortOrder: 8,
+    isActive: true,
+  },
 ];
+
+// HOMEPAGE CMS SECTIONS
+const homepageSectionsData = getHomepageSectionsSeed();
 
 // PRODUCTS — receives a categoryName→ObjectId map built from inserted categories
 const buildProducts = (catMap) => [
@@ -391,23 +492,9 @@ const heroData = [
 ];
 
 // CMS PAGES
+const aboutPageData = getAboutPageSeed();
 const pagesData = [
-  {
-    pageKey: 'about',
-    localizedSlug: { en: 'about', zh: null, sw: null },
-    title: { en: 'About MukonoTalks', zh: null, sw: null },
-    contentBlocks: [
-      { type: 'text', order: 0, data: { en: { heading: 'Who We Are',   body: 'MukonoTalks is a leading B2B supplier of industrial pigments, resins, and specialty chemicals across Africa. Founded with a commitment to quality, innovation, and reliability, we serve manufacturers, distributors, and contractors across the continent.' }, zh: null, sw: null } },
-      { type: 'text', order: 1, data: { en: { heading: 'Our Mission',  body: 'To empower African industry with access to world-class chemical solutions at competitive prices, backed by uncompromising technical support.' }, zh: null, sw: null } },
-      { type: 'text', order: 2, data: { en: { heading: 'Our Values',   body: 'Quality, Integrity, Innovation, and Partnership. These four pillars guide every interaction — from product formulation to after-sale technical support.' }, zh: null, sw: null } },
-    ],
-    seo: {
-      en: { title: 'About Us | MukonoTalks', description: "Learn about MukonoTalks — Africa's trusted B2B industrial chemical supplier." },
-      zh: {}, sw: {},
-    },
-    publishStatus: 'published',
-    publishedAt: new Date(),
-  },
+  aboutPageData,
   {
     pageKey: 'contact',
     localizedSlug: { en: 'contact', zh: null, sw: null },
@@ -423,8 +510,8 @@ const pagesData = [
     publishedAt: new Date(),
   },
   {
-    pageKey: 'privacy-policy',
-    localizedSlug: { en: 'privacy-policy', zh: null, sw: null },
+    pageKey: 'privacy',
+    localizedSlug: { en: 'privacy', zh: null, sw: null },
     title: { en: 'Privacy Policy', zh: null, sw: null },
     contentBlocks: [
       { type: 'text', order: 0, data: { en: { heading: 'Your Privacy Matters', body: 'MukonoTalks is committed to protecting your personal information in accordance with the Protection of Personal Information Act (POPIA) and applicable data protection legislation.' }, zh: null, sw: null } },
@@ -438,14 +525,56 @@ const pagesData = [
     publishedAt: new Date(),
   },
   {
-    pageKey: 'terms-and-conditions',
-    localizedSlug: { en: 'terms-and-conditions', zh: null, sw: null },
+    pageKey: 'terms',
+    localizedSlug: { en: 'terms', zh: null, sw: null },
     title: { en: 'Terms and Conditions', zh: null, sw: null },
     contentBlocks: [
       { type: 'text', order: 0, data: { en: { heading: 'Terms of Use', body: 'By accessing the MukonoTalks platform you agree to these terms. All transactions are subject to South African law. Products are sold for industrial use only and must comply with relevant environmental and safety regulations.' }, zh: null, sw: null } },
     ],
     seo: {
       en: { title: 'Terms & Conditions | MukonoTalks', description: 'Terms governing the use of the MukonoTalks B2B platform.' },
+      zh: {}, sw: {},
+    },
+    publishStatus: 'published',
+    publishedAt: new Date(),
+  },
+  {
+    pageKey: 'local',
+    localizedSlug: { en: 'local', zh: null, sw: null },
+    title: { en: 'Local Updates', zh: null, sw: null },
+    contentBlocks: [
+      { type: 'text', order: 0, data: { en: { heading: 'Local Updates', body: 'This CMS page powers local updates metadata and editable intro content for local coverage.' }, zh: null, sw: null } },
+    ],
+    seo: {
+      en: { title: 'Local Updates | MukonoTalks', description: 'Local stories and updates from your community.' },
+      zh: {}, sw: {},
+    },
+    publishStatus: 'published',
+    publishedAt: new Date(),
+  },
+  {
+    pageKey: 'entertainment',
+    localizedSlug: { en: 'entertainment', zh: null, sw: null },
+    title: { en: 'Entertainment', zh: null, sw: null },
+    contentBlocks: [
+      { type: 'text', order: 0, data: { en: { heading: 'Entertainment', body: 'Editable CMS intro and SEO content for entertainment coverage.' }, zh: null, sw: null } },
+    ],
+    seo: {
+      en: { title: 'Entertainment | MukonoTalks', description: 'Entertainment stories, trends, and updates.' },
+      zh: {}, sw: {},
+    },
+    publishStatus: 'published',
+    publishedAt: new Date(),
+  },
+  {
+    pageKey: 'videos',
+    localizedSlug: { en: 'videos', zh: null, sw: null },
+    title: { en: 'Videos', zh: null, sw: null },
+    contentBlocks: [
+      { type: 'text', order: 0, data: { en: { heading: 'Video Stories', body: 'CMS-managed intro copy for the videos hub page.' }, zh: null, sw: null } },
+    ],
+    seo: {
+      en: { title: 'Videos | MukonoTalks', description: 'Watch videos and visual stories from MukonoTalks.' },
       zh: {}, sw: {},
     },
     publishStatus: 'published',
@@ -543,12 +672,17 @@ const importData = async () => {
     await Hero.insertMany(heroData);
     console.log(`✅  Hero slides seeded: ${heroData.length}`);
 
-    // 5. CMS Pages
+    // 5. Homepage CMS sections
+    await HomepageSection.deleteMany({});
+    await HomepageSection.insertMany(homepageSectionsData);
+    console.log(`✅  Homepage sections seeded: ${homepageSectionsData.length}`);
+
+    // 6. CMS Pages
     await Page.deleteMany({});
     await Page.insertMany(pagesData);
     console.log(`✅  Pages seeded: ${pagesData.length}`);
 
-    // 6. Articles
+    // 7. Articles
     await Article.deleteMany({});
     await Article.insertMany(articlesData);
     console.log(`✅  Articles seeded: ${articlesData.length}`);
@@ -584,6 +718,7 @@ const destroyData = async () => {
       Category.deleteMany({}),
       Product.deleteMany({}),
       Hero.deleteMany({}),
+      HomepageSection.deleteMany({}),
       Page.deleteMany({}),
       Article.deleteMany({}),
       Document.deleteMany({}),

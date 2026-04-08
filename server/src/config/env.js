@@ -70,6 +70,11 @@ const env = {
   CONTACT_EMAIL: process.env.CONTACT_EMAIL || process.env.SALES_EMAIL || '',
   SALES_EMAIL: process.env.SALES_EMAIL || '',
 
+  // Advertise inquiry notifications
+  ADVERTISE_INQUIRY_WEBHOOK_URL: process.env.ADVERTISE_INQUIRY_WEBHOOK_URL || '',
+  ADVERTISE_INQUIRY_WEBHOOK_TOKEN: process.env.ADVERTISE_INQUIRY_WEBHOOK_TOKEN || '',
+  ADVERTISE_INQUIRY_NOTIFICATION_PHONE: process.env.ADVERTISE_INQUIRY_NOTIFICATION_PHONE || '',
+
   // Database Pool
   MONGO_POOL_SIZE: parseInt(process.env.MONGO_POOL_SIZE, 10) || 100,
   MONGO_MIN_POOL: parseInt(process.env.MONGO_MIN_POOL, 10) || 5,

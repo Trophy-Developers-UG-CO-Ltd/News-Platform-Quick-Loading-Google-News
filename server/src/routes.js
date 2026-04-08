@@ -26,6 +26,7 @@ const translationRoutes   = require('./modules/translation/translation.routes');
 const i18nRoutes          = require('./modules/i18n/i18n.routes');
 const siteSettingsRoutes  = require('./modules/site-settings/siteSettings.routes');
 const maintenanceRoutes   = require('./modules/maintenance/maintenance.routes');
+const advertiseInquiryRoutes = require('./modules/advertise-inquiries/advertiseInquiry.routes');
 
 router.use('/contact', contactRoutes);
 router.use('/categories', categoryRoutes);
@@ -55,6 +56,7 @@ router.use('/site-settings',   siteSettingsRoutes);
 router.use('/maintenance',     maintenanceRoutes);
 router.use('/translation',     translationRoutes);
 router.use('/i18n',            i18nRoutes);
+router.use('/advertise',       advertiseInquiryRoutes);
 
 module.exports = router;
 

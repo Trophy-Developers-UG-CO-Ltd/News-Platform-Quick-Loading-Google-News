@@ -224,9 +224,9 @@ const AdminDashboard = () => {
           <FiBarChart2 className="h-8 w-8 text-green-600 mx-auto mb-2" />
           <p className="font-semibold">Analytics</p>
         </Link>
-        <Link to="/admin/inquiries" className="card p-5 text-center hover:shadow-md transition-shadow">
+        <Link to="/admin/advertise-inquiries" className="card p-5 text-center hover:shadow-md transition-shadow">
           <FiMessageSquare className="h-8 w-8 text-purple-600 mx-auto mb-2" />
-          <p className="font-semibold">Inquiries</p>
+          <p className="font-semibold">Advertise Inquiries</p>
         </Link>
         <Link to="/admin/pages" className="card p-5 text-center hover:shadow-md transition-shadow">
           <FiLayout className="h-8 w-8 text-indigo-600 mx-auto mb-2" />

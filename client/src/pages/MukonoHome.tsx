@@ -54,7 +54,6 @@ const MOBILE_MENU_LINKS = [
   { label: 'Entertainment', to: '/entertainment' },
   { label: 'Politics', to: '/local' },
   { label: 'Lifestyle', to: '/entertainment' },
-  { label: 'Opportunities', to: '/applications' },
   { label: 'Videos', to: '/videos' },
   { label: 'About', to: '/about' },
   { label: 'Advertise', to: '/advertise' },
@@ -234,7 +233,6 @@ const MukonoHome = () => {
             <Link to="/entertainment" className="transition hover:text-white/70">Entertainment</Link>
             <Link to="/local" className="transition hover:text-white/70">Politics</Link>
             <Link to="/entertainment" className="transition hover:text-white/70">Lifestyle</Link>
-            <Link to="/applications" className="transition hover:text-white/70">Opportunities</Link>
             <Link to="/videos" className="transition hover:text-white/70">Videos</Link>
           </nav>
 

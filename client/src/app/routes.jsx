@@ -11,6 +11,7 @@ const NewsArticlePage = lazy(() => import('../pages/NewsArticlePage'));
 const LocalUpdatesPage = lazy(() => import('../pages/LocalUpdatesPage'));
 const EntertainmentPage = lazy(() => import('../pages/EntertainmentPage'));
 const VideosPage = lazy(() => import('../pages/VideosPage'));
+const AdvertisePage = lazy(() => import('../pages/AdvertisePage'));
 
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
 const AdminUsers = lazy(() => import('../pages/admin/AdminUsers'));
@@ -33,10 +34,12 @@ const AdminAuditLogs = lazy(() => import('../pages/admin/AdminAuditLogs'));
 const AdminDownloadLogs = lazy(() => import('../pages/admin/AdminDownloadLogs'));
 const AdminBranding = lazy(() => import('../pages/admin/AdminBranding'));
 const AdminMaintenance = lazy(() => import('../pages/admin/AdminMaintenance'));
+const AdminAdvertiseInquiries = lazy(() => import('../pages/admin/AdminAdvertiseInquiries'));
 
 const EditorDashboardPage = lazy(() => import('../pages/editor/EditorDashboardPage'));
 const EditorCategoriesPage = lazy(() => import('../pages/editor/EditorCategoriesPage'));
 const EditorArticleFormPage = lazy(() => import('../pages/editor/EditorArticleFormPage'));
+const Mukono11Login = lazy(() => import('../pages/Mukono11Login'));
 const NotFound = lazy(() => import('../pages/NotFound'));
 
 // Suspense fallback
@@ -54,11 +57,13 @@ const AppRoutes = () => {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/mukono11login" element={<Mukono11Login />} />
         <Route path="/news" element={<NewsPage />} />
         <Route path="/news/:slug" element={<NewsArticlePage />} />
         <Route path="/local" element={<LocalUpdatesPage />} />
         <Route path="/entertainment" element={<EntertainmentPage />} />
         <Route path="/videos" element={<VideosPage />} />
+        <Route path="/advertise" element={<AdvertisePage />} />
         <Route path="/editor" element={<EditorDashboardPage />} />
         <Route path="/editor/categories" element={<EditorCategoriesPage />} />
         <Route path="/editor/articles/new" element={<EditorArticleFormPage />} />
@@ -95,6 +100,7 @@ const AppRoutes = () => {
           <Route path="download-logs" element={<AdminDownloadLogs />} />
           <Route path="branding" element={<AdminBranding />} />
           <Route path="maintenance" element={<AdminMaintenance />} />
+          <Route path="advertise-inquiries" element={<AdminAdvertiseInquiries />} />
           <Route path="*" element={<NotFound />} />
         </Route>
 

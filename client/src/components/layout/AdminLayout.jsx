@@ -43,6 +43,7 @@ import {
   FileCode2,
   Wrench,
   Shapes,
+  MessageSquare,
 } from 'lucide-react';
 
 /* ── Nav data ──────────────────────────────────────────────────── */
@@ -67,6 +68,7 @@ const NAV = [
     items: [
       { to: '/admin/users',      icon: Users,       label: 'Users' },
       { to: '/admin/categories', icon: Shapes,      label: 'Categories' },
+      { to: '/admin/advertise-inquiries', icon: MessageSquare, label: 'Advertise Inquiries' },
     ],
   },
   {
