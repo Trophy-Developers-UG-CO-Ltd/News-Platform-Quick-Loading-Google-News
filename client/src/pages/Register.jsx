@@ -82,8 +82,8 @@ const Register = () => {
     <div className="min-h-[70vh] flex items-center justify-center py-12 px-4">
       <div className="card max-w-lg w-full p-8">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">Create Business Account</h1>
-          <p className="text-gray-500 mt-1">Register for B2B access to MukonoTalks</p>
+          <h1 className="text-2xl font-bold text-gray-800">Create An Account - Advertising/ Personal Account </h1>
+          <p className="text-gray-500 mt-1">Register to MukonoTalks</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -120,7 +120,7 @@ const Register = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Business Email *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
             <div className="relative">
               <FiMail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
               <input
@@ -129,7 +129,7 @@ const Register = () => {
                 value={formData.email}
                 onChange={handleChange}
                 className="input-field pl-10"
-                placeholder="you@company.com"
+                placeholder="you@gmail.com"
                 required
               />
             </div>

@@ -6,6 +6,7 @@ import { FiUser } from 'react-icons/fi';
 import api from '../../app/axios';
 import ThemeToggle from '../ui/ThemeToggle';
 import useThemeMode from '../../hooks/useThemeMode';
+import { getLucideIcon } from '../../utils/getLucideIcon';
 
 const getLocalized = (value) => {
   if (!value) return '';
@@ -35,6 +36,46 @@ const MOBILE_MENU_LINKS = [
   { label: 'Contact', to: '/contact' },
 ];
 
+const DEFAULT_TICKER_ITEMS = [
+  { label: 'Trending',         href: '/news?category=trending',         icon: 'TrendingUp',    iconPosition: 'before', textWeight: 'semibold', isExternal: false, openInNewTab: false },
+  { label: 'Politics update',  href: '/news?category=politics-update',  icon: 'Landmark',      iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
+  { label: 'Celebrity news',   href: '/news?category=celebrity-news',   icon: 'Sparkles',      iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
+  { label: 'Jobs released',    href: '/news?category=jobs-released',    icon: 'Briefcase',     iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
+  { label: 'Campus trends',    href: '/news?category=campus-trends',    icon: 'GraduationCap', iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
+  { label: 'Business stories', href: '/news?category=business-stories', icon: 'BarChart2',     iconPosition: 'after',  textWeight: 'semibold', isExternal: false, openInNewTab: false },
+  { label: 'City News',        href: '/news?category=city-news',        icon: 'Building2',     iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
+];
+
+/** Map slug/name keywords → Lucide icon name for auto-assigned category icons */
+const CATEGORY_ICON_MAP = [
+  { keywords: ['trending', 'viral', 'hot'],                         icon: 'TrendingUp'    },
+  { keywords: ['politi', 'govern', 'elect', 'parliament', 'local'], icon: 'Landmark'      },
+  { keywords: ['celeb', 'entertain', 'star', 'showbiz'],            icon: 'Sparkles'      },
+  { keywords: ['job', 'career', 'hire', 'employ', 'vacancy'],       icon: 'Briefcase'     },
+  { keywords: ['campus', 'school', 'univers', 'college', 'educ'],   icon: 'GraduationCap' },
+  { keywords: ['business', 'finance', 'econom', 'market', 'trade'], icon: 'BarChart2'     },
+  { keywords: ['city', 'urban', 'municipal', 'town'],               icon: 'Building2'     },
+  { keywords: ['sport', 'football', 'soccer', 'athlet'],            icon: 'Trophy'        },
+  { keywords: ['health', 'medical', 'wellness', 'hospital'],        icon: 'HeartPulse'    },
+  { keywords: ['tech', 'digit', 'innovat', 'software'],             icon: 'Cpu'           },
+  { keywords: ['life', 'fashion', 'food', 'travel', 'style'],       icon: 'Coffee'        },
+];
+
+const getCategoryIcon = (name = '', slug = '') => {
+  const haystack = `${name} ${slug}`.toLowerCase();
+  for (const entry of CATEGORY_ICON_MAP) {
+    if (entry.keywords.some((kw) => haystack.includes(kw))) return entry.icon;
+  }
+  return 'Tag';
+};
+
+const TEXT_WEIGHT_CLASS = {
+  normal: 'font-normal',
+  medium: 'font-medium',
+  semibold: 'font-semibold',
+  bold: 'font-bold',
+};
+
 const PremiumSiteHeader = () => {
   const { isDarkMode, toggleTheme } = useThemeMode();
   const { pathname } = useLocation();
@@ -47,6 +88,7 @@ const PremiumSiteHeader = () => {
   const [searchError, setSearchError] = useState('');
   const [articleSearchResults, setArticleSearchResults] = useState([]);
   const [pageSearchResults, setPageSearchResults] = useState([]);
+  const [tickerItems, setTickerItems] = useState(DEFAULT_TICKER_ITEMS);
 
   const isHomePage = pathname === '/';
 
@@ -96,6 +138,49 @@ const PremiumSiteHeader = () => {
 
     return () => window.clearTimeout(requestId);
   }, [searchTerm, mobilePanelOpen]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchTickerItems = async () => {
+      try {
+        const response = await api.get('/categories');
+        const categories = Array.isArray(response?.data?.categories) ? response.data.categories : [];
+
+        if (!isMounted || categories.length === 0) return;
+
+        // Only show active categories; map to ticker shape
+        const normalized = categories
+          .filter((cat) => cat?.isActive !== false)
+          .map((cat) => {
+            const label = cat?.localizedName?.en || cat?.name || '';
+            const slug = cat?.slug || '';
+            return {
+              label,
+              href: `/news?category=${slug}`,
+              isExternal: false,
+              openInNewTab: false,
+              icon: getCategoryIcon(label, slug),
+              iconPosition: 'before',
+              textWeight: 'medium',
+            };
+          })
+          .filter((item) => item.label);
+
+        if (normalized.length > 0) {
+          setTickerItems(normalized);
+        }
+      } catch (_error) {
+        // Keep the premium defaults when the categories API is unavailable.
+      }
+    };
+
+    fetchTickerItems();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const toggleMobilePanel = () => {
     setMobilePanelOpen((current) => !current);
@@ -170,9 +255,9 @@ const PremiumSiteHeader = () => {
           >
             <Search size={18} />
           </Link>
-          <button type="button" className="hidden cursor-pointer hover:text-white/70 md:inline-flex" aria-label="Trending">
+          <Link to="/blog" className="hidden cursor-pointer hover:text-white/70 md:inline-flex" aria-label="Blog">
             <Flame size={18} />
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -266,13 +351,58 @@ const PremiumSiteHeader = () => {
         </div>
       )}
 
-      <div className="home-trending-ticker border-t border-white/10 bg-black px-4 py-2 text-xs text-white/75">
+      <div className="home-trending-ticker border-t border-white/10 bg-black px-4 py-2 text-brand-white/85">
         <div className="home-trending-ticker__fade" aria-hidden="true" />
-        <p className="home-trending-ticker__track" aria-label="Trending headlines">
-          <span className="home-trending-ticker__content">
-            Trending: Politics update • Celebrity news • Jobs released • Campus trends • Business stories
-          </span>
-        </p>
+        <span className="home-trending-ticker__label">Categories:</span>
+        <div className="home-trending-ticker__track" aria-label="Trending headlines">
+          <div className="home-trending-ticker__content" role="list">
+            {[...tickerItems, ...tickerItems].map((item, index) => {
+              const Icon = item.icon ? getLucideIcon(item.icon, 'Circle') : null;
+              const key = `${item.href}-${item.label}-${index}`;
+              const weightClass = TEXT_WEIGHT_CLASS[item.textWeight] || TEXT_WEIGHT_CLASS.medium;
+
+              const content = (
+                <>
+                  {Icon && item.iconPosition !== 'after' ? <Icon className="h-3.5 w-3.5" aria-hidden="true" /> : null}
+                  <span>{item.label}</span>
+                  {Icon && item.iconPosition === 'after' ? <Icon className="h-3.5 w-3.5" aria-hidden="true" /> : null}
+                </>
+              );
+
+              if (item.isExternal) {
+                return (
+                  <React.Fragment key={key}>
+                    <a
+                      href={item.href}
+                      target={item.openInNewTab ? '_blank' : '_self'}
+                      rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
+                      className={`home-trending-ticker__item ${weightClass}`}
+                      role="listitem"
+                    >
+                      {content}
+                    </a>
+                    <span className="home-trending-ticker__divider" aria-hidden="true">•</span>
+                  </React.Fragment>
+                );
+              }
+
+              return (
+                <React.Fragment key={key}>
+                  <Link
+                    to={item.href}
+                    target={item.openInNewTab ? '_blank' : undefined}
+                    rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
+                    className={`home-trending-ticker__item ${weightClass}`}
+                    role="listitem"
+                  >
+                    {content}
+                  </Link>
+                  <span className="home-trending-ticker__divider" aria-hidden="true">•</span>
+                </React.Fragment>
+              );
+            })}
+          </div>
+        </div>
         <div className="home-trending-ticker__fade home-trending-ticker__fade--right" aria-hidden="true" />
       </div>
     </header>

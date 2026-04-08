@@ -143,6 +143,53 @@ const HOMEPAGE_SECTIONS_SEED = [
     thumbnailUrl: 'https://images.unsplash.com/photo-1581092580497-e0d23cbdf1dc?auto=format&fit=crop&w=1280&q=80',
     videoCaption: 'MukonoTalks · Manufacturing Process Overview',
   },
+    {
+      sectionKey: 'opportunities',
+      isActive: true,
+      order: 7,
+      heading: {
+        eyebrow: 'Careers & Openings',
+        title: 'Opportunities',
+        description: 'Explore current opportunities from local organizations and community partners.',
+      },
+      items: [
+        {
+          icon: 'Briefcase',
+          title: 'Community Reporter',
+          description: 'Part-time field reporting role focused on district events and local stories.',
+          link: '/contact',
+          order: 1,
+        },
+        {
+          icon: 'Briefcase',
+          title: 'Campus Correspondent',
+          description: 'Student contributor role for campus news, trends, and youth-focused content.',
+          link: '/contact',
+          order: 2,
+        },
+        {
+          icon: 'Briefcase',
+          title: 'Sales & Partnerships Associate',
+          description: 'Support ad sales, sponsorship outreach, and media partnership coordination.',
+          link: '/contact',
+          order: 3,
+        },
+      ],
+    },
+    {
+      sectionKey: 'inquiry',
+      isActive: true,
+      order: 8,
+      heading: {
+        eyebrow: 'Community Support',
+        title: 'Inquire',
+        description: 'Reach out for publishing support, advertising inquiries, or story collaboration.',
+      },
+      ctaButtons: [
+        { text: 'Join Now', link: 'https://wa.me/256755303076', variant: 'primary' },
+      ],
+      items: [],
+    },
 ];
 
 const ABOUT_PAGE_SEED = {

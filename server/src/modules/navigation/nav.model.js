@@ -48,6 +48,16 @@ const navItemSchema = new mongoose.Schema(
       trim: true,
       default: '',
     },
+    iconPosition: {
+      type: String,
+      enum: ['before', 'after'],
+      default: 'before',
+    },
+    textWeight: {
+      type: String,
+      enum: ['normal', 'medium', 'semibold', 'bold'],
+      default: 'medium',
+    },
   },
   {
     timestamps: true,

@@ -31,6 +31,26 @@ const Footer = () => {
     copyrightName,
   } = settings || {};
 
+  const normalizedQuickLinks = Array.isArray(quickLinks)
+    ? (() => {
+        const hasBlogLink = quickLinks.some((link) => link?.href === '/blog');
+        if (hasBlogLink) return quickLinks;
+
+        const newsIndex = quickLinks.findIndex((link) => link?.href === '/news');
+        const blogLink = { label: 'Blog', href: '/blog' };
+
+        if (newsIndex >= 0) {
+          return [
+            ...quickLinks.slice(0, newsIndex + 1),
+            blogLink,
+            ...quickLinks.slice(newsIndex + 1),
+          ];
+        }
+
+        return [...quickLinks, blogLink];
+      })()
+    : [];
+
   return (
     <footer className="bg-dark-black text-text-secondary">
       <div className="container mx-auto px-4 py-12">
@@ -49,8 +69,8 @@ const Footer = () => {
           <div>
             <h3 className="mb-4 font-semibold text-text-primary">{t('footer.quickLinks', 'Quick Links')}</h3>
             <ul className="space-y-2 text-sm">
-              {quickLinks.length > 0
-                ? quickLinks.map((link) => (
+              {normalizedQuickLinks.length > 0
+                ? normalizedQuickLinks.map((link) => (
                     <li key={link.href + link.label}>
                       <LocalizedLink
                         to={link.href}
@@ -65,6 +85,7 @@ const Footer = () => {
                   <>
                     <li><LocalizedLink to="/" className="transition-colors hover:text-text-primary">{t('nav.home', 'Home')}</LocalizedLink></li>
                     <li><LocalizedLink to="/news" className="transition-colors hover:text-text-primary">News</LocalizedLink></li>
+                    <li><LocalizedLink to="/blog" className="transition-colors hover:text-text-primary">Blog</LocalizedLink></li>
                     <li><LocalizedLink to="/local" className="transition-colors hover:text-text-primary">Local Updates</LocalizedLink></li>
                     <li><LocalizedLink to="/entertainment" className="transition-colors hover:text-text-primary">Entertainment</LocalizedLink></li>
                     <li><LocalizedLink to="/videos" className="transition-colors hover:text-text-primary">Videos</LocalizedLink></li>

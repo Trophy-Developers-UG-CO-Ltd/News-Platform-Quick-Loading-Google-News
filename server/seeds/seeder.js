@@ -10,7 +10,7 @@
  *   npm run seed
  *
  * Collections seeded (in dependency order):
- *   users → categories → products → hero → pages → articles
+ *   users → categories → products → hero → homepage sections → navigation → pages → articles
  *
  * @module utils/seeder
  */
@@ -29,6 +29,7 @@ const Page     = require('../modules/pages/page.model');
 const Article  = require('../modules/articles/article.model');
 const Document = require('../modules/documents/document.model');
 const HomepageSection = require('../modules/homepageSection/homepageSection.model');
+const NavItem = require('../modules/navigation/nav.model');
 const { getHomepageSectionsSeed, getAboutPageSeed } = require('./data/cmsSeedData');
 
 // ─── DB Connect ────────────────────────────────────────────────
@@ -212,6 +213,65 @@ const categoriesData = [
 
 // HOMEPAGE CMS SECTIONS
 const homepageSectionsData = getHomepageSectionsSeed();
+
+// NAVIGATION (used by premium top ticker/menu)
+const navigationData = [
+  {
+    label: 'Politics update',
+    href: '/local',
+    order: 0,
+    isVisible: true,
+    isExternal: false,
+    openInNewTab: false,
+    icon: 'Landmark',
+    iconPosition: 'before',
+    textWeight: 'medium',
+  },
+  {
+    label: 'Celebrity news',
+    href: '/entertainment',
+    order: 1,
+    isVisible: true,
+    isExternal: false,
+    openInNewTab: false,
+    icon: 'Sparkles',
+    iconPosition: 'before',
+    textWeight: 'medium',
+  },
+  {
+    label: 'Jobs released',
+    href: '/news',
+    order: 2,
+    isVisible: true,
+    isExternal: false,
+    openInNewTab: false,
+    icon: 'Briefcase',
+    iconPosition: 'before',
+    textWeight: 'medium',
+  },
+  {
+    label: 'Campus trends',
+    href: '/news',
+    order: 3,
+    isVisible: true,
+    isExternal: false,
+    openInNewTab: false,
+    icon: 'GraduationCap',
+    iconPosition: 'before',
+    textWeight: 'medium',
+  },
+  {
+    label: 'Business stories',
+    href: '/news',
+    order: 4,
+    isVisible: true,
+    isExternal: false,
+    openInNewTab: false,
+    icon: 'TrendingUp',
+    iconPosition: 'after',
+    textWeight: 'semibold',
+  },
+];
 
 // PRODUCTS — receives a categoryName→ObjectId map built from inserted categories
 const buildProducts = (catMap) => [
@@ -677,12 +737,17 @@ const importData = async () => {
     await HomepageSection.insertMany(homepageSectionsData);
     console.log(`✅  Homepage sections seeded: ${homepageSectionsData.length}`);
 
-    // 6. CMS Pages
+    // 6. Navigation
+    await NavItem.deleteMany({});
+    await NavItem.insertMany(navigationData);
+    console.log(`✅  Navigation items seeded: ${navigationData.length}`);
+
+    // 7. CMS Pages
     await Page.deleteMany({});
     await Page.insertMany(pagesData);
     console.log(`✅  Pages seeded: ${pagesData.length}`);
 
-    // 7. Articles
+    // 8. Articles
     await Article.deleteMany({});
     await Article.insertMany(articlesData);
     console.log(`✅  Articles seeded: ${articlesData.length}`);
@@ -719,6 +784,7 @@ const destroyData = async () => {
       Product.deleteMany({}),
       Hero.deleteMany({}),
       HomepageSection.deleteMany({}),
+      NavItem.deleteMany({}),
       Page.deleteMany({}),
       Article.deleteMany({}),
       Document.deleteMany({}),

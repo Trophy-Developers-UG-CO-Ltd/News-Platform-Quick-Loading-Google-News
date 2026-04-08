@@ -38,6 +38,8 @@ const newItem = (order) => ({
   openInNewTab: false,
   isExternal: false,
   icon: '',
+  iconPosition: 'before',
+  textWeight: 'medium',
   order,
   _isNew: true,
 });
@@ -161,6 +163,32 @@ const NavItemRow = ({
               onChange={(e) => handleField('icon', e.target.value)}
               placeholder="e.g. Home, Package, Info"
             />
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Icon position</label>
+            <select
+              className="w-full border border-gray-200 rounded-[48px] px-3 py-2 text-sm focus:outline-none focus:border-primary-400 focus:ring-1 focus:ring-primary-200"
+              value={item.iconPosition || 'before'}
+              onChange={(e) => handleField('iconPosition', e.target.value)}
+            >
+              <option value="before">Before text</option>
+              <option value="after">After text</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Text weight</label>
+            <select
+              className="w-full border border-gray-200 rounded-[48px] px-3 py-2 text-sm focus:outline-none focus:border-primary-400 focus:ring-1 focus:ring-primary-200"
+              value={item.textWeight || 'medium'}
+              onChange={(e) => handleField('textWeight', e.target.value)}
+            >
+              <option value="normal">Normal</option>
+              <option value="medium">Medium</option>
+              <option value="semibold">Semi Bold</option>
+              <option value="bold">Bold</option>
+            </select>
           </div>
 
           <div className="flex flex-col gap-3 pt-1">

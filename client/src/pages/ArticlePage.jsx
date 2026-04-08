@@ -67,8 +67,8 @@ const ArticlePage = () => {
 
   /* Share handler */
   const handleShare = async () => {
-    const localizedShareSlug = article?.localizedSlug?.[validLang] || article?.localizedSlug?.en || slug;
-    const shareUrl = `${BASE_URL}/${validLang}/blog/${localizedShareSlug}`;
+    const localizedShareSlug = article?.localizedSlug?.en || slug;
+    const shareUrl = `${BASE_URL}/blog/${localizedShareSlug}`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -116,7 +116,7 @@ const ArticlePage = () => {
           The article you're looking for doesn't exist or hasn't been published yet.
         </p>
         <Link
-          to={`/${validLang}/blog`}
+          to="/blog"
           className="inline-flex items-center gap-2 btn-primary"
         >
           <FiArrowLeft className="h-4 w-4" /> Back to Blog
@@ -156,7 +156,7 @@ const ArticlePage = () => {
       <Helmet>
         <title>{seoTitle} | MukonoTalks</title>
         <meta name="description" content={seoDescription} />
-        <link rel="canonical" href={`${BASE_URL}/${validLang}/blog/${slug}`} />
+        <link rel="canonical" href={`${BASE_URL}/blog/${slug}`} />
 
         {/* hreflang */}
         {SUPPORTED_LANGUAGES.map((l) => (
@@ -177,7 +177,7 @@ const ArticlePage = () => {
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`${BASE_URL}/${validLang}/blog/${slug}`} />
+        <meta property="og:url" content={`${BASE_URL}/blog/${slug}`} />
         {article.featuredImage && (
           <meta property="og:image" content={article.featuredImage} />
         )}
@@ -200,9 +200,9 @@ const ArticlePage = () => {
       <SchemaInjector schemas={[
         buildArticleSchema(article, validLang),
         buildBreadcrumbSchema([
-          { name: 'Home',     url: `${BASE_URL}/${validLang}` },
-          { name: 'Blog',     url: `${BASE_URL}/${validLang}/blog` },
-          ...(category ? [{ name: CATEGORY_LABELS[category] || category, url: `${BASE_URL}/${validLang}/blog?category=${category}` }] : []),
+          { name: 'Home', url: `${BASE_URL}` },
+          { name: 'Blog', url: `${BASE_URL}/blog` },
+          ...(category ? [{ name: CATEGORY_LABELS[category] || category, url: `${BASE_URL}/blog?category=${category}` }] : []),
           { name: title },
         ]),
       ]} />
@@ -213,13 +213,13 @@ const ArticlePage = () => {
         <nav className="mb-6">
           <ol className="flex items-center gap-2 text-sm text-gray-500">
             <li>
-              <Link to={`/${validLang}`} className="hover:text-primary-600 transition-colors">
+              <Link to="/" className="hover:text-primary-600 transition-colors">
                 Home
               </Link>
             </li>
             <li>/</li>
             <li>
-              <Link to={`/${validLang}/blog`} className="hover:text-primary-600 transition-colors">
+              <Link to="/blog" className="hover:text-primary-600 transition-colors">
                 Blog
               </Link>
             </li>
@@ -228,7 +228,7 @@ const ArticlePage = () => {
                 <li>/</li>
                 <li>
                   <Link
-                    to={`/${validLang}/blog?category=${category}`}
+                    to={`/blog?category=${category}`}
                     className="hover:text-primary-600 transition-colors"
                   >
                     {categoryLabel}
@@ -335,7 +335,7 @@ const ArticlePage = () => {
               {article.tags.map((tag) => (
                 <Link
                   key={tag}
-                  to={`/${validLang}/blog?tag=${tag}`}
+                  to={`/blog?tag=${tag}`}
                   className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-primary-100 hover:text-primary-700 transition-colors"
                 >
                   #{tag}
@@ -377,10 +377,10 @@ const ArticlePage = () => {
         {/* Back to Blog */}
         <div className="mt-12 pt-6 border-t border-gray-200">
           <Link
-            to={`/${validLang}/blog`}
+            to="/blog"
             className="inline-flex items-center gap-2 text-primary-600 hover:text-primary-700 font-medium transition-colors"
           >
-            <FiArrowLeft className="h-4 w-4" /> Back to Blog &amp; Insights
+            <FiArrowLeft className="h-4 w-4" /> Back to Blog
           </Link>
         </div>
       </article>

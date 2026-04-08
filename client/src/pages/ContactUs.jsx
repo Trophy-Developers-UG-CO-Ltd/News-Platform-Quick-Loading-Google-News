@@ -170,27 +170,27 @@ const ContactUs = () => {
             {/* CTA block */}
             <div className="mt-8 bg-primary-600 text-white rounded-xl p-6">
               <h3 className="font-semibold text-lg mb-2">
-                {t('contact.ctaTitle', 'Need a Quote?')}
+                {t('contact.ctaTitle', 'Need to Advertise?')}
               </h3>
               <p className="text-primary-100 text-sm mb-4 leading-relaxed">
                 {t(
                   'contact.ctaDesc',
-                  'Looking to source industrial chemicals or coatings? Browse our product catalogue or request a tailored quote.'
+                  'Looking to reach Mukono and wider Uganda audiences? Explore our advertising options or request a tailored media package.'
                 )}
               </p>
               <div className="flex flex-col gap-2">
                 <LocalizedLink
-                  to="/products"
+                  to="/advertise"
                   className="block text-center bg-white text-primary-600 font-semibold text-sm px-4 py-2.5 rounded-none hover:bg-primary-50 transition-colors"
                 >
-                  {t('contact.ctaProducts', 'Browse Products')}
+                  {t('contact.ctaProducts', 'View Advertising Options')}
                 </LocalizedLink>
-                <LocalizedLink
-                  to="/get-quote"
+                <a
+                  href={`mailto:${contactEmail || 'info@mukonotalks.ug'}?subject=Advertising%20Media%20Package%20Request`}
                   className="block text-center border border-white text-white font-semibold text-sm px-4 py-2.5 rounded-none hover:bg-primary-700 transition-colors"
                 >
-                  {t('contact.ctaQuote', 'Get a Quote')}
-                </LocalizedLink>
+                  {t('contact.ctaQuote', 'Request Media Package')}
+                </a>
               </div>
             </div>
           </div>
@@ -203,7 +203,7 @@ const ContactUs = () => {
               /* Success state */
               <div className="flex flex-col items-center justify-center text-center py-12">
                 <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center mb-6">
-                  <FiCheckCircle className="h-8 w-8 text-green-600" />
+                  <FiCheckCircle className="h-8 w-8 text-white-600" />
                 </div>
                 <h2 className="text-2xl font-bold text-gray-800 mb-3">
                   {t('contact.successTitle', 'Message Sent!')}

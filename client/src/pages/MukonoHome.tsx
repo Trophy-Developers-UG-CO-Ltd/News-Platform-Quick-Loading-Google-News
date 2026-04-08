@@ -52,16 +52,20 @@ const MukonoHome = () => {
   const [articles, setArticles] = useState<any[]>([]);
   const [trending, setTrending] = useState<any[]>([]);
   const [videoSection, setVideoSection] = useState<any>(null);
+  const [opportunitiesSection, setOpportunitiesSection] = useState<any>(null);
+  const [inquirySection, setInquirySection] = useState<any>(null);
 
   useEffect(() => {
     let mounted = true;
 
     const loadHomepage = async () => {
-      const [heroRes, latestRes, trendingRes, videoRes] = await Promise.allSettled([
+      const [heroRes, latestRes, trendingRes, videoRes, opportunitiesRes, inquiryRes] = await Promise.allSettled([
         api.get('/hero/active'),
         api.get('/articles', { params: { page: 1, limit: 12 } }),
         api.get('/articles', { params: { page: 1, limit: 8, sort: 'viewCount' } }),
         api.get('/homepage-sections/video'),
+        api.get('/homepage-sections/opportunities'),
+        api.get('/homepage-sections/inquiry'),
       ]);
 
       if (!mounted) return;
@@ -70,6 +74,8 @@ const MukonoHome = () => {
       setArticles(latestRes.status === 'fulfilled' ? (latestRes.value?.data?.articles || []) : []);
       setTrending(trendingRes.status === 'fulfilled' ? (trendingRes.value?.data?.articles || []) : []);
       setVideoSection(videoRes.status === 'fulfilled' ? (videoRes.value?.data || null) : null);
+      setOpportunitiesSection(opportunitiesRes.status === 'fulfilled' ? (opportunitiesRes.value?.data || null) : null);
+      setInquirySection(inquiryRes.status === 'fulfilled' ? (inquiryRes.value?.data || null) : null);
     };
 
     loadHomepage();
@@ -113,6 +119,24 @@ const MukonoHome = () => {
     const whatsappApiPhone = WHATSAPP_PHONE.replace(/\D/g, '');
     return `https://wa.me/${whatsappApiPhone}?text=${encodeURIComponent(message)}`;
   }, [mainHero?.title, pathname]);
+  const opportunityCards = useMemo(() => {
+    const items = Array.isArray(opportunitiesSection?.items) ? opportunitiesSection.items : [];
+    const activeItems = items.filter((item: any) => (item?.title || item?.description));
+    return activeItems.length > 0
+      ? activeItems.slice(0, 6)
+      : [
+          { title: 'Opportunity Title', description: 'Short description of job or opportunity.', link: '/contact' },
+          { title: 'Opportunity Title', description: 'Short description of job or opportunity.', link: '/contact' },
+          { title: 'Opportunity Title', description: 'Short description of job or opportunity.', link: '/contact' },
+        ];
+  }, [opportunitiesSection]);
+  const inquiryButton = useMemo(() => {
+    const buttons = Array.isArray(inquirySection?.ctaButtons) ? inquirySection.ctaButtons : [];
+    return buttons[0] || { text: 'Join Now', link: whatsappHref };
+  }, [inquirySection, whatsappHref]);
+  const inquiryTitle = inquirySection?.heading?.title || 'Inquire';
+  const inquiryDescription = inquirySection?.heading?.description || '';
+  const opportunitiesTitle = opportunitiesSection?.heading?.title || 'Opportunities';
 
   return (
     <div className="min-h-screen bg-light-body text-text-light-primary dark:bg-dark-charcoal dark:text-text-dark-primary">
@@ -276,22 +300,25 @@ const MukonoHome = () => {
       <section className="mx-auto w-full max-w-7xl px-4 py-10">
         <div className="mb-6 flex items-center gap-2">
           <Briefcase size={18} className="text-black dark:text-white" />
-          <h3 className="text-lg font-semibold">Opportunities</h3>
+          <h3 className="text-lg font-semibold">{opportunitiesTitle}</h3>
         </div>
 
         <div className="grid gap-6 md:grid-cols-3">
-          {[1, 2, 3].map((i) => (
+          {opportunityCards.map((item: any, i: number) => (
             <div
-              key={i}
+              key={item?._id || item?.title || i}
               className="rounded-2xl border border-dark-border bg-white p-5 shadow-soft transition hover:bg-light-hover dark:bg-dark-surface dark:hover:bg-dark-hover"
             >
-              <h4 className="font-semibold">Opportunity Title</h4>
+              <h4 className="font-semibold">{item?.title || 'Opportunity'}</h4>
               <p className="mt-2 text-sm text-text-secondary">
-                Short description of job or opportunity.
+                {item?.description || 'Short description of job or opportunity.'}
               </p>
-              <button type="button" className="mt-3 text-sm font-semibold text-black underline dark:text-white">
+              <a
+                href={item?.link || '/contact'}
+                className="mt-3 inline-block text-sm font-semibold text-black underline dark:text-white"
+              >
                 View Details →
-              </button>
+              </a>
             </div>
           ))}
         </div>
@@ -320,15 +347,18 @@ const MukonoHome = () => {
             <MessageCircle size={20} className="text-black dark:text-white" />
           </div>
 
-          <h3 className="text-lg font-semibold">Inquire</h3>
+          <h3 className="text-lg font-semibold">{inquiryTitle}</h3>
+          {inquiryDescription ? (
+            <p className="mt-2 text-sm text-text-secondary">{inquiryDescription}</p>
+          ) : null}
 
           <a
-            href={whatsappHref}
+            href={inquiryButton?.link || whatsappHref}
             target="_blank"
             rel="noreferrer"
             className="mt-4 inline-flex rounded-xl bg-black px-6 py-2 font-semibold text-white transition hover:opacity-90 dark:bg-white dark:text-black"
           >
-            Join Now
+            {inquiryButton?.text || 'Join Now'}
           </a>
         </div>
       </section>

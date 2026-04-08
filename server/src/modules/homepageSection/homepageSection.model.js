@@ -37,7 +37,7 @@ const homepageSectionSchema = new mongoose.Schema(
       required: true,
       unique:   true,
       index:    true,
-      enum:     ['intro', 'values', 'featured-products', 'industries', 'products', 'advantages', 'faq', 'cta', 'video'],
+      enum:     ['intro', 'values', 'featured-products', 'industries', 'products', 'advantages', 'faq', 'cta', 'video', 'opportunities', 'inquiry'],
     },
     isActive: { type: Boolean, default: true },
     order:    { type: Number,  default: 0    },

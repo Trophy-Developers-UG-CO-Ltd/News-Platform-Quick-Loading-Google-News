@@ -297,10 +297,10 @@
     "successTitle": "Message Sent!",
     "successMessage": "Thank you for reaching out. We have received your message and will respond within 1–2 business days.",
     "sendAnother": "Send Another Message",
-    "ctaTitle": "Need a Quote?",
-    "ctaDesc": "Looking to source industrial chemicals or coatings? Browse our product catalogue or request a tailored quote.",
-    "ctaProducts": "Browse Products",
-    "ctaQuote": "Get a Quote"
+    "ctaTitle": "Need to Advertise?",
+    "ctaDesc": "Looking to reach Mukono and wider Uganda audiences? Explore our advertising options or request a tailored media package.",
+    "ctaProducts": "View Advertising Options",
+    "ctaQuote": "Request Media Package"
   },
   "seo": {
     "homeTitle": "MukonoTalks - Industrial Chemical Solutions",

@@ -8,6 +8,26 @@ import BannerAdSlot from '../components/ads/BannerAdSlot';
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://mukonotalks.ug';
 const LANGS = ['en', 'sw', 'zh'];
 
+const formatDate = (value) => {
+  if (!value) return 'Date unavailable';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Date unavailable';
+  return date.toLocaleDateString('en-UG', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
+const formatCategory = (value) => {
+  if (!value) return 'News';
+  return String(value)
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
+};
+
 const NewsArticlePage = () => {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
@@ -56,6 +76,9 @@ const NewsArticlePage = () => {
   const excerpt = article.excerpt || '';
   const blocks = Array.isArray(article.contentBlocks) ? article.contentBlocks : [];
   const canonicalUrl = `${BASE_URL}/news/${article.slug || slug}`;
+  const authorName = article?.author?.name || 'MukonoTalks Editorial Desk';
+  const publishedDate = formatDate(article?.publishedAt);
+  const category = formatCategory(article?.category);
 
   const newsSchema = {
     '@context': 'https://schema.org',
@@ -66,8 +89,8 @@ const NewsArticlePage = () => {
     datePublished: article.publishedAt,
     dateModified: article.publishedAt,
     author: {
-      '@type': 'Organization',
-      name: 'MukonoTalks Editorial Desk',
+      '@type': 'Person',
+      name: authorName,
     },
     publisher: {
       '@type': 'Organization',
@@ -118,6 +141,14 @@ const NewsArticlePage = () => {
       </Link>
 
       <h1 className="mt-3 text-4xl font-bold leading-tight text-gray-900">{title}</h1>
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-gray-600">
+        <span className="inline-flex rounded-full bg-black px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-brand-white">
+          {category}
+        </span>
+        <span>By {authorName}</span>
+        <span aria-hidden="true">•</span>
+        <time dateTime={article?.publishedAt || ''}>{publishedDate}</time>
+      </div>
       {excerpt ? <p className="mt-3 text-lg text-gray-600">{excerpt}</p> : null}
 
       <BannerAdSlot slotKey="articleInline" className="my-6" />

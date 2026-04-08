@@ -14,6 +14,8 @@ import {
   HelpCircle,
   Megaphone,
   Video,
+  Briefcase,
+  MessageCircle,
   Plus,
   Trash2,
   Save,
@@ -51,6 +53,8 @@ const SECTION_TABS = [
   { key: 'faq',                label: 'FAQ',                 icon: HelpCircle,     color: 'text-orange-600'  },
   { key: 'cta',                label: 'CTA Banner',          icon: Megaphone,      color: 'text-pink-600'    },
   { key: 'video',              label: 'Video',               icon: Video,          color: 'text-teal-600'    },
+  { key: 'opportunities',      label: 'Opportunities',       icon: Briefcase,      color: 'text-cyan-600'    },
+  { key: 'inquiry',            label: 'Inquiry',             icon: MessageCircle,  color: 'text-emerald-600' },
 ];
 
 const SECTION_CONFIG = {
@@ -135,6 +139,24 @@ const SECTION_CONFIG = {
     hasHeading:  true,
     hasCtaBtns:  false,
     hasVideo:    true,
+    hasBottomCta: false,
+  },
+  opportunities: {
+    itemFields:  ['icon', 'title', 'description', 'link'],
+    itemLabel:   'Opportunity',
+    hasItems:    true,
+    hasHeading:  true,
+    hasCtaBtns:  false,
+    hasVideo:    false,
+    hasBottomCta: false,
+  },
+  inquiry: {
+    itemFields:  [],
+    itemLabel:   '',
+    hasItems:    false,
+    hasHeading:  true,
+    hasCtaBtns:  true,
+    hasVideo:    false,
     hasBottomCta: false,
   },
 };

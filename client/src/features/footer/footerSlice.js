@@ -12,6 +12,7 @@ const DEFAULT = {
   quickLinks: [
     { label: 'Home',               href: '/' },
     { label: 'News',               href: '/news' },
+    { label: 'Blog',               href: '/blog' },
     { label: 'Local Updates',      href: '/local' },
     { label: 'Entertainment',      href: '/entertainment' },
     { label: 'Videos',             href: '/videos' },

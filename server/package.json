@@ -15,6 +15,7 @@
     "seed:developer": "node seeds/seedDeveloper.js",
     "seed:subscriber": "node seeds/seedSubscriber.js",
     "seed:hero": "node seeds/seedHero.js",
+    "seed:nav": "node seeds/seedNavigation.js",
     "seed:home": "node seeds/seedHomeSections.js",
     "seed:products": "node seeds/products.seed.js",
     "seed:bulk": "node seeds/importBulkProducts.js",

@@ -66,7 +66,7 @@ const Mukono11Login = () => {
             MukonoTalks Portal
           </h1>
           <p className="mt-1 text-sm text-text-muted">
-            Admin &amp; subscriber access
+            Login with your account to access exclusive features and manage your MukonoTalks experience.
           </p>
         </div>
 

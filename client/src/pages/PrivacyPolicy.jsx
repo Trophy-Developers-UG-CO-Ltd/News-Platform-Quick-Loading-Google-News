@@ -212,7 +212,7 @@ const PrivacyPolicy = () => {
               <p>MukonoTalks Ltd</p>
               <p>Email: privacy@mukonotalks.ug</p>
               <p>Phone: +000 000 000 000</p>
-              <p>Address: Uganda, Kenya, Tanzania</p>
+              <p>Address:Uganda</p>
             </div>
           </section>
 

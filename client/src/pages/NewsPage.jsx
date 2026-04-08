@@ -14,6 +14,26 @@ const resolveLocalized = (value) => {
   return value.en || value.sw || value.zh || '';
 };
 
+const formatDate = (value) => {
+  if (!value) return 'Date unavailable';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Date unavailable';
+  return date.toLocaleDateString('en-UG', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
+const formatCategory = (value) => {
+  if (!value) return 'News';
+  return String(value)
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
+};
+
 const NewsPage = () => {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -91,13 +111,17 @@ const NewsPage = () => {
             const title = resolveLocalized(article?.title) || 'Untitled story';
             const slug = article?.localizedSlug?.en;
             const excerpt = resolveLocalized(article?.excerpt) || 'No summary available.';
+            const category = formatCategory(article?.category);
+            const authorName = article?.author?.name || 'MukonoTalks Editorial Desk';
+            const publishedDate = formatDate(article?.publishedAt);
 
             if (!slug) return null;
 
             return (
               <article key={article._id} className="rounded-2xl border border-dark-border bg-dark-slate p-5 shadow-card">
-                <p className="text-xs font-semibold uppercase tracking-wide text-category-news">News</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-category-news">{category}</p>
                 <h2 className="mt-2 line-clamp-2 text-xl font-semibold text-text-primary">{title}</h2>
+                <p className="mt-2 text-xs text-text-secondary">By {authorName} • {publishedDate}</p>
                 <p className="mt-3 line-clamp-3 text-sm text-text-secondary">{excerpt}</p>
                 <Link
                   to={`/news/${slug}`}

@@ -1,499 +1,686 @@
-﻿/**
- * Public Articles Page — Blog / Insights / Knowledge Base listing
- * Premium B2B blog listing with featured hero, search, category filters, pagination
- * SEO metadata injection via react-helmet-async
- * @module pages/ArticlesPage
- */
-
-import React, { useEffect, useState, useCallback } from 'react';
-import { Link, useSearchParams, useParams } from 'react-router-dom';
+﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchPublicArticles } from '../features/articles/articleSlice';
-import Spinner from '../components/ui/Spinner';
-import Reveal, { StaggerReveal } from '../components/ui/Reveal';
 import {
-  FiSearch,
-  FiClock,
-  FiEye,
-  FiTag,
+  FiArrowRight,
   FiChevronLeft,
   FiChevronRight,
-  FiArrowRight,
-  FiBookOpen,
-  FiUser,
+  FiClock,
+  FiFilm,
+  FiGrid,
+  FiPlayCircle,
+  FiTrendingUp,
 } from 'react-icons/fi';
-
-const CATEGORIES = [
-  { value: '', label: 'All' },
-  { value: 'blog', label: 'Blog' },
-  { value: 'insight', label: 'Insights' },
-  { value: 'knowledge-base', label: 'Knowledge Base' },
-  { value: 'case-study', label: 'Case Studies' },
-  { value: 'announcement', label: 'Announcements' },
-];
-
-const CATEGORY_COLORS = {
-  blog: 'bg-blue-50 text-blue-700 border-blue-200',
-  insight: 'bg-purple-50 text-purple-700 border-purple-200',
-  'knowledge-base': 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  'case-study': 'bg-amber-50 text-amber-700 border-amber-200',
-  announcement: 'bg-red-50 text-red-700 border-red-200',
-};
+import api from '../app/axios';
+import Spinner from '../components/ui/Spinner';
+import SchemaInjector from '../seo/components/SchemaInjector';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://mukonotalks.ug';
+const FALLBACK_YOUTUBE = 'https://www.youtube.com/watch?v=ETOSTwqrFyU';
+
+const resolveText = (value) => {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  return value.en || value.sw || value.zh || '';
+};
+
+const stripHtml = (value = '') =>
+  String(value)
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const toTitleCase = (value = '') =>
+  String(value)
+    .split(/[-_\s]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
+    .join(' ');
+
+const normalizeCategoryKey = (value) => {
+  if (!value) return 'general';
+  if (typeof value === 'object') {
+    return String(value.slug || value.name || value.localizedName?.en || 'general')
+      .trim()
+      .toLowerCase();
+  }
+
+  return String(value).trim().toLowerCase();
+};
+
+const resolveCategoryLabel = (value) => {
+  if (!value) return 'General';
+  if (typeof value === 'object') {
+    return resolveText(value.localizedName) || value.name || toTitleCase(value.slug) || 'General';
+  }
+  return toTitleCase(value);
+};
+
+const resolveCategorySlug = (value) => {
+  if (!value) return 'general';
+  if (typeof value === 'object') return value.slug || normalizeCategoryKey(value);
+  return String(value).trim().toLowerCase();
+};
+
+const getArticleSlug = (article) => article?.localizedSlug?.en || article?.localizedSlug || '';
+
+const getArticleTitle = (article) => resolveText(article?.title) || 'Untitled story';
+
+const getArticleExcerpt = (article) => {
+  const excerpt = stripHtml(resolveText(article?.excerpt));
+  if (excerpt) return excerpt;
+
+  const blockWithText = Array.isArray(article?.contentBlocks)
+    ? article.contentBlocks.find((block) => stripHtml(block?.data?.body || block?.data?.content || block?.data?.text))
+    : null;
+
+  const fallback = stripHtml(
+    blockWithText?.data?.body || blockWithText?.data?.content || blockWithText?.data?.text || ''
+  );
+
+  return fallback || 'Fresh reporting, analysis, and local stories from MukonoTalks.';
+};
+
+const getReadingTime = (article) => {
+  if (Number(article?.readingTime) > 0) return article.readingTime;
+  const sourceText = `${getArticleTitle(article)} ${getArticleExcerpt(article)}`.trim();
+  return Math.max(1, Math.ceil(sourceText.split(/\s+/).filter(Boolean).length / 180));
+};
+
+const formatDate = (value, options = { day: 'numeric', month: 'short', year: 'numeric' }) => {
+  if (!value) return 'Publishing soon';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return 'Publishing soon';
+  return date.toLocaleDateString('en-UG', options);
+};
+
+const getTimestamp = (value) => {
+  const timestamp = new Date(value || 0).getTime();
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+
+const toEmbedUrl = (url) => {
+  if (!url) return '';
+
+  const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  if (ytMatch) return `https://www.youtube.com/embed/${ytMatch[1]}`;
+
+  const vimeoMatch = url.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+
+  const tiktokMatch = url.match(/tiktok\.com\/.+\/video\/(\d+)/);
+  if (tiktokMatch) return `https://www.tiktok.com/embed/v2/${tiktokMatch[1]}`;
+
+  return /^https?:\/\/.+/i.test(url) ? url : '';
+};
+
+const getVideoPlatform = (url = '') => {
+  if (/youtu/i.test(url)) return 'YouTube';
+  if (/vimeo/i.test(url)) return 'Vimeo';
+  if (/tiktok/i.test(url)) return 'TikTok';
+  return 'Video';
+};
+
+const extractArticleVideos = (article) => {
+  if (!Array.isArray(article?.contentBlocks)) return [];
+
+  return article.contentBlocks
+    .filter((block) => block?.type === 'video')
+    .map((block, index) => {
+      const rawUrl =
+        block?.data?.url ||
+        block?.data?.videoUrl ||
+        block?.data?.src ||
+        block?.data?.embedUrl ||
+        '';
+      const embedUrl = toEmbedUrl(rawUrl);
+
+      if (!embedUrl) return null;
+
+      return {
+        id: `${article?._id || 'article'}-video-${index}`,
+        title: block?.data?.title || block?.data?.heading || getArticleTitle(article),
+        embedUrl,
+        sourceUrl: rawUrl,
+        platform: getVideoPlatform(rawUrl),
+        articleSlug: getArticleSlug(article),
+        articleTitle: getArticleTitle(article),
+        publishedAt: article?.publishedAt,
+      };
+    })
+    .filter(Boolean);
+};
+
+const buildCollectionSchema = (articles) => ({
+  '@context': 'https://schema.org',
+  '@type': 'CollectionPage',
+  name: 'MukonoTalks Blog',
+  url: `${BASE_URL}/blog`,
+  mainEntity: {
+    '@type': 'ItemList',
+    itemListElement: articles
+      .filter((article) => getArticleSlug(article))
+      .slice(0, 24)
+      .map((article, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        url: `${BASE_URL}/blog/${getArticleSlug(article)}`,
+        name: getArticleTitle(article),
+      })),
+  },
+});
 
 const ArticlesPage = () => {
-  const dispatch = useDispatch();
-  const { lang = 'en' } = useParams();
-  const { articles, pagination, isLoading } = useSelector((state) => state.articles);
   const [searchParams, setSearchParams] = useSearchParams();
+  const [categories, setCategories] = useState([]);
+  const [articles, setArticles] = useState([]);
+  const [cmsVideoUrl, setCmsVideoUrl] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const railRefs = useRef({});
 
-  const [search, setSearch] = useState(searchParams.get('search') || '');
-  const [category, setCategory] = useState(searchParams.get('category') || '');
-  const [tag, setTag] = useState(searchParams.get('tag') || '');
-  const [page, setPage] = useState(Number(searchParams.get('page')) || 1);
-
-  const loadArticles = useCallback(() => {
-    const params = { page, limit: 12 };
-    if (search) params.search = search;
-    if (category) params.category = category;
-    if (tag) params.tag = tag;
-    dispatch(fetchPublicArticles(params));
-  }, [dispatch, page, search, category, tag]);
+  const selectedCategory = normalizeCategoryKey(searchParams.get('category'));
 
   useEffect(() => {
-    loadArticles();
-  }, [loadArticles]);
+    let mounted = true;
 
-  /* Sync URL params */
-  useEffect(() => {
-    const params = {};
-    if (search) params.search = search;
-    if (category) params.category = category;
-    if (tag) params.tag = tag;
-    if (page > 1) params.page = page;
+    const loadBlogSummary = async () => {
+      setLoading(true);
+      setError('');
+
+      const [categoriesResult, articlesResult, videoResult] = await Promise.allSettled([
+        api.get('/categories'),
+        api.get('/articles', { params: { page: 1, limit: 120, sort: 'publishedAt' } }),
+        api.get('/homepage-sections/video'),
+      ]);
+
+      if (!mounted) return;
+
+      const categoryData =
+        categoriesResult.status === 'fulfilled' && Array.isArray(categoriesResult.value?.data?.categories)
+          ? categoriesResult.value.data.categories.filter((category) => category?.isActive !== false)
+          : [];
+
+      const articleData =
+        articlesResult.status === 'fulfilled' && Array.isArray(articlesResult.value?.data?.articles)
+          ? [...articlesResult.value.data.articles].sort(
+              (left, right) => getTimestamp(right?.publishedAt) - getTimestamp(left?.publishedAt)
+            )
+          : [];
+
+      const resolvedVideoUrl =
+        videoResult.status === 'fulfilled' ? videoResult.value?.data?.videoUrl || '' : '';
+
+      setCategories(categoryData);
+      setArticles(articleData);
+      setCmsVideoUrl(resolvedVideoUrl);
+
+      if (articleData.length === 0 && categoriesResult.status === 'rejected' && articlesResult.status === 'rejected') {
+        setError('The blog is temporarily unavailable.');
+      }
+
+      setLoading(false);
+    };
+
+    loadBlogSummary();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const categoryMetaByKey = useMemo(() => {
+    const meta = new Map();
+
+    categories.forEach((category) => {
+      const key = normalizeCategoryKey(category);
+      meta.set(key, {
+        key,
+        label: resolveCategoryLabel(category),
+        slug: resolveCategorySlug(category),
+        createdAt: category?.createdAt || category?.updatedAt || '',
+      });
+    });
+
+    articles.forEach((article) => {
+      const key = normalizeCategoryKey(article?.category);
+      if (!meta.has(key)) {
+        meta.set(key, {
+          key,
+          label: resolveCategoryLabel(article?.category),
+          slug: resolveCategorySlug(article?.category),
+          createdAt: article?.publishedAt || article?.createdAt || '',
+        });
+      }
+    });
+
+    return meta;
+  }, [articles, categories]);
+
+  const sections = useMemo(() => {
+    const grouped = new Map();
+
+    articles.forEach((article) => {
+      const slug = getArticleSlug(article);
+      if (!slug) return;
+
+      const key = normalizeCategoryKey(article?.category);
+      const meta = categoryMetaByKey.get(key) || {
+        key,
+        label: resolveCategoryLabel(article?.category),
+        slug: resolveCategorySlug(article?.category),
+        createdAt: article?.publishedAt || article?.createdAt || '',
+      };
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          ...meta,
+          articles: [],
+        });
+      }
+
+      grouped.get(key).articles.push(article);
+    });
+
+    return Array.from(grouped.values()).map((section) => {
+      const newestStoryAt = section.articles.reduce(
+        (latest, article) => Math.max(latest, getTimestamp(article?.publishedAt || article?.createdAt)),
+        0
+      );
+
+      return {
+        ...section,
+        articleCount: section.articles.length,
+        newestStoryAt,
+        sortStamp: Math.max(getTimestamp(section.createdAt), newestStoryAt),
+      };
+    });
+  }, [articles, categoryMetaByKey]);
+
+  const alphabeticalCategories = useMemo(
+    () => [...sections].sort((left, right) => left.label.localeCompare(right.label)),
+    [sections]
+  );
+
+  const orderedSections = useMemo(() => alphabeticalCategories, [alphabeticalCategories]);
+
+  const discoveredVideos = useMemo(() => {
+    const entries = [];
+    const seen = new Set();
+
+    const pushVideo = (entry) => {
+      if (!entry?.embedUrl || seen.has(entry.embedUrl)) return;
+      seen.add(entry.embedUrl);
+      entries.push(entry);
+    };
+
+    if (cmsVideoUrl) {
+      pushVideo({
+        id: 'cms-video',
+        title: 'MukonoTalks lead video bulletin',
+        embedUrl: toEmbedUrl(cmsVideoUrl),
+        sourceUrl: cmsVideoUrl,
+        platform: getVideoPlatform(cmsVideoUrl),
+        articleSlug: '',
+        articleTitle: 'Video Trending',
+        publishedAt: articles[0]?.publishedAt || '',
+      });
+    }
+
+    articles.forEach((article) => {
+      extractArticleVideos(article).forEach(pushVideo);
+    });
+
+    if (entries.length === 0) {
+      pushVideo({
+        id: 'fallback-video',
+        title: 'MukonoTalks community watch',
+        embedUrl: toEmbedUrl(FALLBACK_YOUTUBE),
+        sourceUrl: FALLBACK_YOUTUBE,
+        platform: 'YouTube',
+        articleSlug: '',
+        articleTitle: 'Video Trending',
+        publishedAt: articles[0]?.publishedAt || '',
+      });
+    }
+
+    return entries.slice(0, 6);
+  }, [articles, cmsVideoUrl]);
+
+  const leadArticle = articles[0] || null;
+  const latestUpdate = leadArticle?.publishedAt || leadArticle?.createdAt || '';
+  const collectionSchema = useMemo(() => buildCollectionSchema(articles), [articles]);
+
+  const handleCategorySelect = (key) => {
+    const params = new URLSearchParams(searchParams);
+
+    if (!key || key === 'all') {
+      params.delete('category');
+      setSearchParams(params, { replace: true });
+      return;
+    }
+
+    params.set('category', key);
     setSearchParams(params, { replace: true });
-  }, [search, category, tag, page, setSearchParams]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    setPage(1);
-    loadArticles();
+    window.requestAnimationFrame(() => {
+      document.getElementById(`category-${key}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
-  const handleCategoryChange = (cat) => {
-    setCategory(cat);
-    setPage(1);
+  const scrollRail = (key, direction) => {
+    const container = railRefs.current[key];
+    if (!container) return;
+    container.scrollBy({ left: direction * 360, behavior: 'smooth' });
   };
-
-  const handleTagClick = (t) => {
-    setTag(t);
-    setPage(1);
-  };
-
-  const clearTag = () => {
-    setTag('');
-    setPage(1);
-  };
-
-  // Split first article as featured (only on page 1 with no filters)
-  const isFirstPage = page === 1 && !search && !category && !tag;
-  const featuredArticle = isFirstPage && articles?.length > 0 ? articles[0] : null;
-  const gridArticles = isFirstPage && articles?.length > 1 ? articles.slice(1) : articles || [];
 
   return (
-    <>
+    <div className="w-full max-w-full overflow-x-hidden bg-[#f4f4f0] text-black dark:bg-black dark:text-brand-white">
       <Helmet>
-        <title>Blog &amp; Insights | MukonoTalks</title>
+        <title>Uganda News, Jobs and Celebrity Updates | MukonoTalks</title>
         <meta
           name="description"
-          content="Industry insights, technical knowledge base, case studies, and announcements from MukonoTalks — Africa's trusted industrial chemicals supplier."
+          content="Real-time updates on politics, celebrity news, jobs, campus trends and business stories across Uganda."
         />
-        <link rel="canonical" href={`${BASE_URL}/${lang}/blog`} />
-        <meta property="og:title" content="Blog & Insights | MukonoTalks" />
+        <link rel="canonical" href={`${BASE_URL}/blog`} />
+        <meta property="og:title" content="Uganda News, Jobs and Celebrity Updates | MukonoTalks" />
+        <meta property="og:description" content="Real-time updates on politics, celebrity news, jobs, campus trends and business stories across Uganda." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content={`${BASE_URL}/${lang}/blog`} />
+        <meta property="og:url" content={`${BASE_URL}/blog`} />
       </Helmet>
 
-      {/* ── Hero Banner ──────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-br from-slate-900 via-slate-800 to-primary-900 text-white">
-        <div className="container mx-auto px-4 py-16 sm:py-20">
-          <Reveal variant="fade-up">
-            <div className="max-w-3xl mx-auto text-center">
-              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-1.5 text-sm mb-6">
-                <FiBookOpen className="h-4 w-4 text-primary-300" />
-                <span className="text-slate-200">Knowledge Hub</span>
-              </div>
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 leading-tight">
-                Blog &amp; Industry Insights
-              </h1>
-              <p className="text-slate-300 text-lg max-w-2xl mx-auto leading-relaxed">
-                Technical guides, market analysis, case studies, and the latest
-                news from Africa&apos;s trusted industrial chemicals supplier.
-              </p>
-            </div>
-          </Reveal>
+      <SchemaInjector schemas={collectionSchema} />
 
-          {/* Search bar in hero */}
-          <Reveal variant="fade-up" delay={150}>
-            <form onSubmit={handleSearch} className="max-w-xl mx-auto mt-8 relative">
-              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 h-5 w-5" />
-              <input
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search articles, topics, or keywords..."
-                className="w-full pl-12 pr-24 py-3.5 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white placeholder-slate-400 focus:ring-2 focus:ring-primary-400 focus:border-transparent text-sm"
-              />
-              <button
-                type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-primary-500 hover:bg-primary-400 text-white px-5 py-2 rounded-full text-sm font-medium transition-colors"
-              >
-                Search
-              </button>
-            </form>
-          </Reveal>
+      <section className="relative overflow-hidden border-b border-white/10 bg-black text-brand-white">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.16),_transparent_38%),radial-gradient(circle_at_bottom_right,_rgba(255,255,255,0.08),_transparent_32%)]" />
+        <div className="relative mx-auto grid w-full max-w-7xl gap-8 px-4 py-12 sm:py-16 lg:grid-cols-[1.35fr_0.85fr] lg:items-end">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-brand-white/55">MukonoTalks Blog </p>
+            <h1 className="mt-4 max-w-4xl font-display text-4xl font-bold leading-tight text-brand-white sm:text-5xl lg:text-6xl">
+              Uganda News, Jobs and Celebrity Updates | MukonoTalks
+            </h1>
+            <p className="mt-5 max-w-3xl text-base leading-7 text-brand-white/72 sm:text-lg">
+              Real-time updates on politics, celebrity news, jobs, campus trends and business stories across Uganda.
+            </p>
+
+            <div className="mt-8 grid gap-3 sm:grid-cols-3">
+              <StatCard icon={FiGrid} label="Published stories" value={articles.length.toString()} />
+              <StatCard icon={FiTrendingUp} label="Active categories" value={sections.length.toString()} />
+              <StatCard icon={FiFilm} label="Video Current items" value={discoveredVideos.length.toString()} />
+            </div>
+          </div>
+
+          <aside className="rounded-[28px] border border-white/15 bg-white/8 p-6 shadow-glow backdrop-blur-sm">
+            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-brand-white/45">Latest bulletin</p>
+            <p className="mt-3 text-sm text-brand-white/68">
+              {latestUpdate ? `Updated ${formatDate(latestUpdate)}` : 'Waiting for the next dispatch'}
+            </p>
+            {leadArticle ? (
+              <Link to={`/blog/${getArticleSlug(leadArticle)}`} className="group mt-5 block rounded-[24px] border border-white/12 bg-black/40 p-5 transition hover:border-white/28 hover:bg-black/55">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-white/45">
+                  {resolveCategoryLabel(leadArticle?.category)}
+                </p>
+                <h2 className="mt-3 text-2xl font-semibold leading-tight text-brand-white">
+                  {getArticleTitle(leadArticle)}
+                </h2>
+                <p className="mt-3 line-clamp-3 text-sm leading-6 text-brand-white/70">
+                  {getArticleExcerpt(leadArticle)}
+                </p>
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand-white transition group-hover:gap-3">
+                  Open lead story <FiArrowRight className="h-4 w-4" />
+                </span>
+              </Link>
+            ) : (
+              <div className="mt-5 rounded-[24px] border border-white/12 bg-black/35 p-5 text-sm text-brand-white/65">
+                Published stories will appear here once the blog is active.
+              </div>
+            )}
+          </aside>
         </div>
       </section>
 
-      {/* ── Category Tabs + Tag Filter ───────────────────────────────── */}
-      <div className="border-b border-gray-200 bg-white sticky top-0 z-20">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-1 overflow-x-auto py-3 scrollbar-none -mx-4 px-4 sm:mx-0 sm:px-0 sm:justify-center">
-            {CATEGORIES.map((cat) => (
+      <section className="border-b border-black/10 bg-white/90 py-6 dark:border-white/10 dark:bg-[#0b0b0b]">
+        <div className="mx-auto w-full max-w-7xl px-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => handleCategorySelect('all')}
+              className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                !searchParams.get('category')
+                  ? 'border-black bg-black text-brand-white dark:border-white dark:bg-white dark:text-black'
+                  : 'border-black/15 bg-transparent text-black hover:border-black dark:border-white/15 dark:text-brand-white dark:hover:border-white/45'
+              }`}
+            >
+              All categories
+            </button>
+            {alphabeticalCategories.map((section) => (
               <button
-                key={cat.value}
-                onClick={() => handleCategoryChange(cat.value)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
-                  category === cat.value
-                    ? 'bg-primary-600 text-white shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                key={section.key}
+                type="button"
+                onClick={() => handleCategorySelect(section.key)}
+                className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                  selectedCategory === section.key
+                    ? 'border-black bg-black text-brand-white dark:border-white dark:bg-white dark:text-black'
+                    : 'border-black/15 bg-transparent text-black hover:border-black dark:border-white/15 dark:text-brand-white dark:hover:border-white/45'
                 }`}
               >
-                {cat.label}
+                {section.label} <span className="opacity-60">{section.articleCount}</span>
               </button>
             ))}
           </div>
-
-          {tag && (
-            <div className="flex justify-center pb-3">
-              <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-primary-50 text-primary-700 border border-primary-200 rounded-full text-sm">
-                <FiTag className="h-3.5 w-3.5" />
-                Tag: <strong>{tag}</strong>
-                <button
-                  onClick={clearTag}
-                  className="ml-1 hover:text-primary-900 font-bold"
-                >
-                  ×
-                </button>
-              </span>
-            </div>
-          )}
         </div>
-      </div>
+      </section>
 
-      {/* ── Content ──────────────────────────────────────────────────── */}
-      <div className="bg-gray-50 min-h-[50vh]">
-        <div className="container mx-auto px-4 py-10">
-          {isLoading ? (
-            <div className="flex justify-center py-20">
-              <Spinner size="lg" />
-            </div>
-          ) : !articles || articles.length === 0 ? (
-            <div className="text-center py-20">
-              <div className="w-16 h-16 bg-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <FiBookOpen className="w-8 h-8 text-gray-400" />
-              </div>
-              <p className="text-gray-600 text-lg font-medium mb-2">No articles found</p>
-              <p className="text-gray-400 text-sm">
-                Try adjusting your search or filters to find what you&apos;re looking for.
-              </p>
-            </div>
-          ) : (
-            <>
-              {/* Featured article (first page only, no filters) */}
-              {featuredArticle && (
-                <Reveal variant="fade-up">
-                  <FeaturedCard article={featuredArticle} lang={lang} onTagClick={handleTagClick} />
-                </Reveal>
-              )}
-
-              {/* Article Grid */}
-              {gridArticles.length > 0 && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-                  <StaggerReveal stagger={60}>
-                    {gridArticles.map((article) => (
-                      <ArticleCard
-                        key={article._id}
-                        article={article}
-                        lang={lang}
-                        onTagClick={handleTagClick}
-                      />
-                    ))}
-                  </StaggerReveal>
-                </div>
-              )}
-
-              {/* Pagination */}
-              {pagination && pagination.totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-12">
-                  <button
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                    className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium bg-white border border-gray-200 rounded-lg shadow-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-                  >
-                    <FiChevronLeft className="h-4 w-4" /> Previous
-                  </button>
-
-                  {/* Page numbers */}
-                  <div className="hidden sm:flex items-center gap-1">
-                    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
-                      .filter((p) => p === 1 || p === pagination.totalPages || Math.abs(p - page) <= 1)
-                      .reduce((acc, p, idx, arr) => {
-                        if (idx > 0 && p - arr[idx - 1] > 1) acc.push('...');
-                        acc.push(p);
-                        return acc;
-                      }, [])
-                      .map((item, idx) =>
-                        item === '...' ? (
-                          <span key={`ellipsis-${idx}`} className="px-2 text-gray-400 text-sm">...</span>
-                        ) : (
-                          <button
-                            key={item}
-                            onClick={() => setPage(item)}
-                            className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
-                              page === item
-                                ? 'bg-primary-600 text-white shadow-sm'
-                                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
-                            }`}
-                          >
-                            {item}
-                          </button>
-                        )
-                      )}
+      <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:py-12">
+        {loading ? (
+          <div className="flex min-h-[45vh] items-center justify-center">
+            <Spinner size="lg" />
+          </div>
+        ) : error ? (
+          <div className="rounded-[28px] border border-black/10 bg-white p-8 text-center shadow-card dark:border-white/10 dark:bg-[#0f0f0f]">
+            <p className="text-lg font-semibold">{error}</p>
+            <p className="mt-2 text-sm text-black/65 dark:text-brand-white/65">
+              Refresh the page or verify the publishing API is reachable.
+            </p>
+          </div>
+        ) : articles.length === 0 ? (
+          <div className="rounded-[28px] border border-black/10 bg-white p-8 text-center shadow-card dark:border-white/10 dark:bg-[#0f0f0f]">
+            <p className="text-lg font-semibold">No published stories yet.</p>
+            <p className="mt-2 text-sm text-black/65 dark:text-brand-white/65">
+              As soon as the Editorial team publishes content, this page will assemble the full summary automatically.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-10">
+            {orderedSections.map((section, index) => (
+              <section
+                key={section.key}
+                id={`category-${section.key}`}
+                className="rounded-[32px] border border-black/10 bg-black px-5 py-6 text-brand-white shadow-card sm:px-6 lg:px-8"
+              >
+                <div className="flex flex-col gap-4 border-b border-white/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
+                  <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-brand-white/45">
+                      {index === 0 ? 'A-Z category order' : 'Category summary'}
+                    </p>
+                    <h2 className="mt-2 text-2xl font-semibold text-brand-white sm:text-3xl">{section.label}</h2>
+                    <p className="mt-2 text-sm text-brand-white/65">
+                      {section.articleCount} published stories. Latest update {formatDate(section.newestStoryAt)}.
+                    </p>
                   </div>
 
-                  <span className="sm:hidden text-sm text-gray-500">
-                    {pagination.page} / {pagination.totalPages}
-                  </span>
-
-                  <button
-                    onClick={() => setPage((p) => Math.min(pagination.totalPages, p + 1))}
-                    disabled={page === pagination.totalPages}
-                    className="flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium bg-white border border-gray-200 rounded-lg shadow-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors"
-                  >
-                    Next <FiChevronRight className="h-4 w-4" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => scrollRail(section.key, -1)}
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-brand-white transition hover:border-white/40 hover:bg-white/12"
+                      aria-label={`Scroll ${section.label} left`}
+                    >
+                      <FiChevronLeft className="h-5 w-5" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => scrollRail(section.key, 1)}
+                      className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/5 text-brand-white transition hover:border-white/40 hover:bg-white/12"
+                      aria-label={`Scroll ${section.label} right`}
+                    >
+                      <FiChevronRight className="h-5 w-5" />
+                    </button>
+                  </div>
                 </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-    </>
-  );
-};
 
-/* ─── Featured Article Card (Hero-style, first article on page 1) ──── */
-const FeaturedCard = ({ article, lang, onTagClick }) => {
-  const slug = article.localizedSlug?.[lang] || article.localizedSlug?.en || article.localizedSlug;
-  const title = article.title?.[lang] || article.title?.en || article.title || 'Untitled';
-  const excerpt = article.excerpt?.[lang] || article.excerpt?.en || article.excerpt || '';
-  const categoryClass = CATEGORY_COLORS[article.category] || 'bg-gray-50 text-gray-600 border-gray-200';
-  const categoryLabel = CATEGORIES.find((c) => c.value === article.category)?.label || article.category;
-
-  return (
-    <Link
-      to={`/${lang}/blog/${slug}`}
-      className="block bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow group border border-gray-100"
-    >
-      <div className="grid md:grid-cols-2 gap-0">
-        {/* Image */}
-        <div className="h-56 md:h-full min-h-[280px] overflow-hidden bg-gray-100">
-          {article.featuredImage ? (
-            <img
-              src={article.featuredImage}
-              alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              loading="eager"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary-50 to-primary-100">
-              <FiBookOpen className="w-16 h-16 text-primary-300" />
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className="p-6 sm:p-8 flex flex-col justify-center">
-          <div className="flex items-center gap-3 mb-4">
-            <span className={`px-3 py-1 text-xs font-semibold rounded-full border ${categoryClass}`}>
-              {categoryLabel}
-            </span>
-            {article.readingTime > 0 && (
-              <span className="text-xs text-gray-400 flex items-center gap-1">
-                <FiClock className="h-3 w-3" />
-                {article.readingTime} min read
-              </span>
-            )}
-          </div>
-
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 group-hover:text-primary-600 transition-colors leading-snug">
-            {title}
-          </h2>
-
-          {excerpt && (
-            <p className="text-gray-500 mb-5 leading-relaxed line-clamp-3">
-              {excerpt}
-            </p>
-          )}
-
-          <div className="flex items-center justify-between mt-auto">
-            <div className="flex items-center gap-4 text-xs text-gray-400">
-              {article.author?.name && (
-                <span className="flex items-center gap-1">
-                  <FiUser className="h-3.5 w-3.5" />
-                  {article.author.name}
-                </span>
-              )}
-              {article.publishedAt && (
-                <span className="flex items-center gap-1">
-                  <FiClock className="h-3.5 w-3.5" />
-                  {new Date(article.publishedAt).toLocaleDateString('en-ZA', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                  })}
-                </span>
-              )}
-            </div>
-            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-primary-600 group-hover:gap-2.5 transition-all">
-              Read Article <FiArrowRight className="h-4 w-4" />
-            </span>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-};
-
-/* ─── Article Card Component ─────────────────────── */
-const ArticleCard = ({ article, lang, onTagClick }) => {
-  const slug = article.localizedSlug?.[lang] || article.localizedSlug?.en || article.localizedSlug;
-  const title = article.title?.[lang] || article.title?.en || article.title || 'Untitled';
-  const excerpt = article.excerpt?.[lang] || article.excerpt?.en || article.excerpt || '';
-  const categoryClass = CATEGORY_COLORS[article.category] || 'bg-gray-50 text-gray-600 border-gray-200';
-  const categoryLabel = CATEGORIES.find((c) => c.value === article.category)?.label || article.category;
-
-  return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-all group border border-gray-100 flex flex-col">
-      {/* Featured Image */}
-      <Link to={`/${lang}/blog/${slug}`} className="block">
-        <div className="h-48 overflow-hidden bg-gray-100">
-          {article.featuredImage ? (
-            <img
-              src={article.featuredImage}
-              alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              loading="lazy"
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100">
-              <FiBookOpen className="w-10 h-10 text-gray-300" />
-            </div>
-          )}
-        </div>
-      </Link>
-
-      <div className="p-5 flex flex-col flex-1">
-        {/* Category + Reading time */}
-        <div className="flex items-center gap-2 mb-3">
-          <span className={`px-2.5 py-0.5 text-[11px] font-semibold rounded-full border ${categoryClass}`}>
-            {categoryLabel}
-          </span>
-          {article.readingTime > 0 && (
-            <span className="text-[11px] text-gray-400 flex items-center gap-1">
-              <FiClock className="h-3 w-3" />
-              {article.readingTime} min
-            </span>
-          )}
-        </div>
-
-        {/* Title */}
-        <Link to={`/${lang}/blog/${slug}`}>
-          <h2 className="text-base font-bold text-gray-900 mb-2 group-hover:text-primary-600 transition-colors line-clamp-2 leading-snug">
-            {title}
-          </h2>
-        </Link>
-
-        {/* Excerpt */}
-        {excerpt && (
-          <p className="text-sm text-gray-500 mb-4 line-clamp-2 leading-relaxed flex-1">
-            {excerpt}
-          </p>
-        )}
-
-        {/* Tags */}
-        {article.tags && article.tags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mb-4">
-            {article.tags.slice(0, 3).map((t) => (
-              <button
-                key={t}
-                onClick={(e) => {
-                  e.preventDefault();
-                  onTagClick(t);
-                }}
-                className="px-2 py-0.5 text-[11px] bg-gray-50 text-gray-500 rounded-full hover:bg-primary-50 hover:text-primary-600 transition-colors border border-gray-100"
-              >
-                #{t}
-              </button>
+                <div
+                  ref={(node) => {
+                    railRefs.current[section.key] = node;
+                  }}
+                  className="mt-6 flex gap-4 overflow-x-auto pb-2"
+                >
+                  {section.articles.map((article) => (
+                    <ArticleRailCard key={article._id || getArticleSlug(article)} article={article} />
+                  ))}
+                </div>
+              </section>
             ))}
-            {article.tags.length > 3 && (
-              <span className="px-2 py-0.5 text-[11px] text-gray-400">
-                +{article.tags.length - 3}
-              </span>
-            )}
+
+            <section className="rounded-[32px] border border-black/10 bg-white p-5 shadow-card dark:border-white/10 dark:bg-[#0d0d0d] sm:p-6 lg:p-8">
+              <div className="grid gap-6 lg:grid-cols-[1.2fr_0.8fr]">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-black/45 dark:text-brand-white/45">Video</p>
+                  <h2 className="mt-2 text-3xl font-semibold">Published video watchlist</h2>
+                  <p className="mt-3 max-w-2xl text-sm leading-6 text-black/65 dark:text-brand-white/65">
+                    A compact video summary pulled from the MukonoTalks publishing stack, led by the active CMS feature and extended with article video embeds when they exist.
+                  </p>
+
+                  <div className="mt-6 overflow-hidden rounded-[28px] border border-black/10 bg-black shadow-card dark:border-white/10">
+                    <div className="aspect-video w-full bg-black">
+                      <iframe
+                        className="h-full w-full"
+                        src={discoveredVideos[0]?.embedUrl}
+                        title={discoveredVideos[0]?.title || 'MukonoTalks video'}
+                        loading="lazy"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                      />
+                    </div>
+                    <div className="border-t border-white/10 px-5 py-4 text-brand-white">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.28em] text-brand-white/45">
+                        {discoveredVideos[0]?.platform || 'Video'}
+                      </p>
+                      <h3 className="mt-2 text-xl font-semibold text-brand-white">
+                        {discoveredVideos[0]?.title || 'MukonoTalks video watch'}
+                      </h3>
+                      <p className="mt-2 text-sm text-brand-white/65">
+                        {discoveredVideos[0]?.articleTitle || 'Editorial video feature'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {discoveredVideos.slice(1).map((video) => (
+                    <VideoSummaryCard key={video.id} video={video} />
+                  ))}
+
+                  {discoveredVideos.length === 1 && (
+                    <div className="rounded-[24px] border border-black/10 bg-[#f5f5f0] p-5 text-sm text-black/65 dark:border-white/10 dark:bg-black/40 dark:text-brand-white/65">
+                      More embedded video cards will appear here as editors publish video blocks into articles.
+                    </div>
+                  )}
+                </div>
+              </div>
+            </section>
           </div>
         )}
-
-        {/* Footer: Author + Date + Read More */}
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-auto">
-          <div className="flex items-center gap-3 text-xs text-gray-400">
-            {article.author?.name && (
-              <span className="flex items-center gap-1 font-medium text-gray-500">
-                <FiUser className="h-3 w-3" />
-                {article.author.name}
-              </span>
-            )}
-            {article.publishedAt && (
-              <span>
-                {new Date(article.publishedAt).toLocaleDateString('en-ZA', {
-                  day: 'numeric',
-                  month: 'short',
-                })}
-              </span>
-            )}
-            {article.viewCount > 0 && (
-              <span className="flex items-center gap-1">
-                <FiEye className="h-3 w-3" /> {article.viewCount.toLocaleString()}
-              </span>
-            )}
-          </div>
-
-          <Link
-            to={`/${lang}/blog/${slug}`}
-            className="text-xs font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1 group-hover:gap-1.5 transition-all"
-          >
-            Read <FiArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
       </div>
     </div>
   );
 };
 
-export default ArticlesPage;
+const StatCard = ({ icon: Icon, label, value }) => (
+  <div className="rounded-[24px] border border-white/12 bg-white/6 px-5 py-4 backdrop-blur-sm">
+    <Icon className="h-5 w-5 text-brand-white/72" />
+    <p className="mt-4 text-3xl font-semibold text-brand-white">{value}</p>
+    <p className="mt-1 text-sm text-brand-white/58">{label}</p>
+  </div>
+);
 
-// MukonoTalks
+const ArticleRailCard = ({ article }) => {
+  const slug = getArticleSlug(article);
+  const title = getArticleTitle(article);
+  const excerpt = getArticleExcerpt(article);
+  const image = article?.featuredImage;
+
+  return (
+    <article className="min-w-[280px] max-w-[280px] flex-shrink-0 overflow-hidden rounded-[26px] border border-white/10 bg-white text-black shadow-card transition hover:-translate-y-1 hover:shadow-glow dark:bg-[#f3f3ef]">
+      <Link to={`/blog/${slug}`} className="block">
+        <div className="h-44 w-full overflow-hidden bg-[#d9d9d4]">
+          {image ? (
+            <img
+              src={image}
+              alt={title}
+              className="h-full w-full object-cover transition duration-500 hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full items-center justify-center bg-[linear-gradient(135deg,#dcdcd6,#bcbcb5)] text-black/45">
+              <FiGrid className="h-10 w-10" />
+            </div>
+          )}
+        </div>
+      </Link>
+
+      <div className="flex h-[230px] flex-col px-5 py-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-black/45">
+          {resolveCategoryLabel(article?.category)}
+        </p>
+        <Link to={`/blog/${slug}`}>
+          <h3 className="mt-2 line-clamp-3 text-lg font-semibold leading-snug">{title}</h3>
+        </Link>
+        <p className="mt-3 line-clamp-3 text-sm leading-6 text-black/68">{excerpt}</p>
+
+        <div className="mt-auto flex items-center justify-between border-t border-black/10 pt-4 text-xs text-black/58">
+          <span className="inline-flex items-center gap-1.5">
+            <FiClock className="h-3.5 w-3.5" />
+            {getReadingTime(article)} min
+          </span>
+          <span>{formatDate(article?.publishedAt, { day: 'numeric', month: 'short' })}</span>
+        </div>
+      </div>
+    </article>
+  );
+};
+
+const VideoSummaryCard = ({ video }) => (
+  <article className="rounded-[24px] border border-black/10 bg-[#f5f5f0] p-5 shadow-card dark:border-white/10 dark:bg-black/40">
+    <div className="flex items-start gap-3">
+      <span className="inline-flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-black text-brand-white dark:bg-white dark:text-black">
+        <FiPlayCircle className="h-5 w-5" />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.25em] text-black/45 dark:text-brand-white/45">{video.platform}</p>
+        <h3 className="mt-2 line-clamp-2 text-lg font-semibold">{video.title}</h3>
+        <p className="mt-1 text-sm text-black/65 dark:text-brand-white/65">{video.articleTitle}</p>
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-black/55 dark:text-brand-white/55">
+          <span>{formatDate(video.publishedAt, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+          {video.articleSlug ? (
+            <Link to={`/blog/${video.articleSlug}`} className="inline-flex items-center gap-1 font-semibold text-black transition hover:gap-2 dark:text-brand-white">
+              Open article <FiArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          ) : (
+            <a
+              href={video.sourceUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1 font-semibold text-black transition hover:gap-2 dark:text-brand-white"
+            >
+              Watch source <FiArrowRight className="h-3.5 w-3.5" />
+            </a>
+          )}
+        </div>
+      </div>
+    </div>
+  </article>
+);
+
+export default ArticlesPage;
 

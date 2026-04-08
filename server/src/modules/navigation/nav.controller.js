@@ -8,10 +8,10 @@ const NavItem = require('./nav.model');
 
 /* ─── Default seed data ─────────────────────────────────────── */
 const DEFAULT_NAV = [
-  { label: 'Home',      href: '/',         order: 0, isVisible: true,  isExternal: false, icon: 'Home' },
-  { label: 'Products',  href: '/products', order: 1, isVisible: true,  isExternal: false, icon: 'Package' },
-  { label: 'About Us',  href: '/about',    order: 2, isVisible: true,  isExternal: false, icon: 'Info' },
-  { label: 'Blog',      href: '/blog',     order: 3, isVisible: true,  isExternal: false, icon: 'BookOpen' },
+  { label: 'Home',      href: '/',         order: 0, isVisible: true,  isExternal: false, icon: 'Home', iconPosition: 'before', textWeight: 'medium' },
+  { label: 'Products',  href: '/products', order: 1, isVisible: true,  isExternal: false, icon: 'Package', iconPosition: 'before', textWeight: 'medium' },
+  { label: 'About Us',  href: '/about',    order: 2, isVisible: true,  isExternal: false, icon: 'Info', iconPosition: 'before', textWeight: 'medium' },
+  { label: 'Blog',      href: '/blog',     order: 3, isVisible: true,  isExternal: false, icon: 'BookOpen', iconPosition: 'before', textWeight: 'medium' },
 ];
 
 /* ─── GET /api/navigation — public visible items ───────────── */
@@ -66,6 +66,8 @@ exports.bulkUpdate = async (req, res, next) => {
       openInNewTab: item.openInNewTab !== undefined ? item.openInNewTab : false,
       isExternal:  item.isExternal  !== undefined ? item.isExternal  : false,
       icon:        item.icon       || '',
+      iconPosition: item.iconPosition === 'after' ? 'after' : 'before',
+      textWeight: ['normal', 'medium', 'semibold', 'bold'].includes(item.textWeight) ? item.textWeight : 'medium',
     }));
 
     const created = await NavItem.insertMany(payload);
