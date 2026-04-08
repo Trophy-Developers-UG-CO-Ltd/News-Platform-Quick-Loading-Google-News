@@ -62,7 +62,7 @@ const Mukono11Login = () => {
           <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-accent-blue/10 ring-1 ring-accent-blue/30">
             <FiShield className="h-7 w-7 text-accent-blue" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-brand-white">
+          <h1 className="font-display text-2xl font-bold text-text-primary">
             MukonoTalks Portal
           </h1>
           <p className="mt-1 text-sm text-text-muted">
@@ -131,7 +131,7 @@ const Mukono11Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="btn-primary w-full flex items-center justify-center gap-2 py-3"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-[26px] bg-[#111111] text-brand-white hover:bg-[#262626] dark:bg-[#f4f4f4] dark:text-[#0a0a0a] dark:hover:bg-[#e5e5e5] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-dark-border focus:ring-offset-2 focus:ring-offset-dark-charcoal disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
