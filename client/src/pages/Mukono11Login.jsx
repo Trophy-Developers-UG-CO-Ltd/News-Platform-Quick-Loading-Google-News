@@ -55,14 +55,14 @@ const Mukono11Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-dark-900 px-4 py-16">
+    <div className="min-h-screen flex items-center justify-center bg-light-body dark:bg-dark-charcoal px-4 py-16">
       <div className="w-full max-w-sm">
         {/* Header */}
         <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-accent-blue/10 ring-1 ring-accent-blue/30">
-            <FiShield className="h-7 w-7 text-accent-blue" />
+          <div className="mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-full bg-[#0a0a0a]/10 ring-1 ring-[#0a0a0a]/25 dark:bg-[#f4f4f4]/10 dark:ring-[#f4f4f4]/25">
+            <FiShield className="h-7 w-7 text-[#0a0a0a] dark:text-[#f4f4f4]" />
           </div>
-          <h1 className="font-display text-2xl font-bold text-text-primary">
+          <h1 className="font-display text-2xl font-bold text-[#0a0a0a] dark:text-[#f4f4f4]">
             MukonoTalks Portal
           </h1>
           <p className="mt-1 text-sm text-text-muted">
@@ -82,7 +82,7 @@ const Mukono11Login = () => {
                 Email address
               </label>
               <div className="relative">
-                <FiMail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+                <FiMail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#52525b] dark:text-[#a1a1aa]" />
                 <input
                   id="mt11-email"
                   type="email"
@@ -105,7 +105,7 @@ const Mukono11Login = () => {
                 Password
               </label>
               <div className="relative">
-                <FiLock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-muted" />
+                <FiLock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#52525b] dark:text-[#a1a1aa]" />
                 <input
                   id="mt11-password"
                   type={showPw ? 'text' : 'password'}
@@ -119,7 +119,7 @@ const Mukono11Login = () => {
                 <button
                   type="button"
                   onClick={() => setShowPw((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-text-muted hover:text-brand-white transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-[#52525b] hover:text-[#0a0a0a] dark:text-[#a1a1aa] dark:hover:text-[#f4f4f4] transition-colors"
                   aria-label={showPw ? 'Hide password' : 'Show password'}
                 >
                   {showPw ? 'Hide' : 'Show'}
@@ -131,7 +131,7 @@ const Mukono11Login = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-[26px] bg-[#111111] text-brand-white hover:bg-[#262626] dark:bg-[#f4f4f4] dark:text-[#0a0a0a] dark:hover:bg-[#e5e5e5] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-dark-border focus:ring-offset-2 focus:ring-offset-dark-charcoal disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-[26px] bg-[#0a0a0a] text-[#ffffff] hover:bg-[#262626] dark:bg-[#f4f4f4] dark:text-[#0a0a0a] dark:hover:bg-[#e5e5e5] transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-dark-border focus:ring-offset-2 focus:ring-offset-light-body dark:focus:ring-offset-dark-charcoal disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <>
