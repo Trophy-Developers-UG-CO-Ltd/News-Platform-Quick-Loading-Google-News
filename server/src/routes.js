@@ -1,6 +1,7 @@
 ﻿const express = require('express');
 const router = express.Router();
 
+const authRoutes = require('./modules/auth/auth.routes');
 const contactRoutes = require('./modules/contact/contact.routes');
 const categoryRoutes = require('./modules/categories/category.routes');
 const pageRoutes = require('./modules/pages/page.routes');
@@ -28,6 +29,7 @@ const siteSettingsRoutes  = require('./modules/site-settings/siteSettings.routes
 const maintenanceRoutes   = require('./modules/maintenance/maintenance.routes');
 const advertiseInquiryRoutes = require('./modules/advertise-inquiries/advertiseInquiry.routes');
 
+router.use('/auth', authRoutes);
 router.use('/contact', contactRoutes);
 router.use('/categories', categoryRoutes);
 router.use('/pages', pageRoutes);

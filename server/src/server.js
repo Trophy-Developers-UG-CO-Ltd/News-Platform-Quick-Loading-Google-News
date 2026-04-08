@@ -26,6 +26,7 @@ const { languageMiddleware } = require("./middlewares/language.middleware");
 const { maintenanceMiddleware } = require("./middlewares/maintenance.middleware");
 
 const routes = require("./routes");
+const authRoutes = require("./modules/auth/auth.routes");
 
 // Validate environment variables
 validateEnv();
@@ -299,6 +300,7 @@ app.use(maintenanceMiddleware);
 // ─────────────────────────────────────────
 app.use(languageMiddleware);
 app.use("/api", routes);
+app.use("/auth", authRoutes);
 
 // ─────────────────────────────────────────
 // Health Check
