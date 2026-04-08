@@ -2,16 +2,27 @@
 import { Routes, Route } from 'react-router-dom';
 import Spinner from '../components/ui/Spinner';
 import AdminRoute from '../components/protected/AdminRoute';
+import ProtectedRoute from '../components/protected/ProtectedRoute';
 import AdminLayout from '../components/layout/AdminLayout';
 
 const Home = lazy(() => import('../pages/MukonoHome'));
+const Dashboard = lazy(() => import('../pages/Dashboard'));
 const LoginPage = lazy(() => import('../pages/Login'));
+const RegisterPage = lazy(() => import('../pages/Register'));
+const ContactUsPage = lazy(() => import('../pages/ContactUs'));
+const PrivacyPolicyPage = lazy(() => import('../pages/PrivacyPolicy'));
+const TermsConditionsPage = lazy(() => import('../pages/TermsConditions'));
+const TranslatorPage = lazy(() => import('../pages/TranslatorPage'));
+const MaintenancePage = lazy(() => import('../pages/MaintenancePage'));
 const NewsPage = lazy(() => import('../pages/NewsPage'));
 const NewsArticlePage = lazy(() => import('../pages/NewsArticlePage'));
 const LocalUpdatesPage = lazy(() => import('../pages/LocalUpdatesPage'));
 const EntertainmentPage = lazy(() => import('../pages/EntertainmentPage'));
 const VideosPage = lazy(() => import('../pages/VideosPage'));
 const AdvertisePage = lazy(() => import('../pages/AdvertisePage'));
+const ArticlesPage = lazy(() => import('../pages/ArticlesPage'));
+const ArticlePage = lazy(() => import('../pages/ArticlePage'));
+const DynamicPage = lazy(() => import('../pages/DynamicPage'));
 
 const AdminDashboard = lazy(() => import('../pages/admin/AdminDashboard'));
 const AdminUsers = lazy(() => import('../pages/admin/AdminUsers'));
@@ -56,10 +67,26 @@ const AppRoutes = () => {
     <Suspense fallback={<SuspenseFallback />}>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route
+          path="/dashboard"
+          element={(
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          )}
+        />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
         <Route path="/mukono11login" element={<Mukono11Login />} />
+        <Route path="/contact" element={<ContactUsPage />} />
+        <Route path="/privacy" element={<PrivacyPolicyPage />} />
+        <Route path="/terms" element={<TermsConditionsPage />} />
+        <Route path="/translator" element={<TranslatorPage />} />
+        <Route path="/maintenance" element={<MaintenancePage />} />
         <Route path="/news" element={<NewsPage />} />
         <Route path="/news/:slug" element={<NewsArticlePage />} />
+        <Route path="/blog" element={<ArticlesPage />} />
+        <Route path="/blog/:slug" element={<ArticlePage />} />
         <Route path="/local" element={<LocalUpdatesPage />} />
         <Route path="/entertainment" element={<EntertainmentPage />} />
         <Route path="/videos" element={<VideosPage />} />
@@ -104,6 +131,7 @@ const AppRoutes = () => {
           <Route path="*" element={<NotFound />} />
         </Route>
 
+        <Route path="/:slug" element={<DynamicPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

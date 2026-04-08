@@ -11,12 +11,12 @@
 
 import React from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
-import { TriangleAlert, RotateCcw } from 'lucide-react';
+import { TriangleAlert, X } from 'lucide-react';
 
 function ErrorFallback({ error, resetErrorBoundary }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-dark-charcoal px-4">
-      <div className="w-full max-w-md rounded-2xl border border-dark-border bg-dark-slate p-10 text-center shadow-card">
+    <div className="flex min-h-screen items-center justify-center bg-light-body px-4 dark:bg-dark-charcoal">
+      <div className="w-full max-w-md rounded-2xl border border-dark-border bg-light-surface p-10 text-center shadow-card dark:bg-dark-slate">
         <div className="mb-5 flex justify-center text-accent-orange">
           <TriangleAlert size={64} strokeWidth={1.5} />
         </div>
@@ -32,9 +32,9 @@ function ErrorFallback({ error, resetErrorBoundary }) {
         </p>
         <button
           onClick={resetErrorBoundary}
-          className="inline-flex items-center justify-center gap-2 rounded-none bg-accent-blue px-8 py-3 font-semibold text-text-primary transition-all hover:bg-category-news active:scale-95"
+          className="inline-flex items-center justify-center gap-2 rounded-none bg-black px-8 py-3 font-semibold text-brand-white transition-all hover:bg-[#1f1f1f] active:scale-95 dark:bg-brand-white dark:text-black dark:hover:bg-[#e9e9e9]"
         >
-          <RotateCcw size={16} /> Try Again
+          <X size={16} /> Try Again
         </button>
       </div>
     </div>

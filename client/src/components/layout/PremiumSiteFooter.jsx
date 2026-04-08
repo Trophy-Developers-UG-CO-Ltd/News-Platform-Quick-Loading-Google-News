@@ -23,7 +23,7 @@ const SOCIAL_LINKS = [
   },
   {
     label: 'Facebook',
-    href: 'https://www.facebook.com/mukonotalks',
+    href: 'https://www.facebook.com/profile.php?id=61571129277548',
     Icon: FaFacebookF,
   },
   {

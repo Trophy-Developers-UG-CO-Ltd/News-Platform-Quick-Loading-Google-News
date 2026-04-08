@@ -1,5 +1,4 @@
 ﻿import React, { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
 import AppRoutes from './app/routes';
@@ -10,8 +9,6 @@ import { loadUser } from './features/auth/authSlice';
 
 const App = () => {
   const dispatch = useDispatch();
-  const { pathname } = useLocation();
-  const isHomeRoute = pathname === '/';
 
   useEffect(() => {
     dispatch(loadUser());
@@ -20,9 +17,7 @@ const App = () => {
   return (
     <div className="flex min-h-screen w-full max-w-full flex-col bg-light-body text-text-light-primary dark:bg-dark-charcoal dark:text-text-dark-primary">
       <AdSenseScript />
-      {!isHomeRoute && (
-        <PremiumSiteHeader />
-      )}
+      <PremiumSiteHeader />
       <main className="flex-grow">
         <AppRoutes />
       </main>

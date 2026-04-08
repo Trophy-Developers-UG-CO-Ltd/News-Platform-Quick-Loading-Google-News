@@ -1,6 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Search, X, Flame } from 'lucide-react';
+import { useSelector } from 'react-redux';
+import { FiUser } from 'react-icons/fi';
 import api from '../../app/axios';
 import ThemeToggle from '../ui/ThemeToggle';
 import useThemeMode from '../../hooks/useThemeMode';
@@ -36,6 +38,7 @@ const MOBILE_MENU_LINKS = [
 const PremiumSiteHeader = () => {
   const { isDarkMode, toggleTheme } = useThemeMode();
   const { pathname } = useLocation();
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const mobileSearchInputRef = useRef(null);
 
   const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
@@ -151,6 +154,15 @@ const PremiumSiteHeader = () => {
           <div className="order-1">
             <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} compactOnMobile />
           </div>
+          {/* Account Icon - Always Visible */}
+          <Link
+            to={isAuthenticated ? "/dashboard" : "/mukono11login"}
+            className="inline-flex items-center justify-center rounded-full border border-white/40 p-2 hover:border-white/80 transition"
+            aria-label={isAuthenticated ? "Account" : "Login"}
+            title={isAuthenticated ? "Account" : "Login"}
+          >
+            <FiUser size={20} />
+          </Link>
           <Link
             to={desktopSearchHref}
             className="hidden cursor-pointer hover:text-white/70 md:inline-flex"
