@@ -6,6 +6,7 @@ const hpp = require("hpp");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
 const path = require("path");
+const fs = require("fs");
 
 const { env, validateEnv } = require("./config/env");
 const connectDB = require("./config/db");
@@ -35,6 +36,8 @@ validateEnv();
 const app = express();
 
 const PORT = env.PORT || 5000;
+const CLIENT_BUILD_DIR = path.join(__dirname, "../../client/build");
+const CLIENT_INDEX_FILE = path.join(CLIENT_BUILD_DIR, "index.html");
 
 // New category/article system (CommonJS)
 const categoryRoutes = require("./routes/category.routes");
@@ -320,15 +323,34 @@ app.get("/health", (req, res) => {
 });
 
 // ─────────────────────────────────────────
+// Frontend Route Bridge (dev + prod)
+// Handles direct browser hits to frontend-only routes via API server origin.
+// ─────────────────────────────────────────
+app.get(["/maintenance", "/admin/maintenance"], (req, res, next) => {
+  if (env.NODE_ENV === "production") return next();
+
+  // If a client build exists locally, serve it.
+  if (fs.existsSync(CLIENT_INDEX_FILE)) {
+    return res.sendFile(path.resolve(CLIENT_INDEX_FILE));
+  }
+
+  // In dev, forward to Vite/client origin so React Router can resolve route.
+  try {
+    const target = new URL(req.originalUrl, env.CLIENT_URL).toString();
+    return res.redirect(302, target);
+  } catch {
+    return next();
+  }
+});
+
+// ─────────────────────────────────────────
 // Serve React Production Build
 // ─────────────────────────────────────────
 if (env.NODE_ENV === "production") {
-  app.use(express.static(path.join(__dirname, "../../client/build")));
+  app.use(express.static(CLIENT_BUILD_DIR));
 
   app.get("*", (req, res) => {
-    res.sendFile(
-      path.resolve(__dirname, "../../client/build", "index.html")
-    );
+    res.sendFile(path.resolve(CLIENT_INDEX_FILE));
   });
 }
 

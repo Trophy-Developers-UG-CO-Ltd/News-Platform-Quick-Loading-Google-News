@@ -11,6 +11,7 @@
     "lint": "eslint src/",
     "seed": "node seeds/seeder.js",
     "seed:cms": "node seeds/seeder.js",
+    "seed:categories": "node seeds/seedCategories.js",
     "seed:admin": "node seeds/seedAdmin.js",
     "seed:developer": "node seeds/seedDeveloper.js",
     "seed:subscriber": "node seeds/seedSubscriber.js",
@@ -69,4 +70,3 @@
   "author": "MukonoTalks",
   "license": "UNLICENSED"
 }
-
