@@ -86,6 +86,9 @@ const AdminMaintenance = () => {
           <p className="text-sm text-gray-500">
             Block website access for all users except developers
           </p>
+          <p className="text-xs text-gray-500 mt-1">
+            Developer privileges inherit all super admin privileges, and only developers can turn maintenance mode on or off.
+          </p>
         </div>
       </div>
 

@@ -1,7 +1,8 @@
 // AdOrder Routes
 const express = require('express');
 const { submitAdOrder, listAdOrders, updateAdOrderStatus, getActiveAds } = require('./adOrder.controller');
-const { protect, authorize } = require('../../middlewares/auth.middleware');
+const { protect } = require('../../middlewares/auth.middleware');
+const { authorize } = require('../../middlewares/role.middleware');
 
 const router = express.Router();
 

@@ -7,7 +7,8 @@
 /**
  * Authorize specific roles
  * @param  {...string} roles - Allowed roles (e.g. 'admin', 'customer')
- * Note: 'developer' automatically inherits all 'admin' permissions.
+ * Note: developer privileges inherit all super admin/admin privileges.
+ *       Only developers can enable/disable maintenance mode.
  */
 const authorize = (...roles) => {
   return (req, res, next) => {
@@ -18,7 +19,7 @@ const authorize = (...roles) => {
       });
     }
 
-    // developer inherits all admin privileges
+    // developer inherits all super admin/admin privileges
     const effectiveRoles = roles.includes('admin')
       ? [...new Set([...roles, 'developer'])]
       : roles;
