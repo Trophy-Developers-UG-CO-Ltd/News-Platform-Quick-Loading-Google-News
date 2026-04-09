@@ -88,7 +88,23 @@ const optionalAuth = async (req, res, next) => {
   }
 };
 
-module.exports = { protect, optionalAuth };
+/**
+ * Authorize roles middleware
+ * Usage: authorize('admin'), authorize('editor', 'admin'), etc.
+ */
+function authorize(...roles) {
+  return (req, res, next) => {
+    if (!req.user || !roles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden: insufficient permissions',
+      });
+    }
+    next();
+  };
+}
+
+module.exports = { protect, optionalAuth, authorize };
 
 // MukonoTalks
 

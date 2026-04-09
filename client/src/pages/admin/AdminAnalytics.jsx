@@ -16,6 +16,7 @@ import Spinner from '../../components/ui/Spinner';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '../../components/ui/card';
 import { Badge } from '../../components/ui/badge';
 import toast from 'react-hot-toast';
+import { useInteractionAnalytics } from '../../hooks/useInteractionAnalytics';
 
 const CHART_COLORS = ['#1a56db', '#0ea5e9', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 const DAYS_OPTIONS = [7, 14, 30, 90];
@@ -150,6 +151,8 @@ const AdminAnalytics = () => {
     name: p.productTitle || p._id || `Product ${i + 1}`,
     value: p.totalViews || p.count || 0,
   }));
+
+  const { data: interactionData, loading: loadingInteractions, error: errorInteractions } = useInteractionAnalytics();
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
@@ -431,6 +434,69 @@ const AdminAnalytics = () => {
             <p className="text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-none px-4 py-3">
               Enter your GA4 Measurement ID above (e.g. <code className="font-mono font-bold">G-XXXXXXXXXX</code>) and click Save to activate tracking. You can find it in your GA4 property settings under Data Streams.
             </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* ─── Interaction Analytics ───────────────────────────── */}
+      <Card>
+        <CardHeader>
+          <CardTitle>User Interactions (Views, Clicks, Scrolls)</CardTitle>
+          <CardDescription>Aggregated user engagement from the new tracking system</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {loadingInteractions ? (
+            <Spinner size="md" />
+          ) : errorInteractions ? (
+            <p className="text-sm text-red-500">{errorInteractions}</p>
+          ) : interactionData && interactionData.success ? (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {interactionData.byType.map((t) => (
+                  <div key={t._id} className="p-4 bg-gray-50 rounded text-center">
+                    <div className="text-lg font-bold text-gray-800">{t.count}</div>
+                    <div className="text-xs text-gray-500 uppercase tracking-wide">{t._id}</div>
+                  </div>
+                ))}
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-700 mb-2">Top Articles by Interactions</h3>
+                <div className="overflow-x-auto">
+                  <table className="min-w-[400px] text-sm">
+                    <thead>
+                      <tr className="text-gray-500">
+                        <th className="px-2 py-1 text-left">Article ID</th>
+                        <th className="px-2 py-1 text-left">Type</th>
+                        <th className="px-2 py-1 text-right">Count</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {interactionData.topArticles.map((a, i) => (
+                        <tr key={i} className="border-b last:border-0">
+                          <td className="px-2 py-1 font-mono">{a._id.articleId}</td>
+                          <td className="px-2 py-1">{a._id.type}</td>
+                          <td className="px-2 py-1 text-right">{a.count}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-700 mb-2">Recent Interactions</h3>
+                <ul className="divide-y divide-gray-100">
+                  {interactionData.recent.map((r, i) => (
+                    <li key={r._id || i} className="py-1 flex items-center gap-2 text-xs text-gray-600">
+                      <span className="font-mono text-gray-800">{r.type}</span>
+                      <span>Article: <span className="font-mono">{r.articleId || '—'}</span></span>
+                      <span>{r.createdAt ? new Date(r.createdAt).toLocaleString() : ''}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          ) : (
+            <p className="text-sm text-gray-400">No interaction data yet.</p>
           )}
         </CardContent>
       </Card>

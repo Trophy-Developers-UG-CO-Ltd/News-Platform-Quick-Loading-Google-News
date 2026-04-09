@@ -158,7 +158,7 @@ const PremiumSiteHeader = () => {
             const slug = cat?.slug || '';
             return {
               label,
-              href: `/news?category=${slug}`,
+              href: `/category/${slug}`,
               isExternal: false,
               openInNewTab: false,
               icon: getCategoryIcon(label, slug),

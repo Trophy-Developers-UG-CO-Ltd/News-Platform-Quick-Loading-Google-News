@@ -1,4 +1,5 @@
 ﻿import React, { Suspense, lazy } from 'react';
+const CategoryPage = lazy(() => import('../pages/CategoryPage'));
 import { Routes, Route } from 'react-router-dom';
 import Spinner from '../components/ui/Spinner';
 import AdminRoute from '../components/protected/AdminRoute';
@@ -88,6 +89,7 @@ const AppRoutes = () => {
         <Route path="/news/:slug" element={<NewsArticlePage />} />
         <Route path="/blog" element={<ArticlesPage />} />
         <Route path="/blog/:slug" element={<ArticlePage />} />
+        <Route path="/category/:slug" element={<CategoryPage />} />
         <Route path="/local" element={<LocalUpdatesPage />} />
         <Route path="/entertainment" element={<EntertainmentPage />} />
         <Route path="/videos" element={<VideosPage />} />

@@ -29,6 +29,18 @@ if (process.env.NODE_ENV === 'production') {
   loadEnvFile(path.join(baseDir, '.env.production'), true);
 }
 
+// Startup check for required environment variables
+if (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'your_jwt_secret_here_change_in_production') {
+  // eslint-disable-next-line no-console
+  console.error('[FATAL] JWT_SECRET is missing or default in .env. Set a strong secret in .env and restart.');
+  process.exit(1);
+}
+if (!process.env.MONGO_URI) {
+  // eslint-disable-next-line no-console
+  console.error('[FATAL] MONGO_URI is missing in .env. Set your MongoDB URI and restart.');
+  process.exit(1);
+}
+
 const env = {
   // App
   NODE_ENV: process.env.NODE_ENV || 'development',

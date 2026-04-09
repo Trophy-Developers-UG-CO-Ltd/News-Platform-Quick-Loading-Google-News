@@ -9,6 +9,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import articleService from '../../features/articles/articleService';
 import categoryService from '../../features/articles/categoryService';
+import api from '../../app/axios';
 import Spinner from '../../components/ui/Spinner';
 import SlugChangeDialog from '../../components/admin/SlugChangeDialog';
 import toast from 'react-hot-toast';
@@ -43,6 +44,17 @@ const FALLBACK_CATEGORIES = [
   { value: 'opportunities', label: 'Opportunities' },
   { value: 'knowledge-base', label: 'Knowledge Base' },
 ];
+
+// Helper to normalize options from different sources
+const normalizeOptions = (arr, valueKey = 'slug', labelKey = 'name', fallbackLabel = 'Unnamed') =>
+  (arr || [])
+    .map((item) => ({
+      value: item[valueKey] || item[labelKey] || '',
+      label:
+        (item.localizedName?.en || item[labelKey] || item[valueKey] || fallbackLabel)
+    }))
+    .filter((item) => item.value)
+    .sort((a, b) => a.label.localeCompare(b.label));
 
 const emptyArticle = {
   title: { en: '', zh: '', sw: '' },
@@ -96,25 +108,49 @@ const AdminArticleEditor = () => {
   useEffect(() => {
     let mounted = true;
 
-    const loadCategories = async () => {
+    const loadAllCategorySources = async () => {
       try {
-        const result = await categoryService.listCategories();
-        const options = categoryService.normalizeCategoryOptions(result?.categories || []);
-        if (mounted && options.length) {
-          setCategoryOptions(options);
+        // Fetch all in parallel
+        const [catRes, sectionRes, navRes] = await Promise.all([
+          api.get('/categories/admin/all'),
+          api.get('/homepage-sections'),
+          api.get('/navigation/admin'),
+        ]);
+
+        // Normalize
+        const catOptions = normalizeOptions(catRes.data?.categories || [], 'slug', 'name', 'Unnamed category');
+        const sectionOptions = normalizeOptions(sectionRes.data || [], 'sectionKey', 'title', 'Homepage Section');
+        // Navigation: flatten tree if needed
+        let navItems = navRes.data?.data || [];
+        if (Array.isArray(navItems)) {
+          navItems = navItems.flatMap((item) => [item, ...(item.items || [])]);
+        }
+        const navOptions = normalizeOptions(navItems, 'slug', 'label', 'Navigation');
+
+        // Merge and dedupe by value
+        const merged = [...catOptions, ...sectionOptions, ...navOptions];
+        const seen = new Set();
+        const mergedOptions = merged.filter((opt) => {
+          if (seen.has(opt.value)) return false;
+          seen.add(opt.value);
+          return true;
+        });
+
+        if (mounted && mergedOptions.length) {
+          setCategoryOptions(mergedOptions);
           setArticle((prev) => ({
             ...prev,
-            category: options.some((option) => option.value === prev.category)
+            category: mergedOptions.some((option) => option.value === prev.category)
               ? prev.category
-              : options[0].value,
+              : mergedOptions[0].value,
           }));
         }
-      } catch (_) {
+      } catch (err) {
         if (mounted) setCategoryOptions(FALLBACK_CATEGORIES);
       }
     };
 
-    loadCategories();
+    loadAllCategorySources();
     return () => {
       mounted = false;
     };
@@ -289,6 +325,15 @@ const AdminArticleEditor = () => {
     if (!article.localizedSlug.en) return toast.error('English slug is required');
     if (!article.category) return toast.error('Category is required');
 
+    // Diagnostic log
+    // eslint-disable-next-line no-console
+    console.log('[AdminArticleEditor] handleSave fired', {
+      isEditing,
+      article,
+      apiBaseUrl: import.meta.env.VITE_API_URL,
+      windowLocation: window.location.href
+    });
+
     setIsSaving(true);
     try {
       if (isEditing) {
@@ -300,8 +345,8 @@ const AdminArticleEditor = () => {
         if (origSlug && newSlug && origSlug !== newSlug) {
           setSlugDialog({
             open:    true,
-            oldPath: `/en/blog/${origSlug}`,
-            newPath: `/en/blog/${newSlug}`,
+            oldPath: `/blog/${origSlug}`,
+            newPath: `/blog/${newSlug}`,
           });
           originalSlugRef.current = { ...article.localizedSlug };
         }
@@ -352,7 +397,7 @@ const AdminArticleEditor = () => {
         <div className="flex items-center gap-2">
           {isEditing && article.localizedSlug?.en && (
             <Link
-              to={`/en/blog/${article.localizedSlug.en}`}
+              to={`/blog/${article.localizedSlug.en}`}
               target="_blank"
               className="flex items-center gap-1 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
             >

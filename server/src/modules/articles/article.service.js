@@ -1,4 +1,92 @@
 ﻿/**
+ * Update an existing article
+ */
+const updateArticle = async (articleId, data, req) => {
+  const article = await Article.findById(articleId);
+  if (!article) {
+    const error = new Error('Article not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (data.localizedSlug) {
+    await _validateSlugUniqueness(data.localizedSlug, articleId);
+  }
+
+  if (data.contentBlocks && data.contentBlocks.length > 0) {
+    data.contentBlocks.sort((a, b) => a.order - b.order);
+  }
+  if (data.tags) {
+    data.tags = data.tags.map((t) => t.toLowerCase().trim());
+  }
+
+  // Auto-translate English content to Swahili and Chinese
+  await _injectArticleTranslations(data);
+
+  // Track changes for audit
+  const changes = {};
+  if (data.title && JSON.stringify(data.title) !== JSON.stringify(article.title)) {
+    changes.title = { from: article.title, to: data.title };
+  }
+  if (data.localizedSlug && JSON.stringify(data.localizedSlug) !== JSON.stringify(article.localizedSlug)) {
+    changes.slug = { from: article.localizedSlug, to: data.localizedSlug };
+  }
+  // Snapshot old slugs before applying update
+  const oldLocalizedSlug = { ...article.localizedSlug.toObject?.() ?? article.localizedSlug };
+  if (data.contentBlocks) {
+    changes.blocksCount = { from: article.contentBlocks.length, to: data.contentBlocks.length };
+  }
+  if (data.category && data.category !== article.category) {
+    changes.category = { from: article.category, to: data.category };
+  }
+  if (data.seo && JSON.stringify(data.seo) !== JSON.stringify(article.seo)) {
+    changes.seo = true;
+  }
+
+  Object.assign(article, data);
+  article.updatedBy = req.user._id;
+  await article.save();
+
+  // Auto-create redirect requests if any localized slug changed
+  if (changes.slug) {
+    const newSlugs = data.localizedSlug;
+    const userId = req.user?._id ?? null;
+    const redirectTasks = SUPPORTED_LANGS
+      .filter((lang) => oldLocalizedSlug[lang] && newSlugs[lang] && oldLocalizedSlug[lang] !== newSlugs[lang])
+      .map((lang) =>
+        RedirectService.createRedirect({
+          fromPath: `/${lang}/blog/${oldLocalizedSlug[lang]}`,
+          toPath: `/${lang}/blog/${newSlugs[lang]}`,
+          statusCode: 301,
+          source: 'auto',
+          resourceType: 'article',
+          resourceId: article._id,
+          createdBy: userId,
+        }).catch((err) => logger.warn('[ArticleService] Failed to queue redirect:', err.message))
+      );
+    await Promise.all(redirectTasks);
+  }
+
+  const actions = [];
+  if (changes.title) actions.push('title_changed');
+  if (changes.slug) actions.push('slug_changed');
+  if (changes.blocksCount) actions.push('blocks_modified');
+  if (changes.category) actions.push('category_changed');
+  if (changes.seo) actions.push('seo_changed');
+
+  AuditService.log({
+    action: 'ARTICLE_UPDATE',
+    req,
+    targetModel: 'Article',
+    targetId: article._id,
+    targetIdentifier: article.localizedSlug.en,
+    changes,
+    metadata: { modifications: actions },
+  });
+
+  return article;
+};
+/**
  * Transition article status (review, approve, request edit, etc.)
  * Only allowed by specific roles for each transition
  */
@@ -230,88 +318,43 @@ const createArticle = async (data, req) => {
 /**
  * Update an existing article
  */
-const updateArticle = async (articleId, data, req) => {
+
+const publishArticle = async (articleId, action, req) => {
+  const logger = require('../../utils/logger');
+  logger.info(`[publishArticle] Attempting to ${action} article: id=${articleId}`);
   const article = await Article.findById(articleId);
   if (!article) {
+    logger.error(`[publishArticle] Article not found: id=${articleId}`);
     const error = new Error('Article not found');
     error.statusCode = 404;
     throw error;
   }
 
-  if (data.localizedSlug) {
-    await _validateSlugUniqueness(data.localizedSlug, articleId);
+  if (action === 'publish') {
+    _enforceEnglishContent(article);
+    article.publishStatus = 'published';
+    article.publishedAt = new Date();
+    article.publishedBy = req.user._id;
+    article.scheduledAt = null; // Clear any schedule
+    logger.info(`[publishArticle] Article published: id=${articleId}, slug=${article.localizedSlug.en}, category=${article.category}`);
+  } else {
+    article.publishStatus = 'draft';
+    logger.info(`[publishArticle] Article unpublished (set to draft): id=${articleId}`);
   }
 
-  if (data.contentBlocks && data.contentBlocks.length > 0) {
-    data.contentBlocks.sort((a, b) => a.order - b.order);
-  }
-  if (data.tags) {
-    data.tags = data.tags.map((t) => t.toLowerCase().trim());
-  }
-
-  // Auto-translate English content to Swahili and Chinese
-  await _injectArticleTranslations(data);
-
-  // Track changes for audit
-  const changes = {};
-  if (data.title && JSON.stringify(data.title) !== JSON.stringify(article.title)) {
-    changes.title = { from: article.title, to: data.title };
-  }
-  if (data.localizedSlug && JSON.stringify(data.localizedSlug) !== JSON.stringify(article.localizedSlug)) {
-    changes.slug = { from: article.localizedSlug, to: data.localizedSlug };
-  }
-  // Snapshot old slugs before applying update
-  const oldLocalizedSlug = { ...article.localizedSlug.toObject?.() ?? article.localizedSlug };
-  if (data.contentBlocks) {
-    changes.blocksCount = { from: article.contentBlocks.length, to: data.contentBlocks.length };
-  }
-  if (data.category && data.category !== article.category) {
-    changes.category = { from: article.category, to: data.category };
-  }
-  if (data.seo && JSON.stringify(data.seo) !== JSON.stringify(article.seo)) {
-    changes.seo = true;
-  }
-
-  Object.assign(article, data);
   article.updatedBy = req.user._id;
   await article.save();
 
-  // Auto-create redirect requests if any localized slug changed
-  if (changes.slug) {
-    const newSlugs = data.localizedSlug;
-    const userId = req.user?._id ?? null;
-    const redirectTasks = SUPPORTED_LANGS
-      .filter((lang) => oldLocalizedSlug[lang] && newSlugs[lang] && oldLocalizedSlug[lang] !== newSlugs[lang])
-      .map((lang) =>
-        RedirectService.createRedirect({
-          fromPath: `/${lang}/blog/${oldLocalizedSlug[lang]}`,
-          toPath: `/${lang}/blog/${newSlugs[lang]}`,
-          statusCode: 301,
-          source: 'auto',
-          resourceType: 'article',
-          resourceId: article._id,
-          createdBy: userId,
-        }).catch((err) => logger.warn('[ArticleService] Failed to queue redirect:', err.message))
-      );
-    await Promise.all(redirectTasks);
-  }
-
-  const actions = [];
-  if (changes.title) actions.push('title_changed');
-  if (changes.slug) actions.push('slug_changed');
-  if (changes.blocksCount) actions.push('blocks_modified');
-  if (changes.category) actions.push('category_changed');
-  if (changes.seo) actions.push('seo_changed');
-
   AuditService.log({
-    action: 'ARTICLE_UPDATE',
+    action: action === 'publish' ? 'ARTICLE_PUBLISH' : 'ARTICLE_UNPUBLISH',
     req,
     targetModel: 'Article',
     targetId: article._id,
     targetIdentifier: article.localizedSlug.en,
-    changes,
-    metadata: { modifications: actions },
+    severity: action === 'publish' ? 'info' : 'warning',
+    metadata: { category: article.category, publishStatus: article.publishStatus },
   });
+
 
   return article;
 };
@@ -342,44 +385,7 @@ const deleteArticle = async (articleId, req) => {
   return { message: 'Article deleted successfully' };
 };
 
-/**
- * Publish or unpublish an article
- * Enforces: English title, slug, and content blocks required before publishing
- */
-const publishArticle = async (articleId, action, req) => {
-  const article = await Article.findById(articleId);
-  if (!article) {
-    const error = new Error('Article not found');
-    error.statusCode = 404;
-    throw error;
-  }
 
-  if (action === 'publish') {
-    _enforceEnglishContent(article);
-
-    article.publishStatus = 'published';
-    article.publishedAt = new Date();
-    article.publishedBy = req.user._id;
-    article.scheduledAt = null; // Clear any schedule
-  } else {
-    article.publishStatus = 'draft';
-  }
-
-  article.updatedBy = req.user._id;
-  await article.save();
-
-  AuditService.log({
-    action: action === 'publish' ? 'ARTICLE_PUBLISH' : 'ARTICLE_UNPUBLISH',
-    req,
-    targetModel: 'Article',
-    targetId: article._id,
-    targetIdentifier: article.localizedSlug.en,
-    severity: action === 'publish' ? 'info' : 'warning',
-    metadata: { category: article.category, publishStatus: article.publishStatus },
-  });
-
-  return article;
-};
 
 /**
  * Schedule an article for future publishing
@@ -423,8 +429,12 @@ const scheduleArticle = async (articleId, scheduledAt, req) => {
  * Only returns published articles (not draft or scheduled)
  * Increments view count atomically
  */
+
 const getPublicArticle = async (lang, slug) => {
+  const logger = require('../../utils/logger');
+  logger.info(`[getPublicArticle] Fetching article: lang=${lang}, slug=${slug}`);
   if (!SUPPORTED_LANGS.includes(lang)) {
+    logger.warn(`[getPublicArticle] Unsupported language: ${lang}`);
     const error = new Error(`Unsupported language: ${lang}`);
     error.statusCode = 400;
     throw error;
@@ -434,6 +444,7 @@ const getPublicArticle = async (lang, slug) => {
     publishStatus: 'published',
     [`localizedSlug.${lang}`]: slug,
   };
+  logger.debug(`[getPublicArticle] Query: ${JSON.stringify(query)}`);
 
   // Atomically increment view count and return document
   const article = await Article.findOneAndUpdate(
@@ -446,6 +457,20 @@ const getPublicArticle = async (lang, slug) => {
     .lean();
 
   if (!article) {
+    // Extra diagnostics: check if article exists with this slug in any status/lang
+    const alt = await Article.findOne({
+      $or: [
+        { [`localizedSlug.${lang}`]: slug },
+        { [`localizedSlug.en`]: slug },
+        { [`localizedSlug.zh`]: slug },
+        { [`localizedSlug.sw`]: slug },
+      ],
+    });
+    if (!alt) {
+      logger.error(`[getPublicArticle] No article found for slug='${slug}' in any language.`);
+    } else {
+      logger.warn(`[getPublicArticle] Article found for slug='${slug}' but publishStatus='${alt.publishStatus}'.`);
+    }
     const error = new Error('Article not found');
     error.statusCode = 404;
     throw error;
@@ -481,6 +506,7 @@ const getPublicArticle = async (lang, slug) => {
     ),
   };
 
+  logger.info(`[getPublicArticle] Article found: id=${localizedArticle._id}, category=${localizedArticle.category}, publishStatus=published`);
   return localizedArticle;
 };
 

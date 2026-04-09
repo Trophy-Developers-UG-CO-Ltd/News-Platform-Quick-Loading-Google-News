@@ -249,7 +249,7 @@ const AdminArticles = () => {
                     </button>
                     {article.publishStatus === 'published' && (
                       <Link
-                        to={`/blog/en/${article.localizedSlug?.en}`}
+                        to={`/blog/${article.localizedSlug?.en}`}
                         className="p-2 text-gray-400 hover:text-primary-600 transition-colors"
                         title="View"
                       >

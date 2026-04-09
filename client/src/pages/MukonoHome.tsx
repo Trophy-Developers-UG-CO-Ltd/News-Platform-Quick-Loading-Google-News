@@ -1,15 +1,6 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Helmet } from 'react-helmet-async';
-import {
-  Search,
-  Flame,
-  PlayCircle,
-  Briefcase,
-  BarChart3,
-  MessageCircle,
-} from 'lucide-react';
-import api from '../app/axios';
+
+// ...existing code...
+
 
 const FALLBACK_IMAGE = 'https://via.placeholder.com/800x500';
 const FALLBACK_VIDEO = 'https://www.youtube.com/watch?v=ETOSTwqrFyU';
@@ -54,28 +45,59 @@ const MukonoHome = () => {
   const [videoSection, setVideoSection] = useState<any>(null);
   const [opportunitiesSection, setOpportunitiesSection] = useState<any>(null);
   const [inquirySection, setInquirySection] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
   // REAL API: Fetch homepage data
+  // Initial load and infinite scroll
   useEffect(() => {
-    fetch("/api/v1/home")
+    setLoading(true);
+    fetch(`/api/v1/home?page=${page}`)
       .then((res) => res.json())
       .then((data) => {
-        setHeroSlides(data.heroSlides || []);
-        setArticles(data.articles || []);
+        if (page === 1) {
+          setHeroSlides(data.heroSlides || []);
+          setArticles(data.articles || []);
+        } else {
+          setArticles((prev: any[]) => [...prev, ...(data.articles || [])]);
+        }
         setTrending(data.trending || []);
         setVideoSection(data.videoSection || null);
         setOpportunitiesSection(data.opportunitiesSection || null);
         setInquirySection(data.inquirySection || null);
+        setHasMore(data.articles && data.articles.length > 0);
+        setLoading(false);
       })
       .catch(() => {
-        setHeroSlides([]);
-        setArticles([]);
+        if (page === 1) {
+          setHeroSlides([]);
+          setArticles([]);
+        }
         setTrending([]);
         setVideoSection(null);
         setOpportunitiesSection(null);
         setInquirySection(null);
+        setHasMore(false);
+        setLoading(false);
       });
-  }, []);
+    // eslint-disable-next-line
+  }, [page]);
+
+  // Infinite scroll handler
+  useEffect(() => {
+    const onScroll = () => {
+      if (
+        window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 &&
+        !loading && hasMore
+      ) {
+        setPage((p) => p + 1);
+      }
+    };
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+    // eslint-disable-next-line
+  }, [loading, hasMore]);
 
   const mainHero = useMemo(() => {
     const activeHero = heroSlides?.[0];
@@ -156,63 +178,86 @@ const MukonoHome = () => {
       </div>
 
       <section className="mx-auto grid w-full max-w-7xl gap-4 px-4 md:grid-cols-3">
-        <div className="group relative overflow-hidden rounded-3xl shadow-card md:col-span-2">
-          <img
-            src={getArticleImage(articles[0])}
-            alt=""
-            className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
-          <div className="absolute inset-0 flex flex-col justify-end p-6">
-            <Link
-              to={`/news?category=${encodeURIComponent(mainHero.category)}`}
-              className="w-fit rounded-full bg-white px-3 py-1 text-xs font-bold tracking-wide text-black hover:bg-gray-200 transition-colors"
-            >
-              {mainHero.category}
-            </Link>
-            <h2 className="text-2xl font-bold leading-tight md:text-3xl">
-              <Link to={mainHero.link} className="hover:underline" onClick={() => {
-                if (articles[0]?._id) {
-                  fetch("/api/v1/track-view", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ postId: articles[0]._id }),
-                  });
-                }
-              }}>
-                {mainHero.title}
-              </Link>
-            </h2>
-            <p className="mt-2 text-xs text-text-muted">{mainHero.meta}</p>
-          </div>
-        </div>
-        <div className="flex flex-col gap-4">
-          {sideStories.map((story) => (
-            <div key={story._id} className="group relative overflow-hidden rounded-3xl shadow-soft">
-              <img src={getArticleImage(story)} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-              <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-dark-black to-transparent p-4">
+        <div className="group relative overflow-hidden rounded-3xl shadow-card md:col-span-2 min-h-[320px]">
+          {loading && !articles.length ? (
+            <div className="animate-pulse h-80 bg-gray-200 rounded-3xl w-full" />
+          ) : (
+            <>
+              <img
+                src={getArticleImage(articles[0])}
+                alt=""
+                className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+                loading="lazy"
+                width="800"
+                height="500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+              <div className="absolute inset-0 flex flex-col justify-end p-6">
                 <Link
-                  to={`/news?category=${encodeURIComponent(story?.category || 'entertainment')}`}
-                  className="w-fit rounded-full bg-white px-2.5 py-1 text-xs font-bold tracking-wide text-black hover:bg-gray-200 transition-colors"
+                  to={`/news?category=${encodeURIComponent(mainHero.category)}`}
+                  className="w-fit rounded-full bg-white px-3 py-1 text-xs font-bold tracking-wide text-black hover:bg-gray-200 transition-colors"
                 >
-                  {(story?.category || 'entertainment').toUpperCase()}
+                  {mainHero.category}
                 </Link>
-                <h3 className="text-sm font-semibold">
-                  <Link to={`/news/${getArticleSlug(story)}`} className="hover:underline" onClick={() => {
-                    if (story?._id) {
+                <h2 className="text-2xl font-bold leading-tight md:text-3xl">
+                  <Link to={mainHero.link} className="hover:underline" onClick={() => {
+                    if (articles[0]?._id) {
                       fetch("/api/v1/track-view", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ postId: story._id }),
+                        body: JSON.stringify({ postId: articles[0]._id }),
                       });
                     }
                   }}>
-                    {getArticleTitle(story)}
+                    {mainHero.title}
                   </Link>
-                </h3>
+                </h2>
+                <p className="mt-2 text-xs text-text-muted">{mainHero.meta}</p>
               </div>
-            </div>
-          ))}
+            </>
+          )}
+        </div>
+        <div className="flex flex-col gap-4">
+          {loading && !sideStories.length ? (
+            <>
+              <div className="animate-pulse h-32 bg-gray-200 rounded-3xl w-full" />
+              <div className="animate-pulse h-32 bg-gray-200 rounded-3xl w-full" />
+            </>
+          ) : (
+            sideStories.map((story) => (
+              <div key={story._id} className="group relative overflow-hidden rounded-3xl shadow-soft">
+                <img
+                  src={getArticleImage(story)}
+                  alt=""
+                  className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                  loading="lazy"
+                  width="800"
+                  height="500"
+                />
+                <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-dark-black to-transparent p-4">
+                  <Link
+                    to={`/news?category=${encodeURIComponent(story?.category || 'entertainment')}`}
+                    className="w-fit rounded-full bg-white px-2.5 py-1 text-xs font-bold tracking-wide text-black hover:bg-gray-200 transition-colors"
+                  >
+                    {(story?.category || 'entertainment').toUpperCase()}
+                  </Link>
+                  <h3 className="text-sm font-semibold">
+                    <Link to={`/news/${getArticleSlug(story)}`} className="hover:underline" onClick={() => {
+                      if (story?._id) {
+                        fetch("/api/v1/track-view", {
+                          method: "POST",
+                          headers: { "Content-Type": "application/json" },
+                          body: JSON.stringify({ postId: story._id }),
+                        });
+                      }
+                    }}>
+                      {getArticleTitle(story)}
+                    </Link>
+                  </h3>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </section>
 
@@ -234,7 +279,14 @@ const MukonoHome = () => {
               key={story._id}
               className="snap-start min-w-[240px] overflow-hidden rounded-2xl bg-white shadow-soft transition hover:bg-light-hover hover:shadow-card dark:bg-dark-surface dark:hover:bg-dark-hover"
             >
-              <img src={getArticleImage(story)} alt="" className="h-[120px] w-full object-cover" />
+              <img
+                src={getArticleImage(story)}
+                alt=""
+                className="h-[120px] w-full object-cover"
+                loading="lazy"
+                width="400"
+                height="120"
+              />
               <div className="p-3 text-sm text-text-secondary">
                 <Link to={`/news/${getArticleSlug(story)}`} className="hover:text-text-primary" onClick={() => {
                   if (story?._id) {
@@ -253,33 +305,80 @@ const MukonoHome = () => {
         </div>
       </section>
 
-      <section className="mx-auto grid w-full max-w-7xl gap-6 px-4 py-6 md:grid-cols-3">
-        {feedStories.map((story) => (
-          <div key={story._id} className="group cursor-pointer animate-fade">
-            <div className="overflow-hidden rounded-2xl shadow-soft">
-              <img
-                src={getArticleImage(story)}
-                alt=""
-                className="w-full transition duration-500 group-hover:scale-105"
-              />
+      {/* Sticky sidebar + premium feed cards */}
+      <section className="mx-auto w-full max-w-7xl px-4 py-6">
+        <div className="grid md:grid-cols-4 gap-6">
+          <div className="md:col-span-3">
+            <div className="grid gap-6 md:grid-cols-2">
+              {loading && !feedStories.length ? (
+                Array.from({ length: 6 }).map((_, i) => (
+                  <div key={i} className="animate-pulse h-48 bg-gray-200 rounded-2xl w-full" />
+                ))
+              ) : (
+                feedStories.map((story) => (
+                  <div key={story._id} className="group cursor-pointer animate-fade">
+                    <div className="overflow-hidden rounded-2xl shadow-soft">
+                      <img
+                        src={getArticleImage(story)}
+                        alt=""
+                        className="w-full transition duration-500 group-hover:scale-105"
+                        loading="lazy"
+                        width="400"
+                        height="250"
+                      />
+                    </div>
+                    <span className="mt-2 inline-block rounded-full bg-black px-3 py-1 text-xs font-bold tracking-wide text-white dark:bg-white dark:text-black">{(story?.category || 'news').toUpperCase()}</span>
+                    <h3 className="mt-1 line-clamp-2 font-semibold text-text-primary">
+                      <Link to={`/news/${getArticleSlug(story)}`} className="hover:underline" onClick={() => {
+                        if (story?._id) {
+                          fetch("/api/v1/track-view", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ postId: story._id }),
+                          });
+                        }
+                      }}>
+                        {getArticleTitle(story)}
+                      </Link>
+                    </h3>
+                    <p className="text-xs text-gray-500 mt-1">
+                      {story.publishedAt ? new Date(story.publishedAt).toLocaleDateString() : ''}
+                      {story.viewCount ? ` • ${story.viewCount} views` : ''}
+                    </p>
+                    <p className="mt-1 line-clamp-2 text-xs text-text-muted">{getArticleExcerpt(story)}</p>
+                  </div>
+                ))
+              )}
             </div>
-            <span className="mt-2 inline-block rounded-full bg-black px-3 py-1 text-xs font-bold tracking-wide text-white dark:bg-white dark:text-black">{(story?.category || 'news').toUpperCase()}</span>
-            <h3 className="mt-1 line-clamp-2 font-semibold text-text-primary">
-              <Link to={`/news/${getArticleSlug(story)}`} className="hover:underline" onClick={() => {
-                if (story?._id) {
-                  fetch("/api/v1/track-view", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ postId: story._id }),
-                  });
-                }
-              }}>
-                {getArticleTitle(story)}
-              </Link>
-            </h3>
-            <p className="mt-1 line-clamp-2 text-xs text-text-muted">{getArticleExcerpt(story)}</p>
+            {loading && (
+              <div className="animate-pulse h-12 bg-gray-200 rounded-xl mt-6" />
+            )}
+            {!hasMore && !loading && (
+              <div className="text-center text-gray-400 mt-6">No more articles to load.</div>
+            )}
           </div>
-        ))}
+          {/* Sticky sidebar */}
+          <aside className="hidden md:block sticky top-20 space-y-6">
+            <section>
+              <div className="mb-4 flex items-center gap-2">
+                <BarChart3 size={18} className="text-text-secondary" />
+                <h3 className="text-lg font-semibold">Most Read</h3>
+              </div>
+              <ol className="space-y-3">
+                {mostRead.map((story, index) => (
+                  <li key={story._id} className="cursor-pointer text-text-secondary transition hover:text-text-primary">
+                    <Link to={`/news/${getArticleSlug(story)}`}>{index + 1}. {getArticleTitle(story)}</Link>
+                  </li>
+                ))}
+              </ol>
+            </section>
+            <section>
+              <div className="flex h-32 items-center justify-center rounded-2xl border border-dark-border bg-white text-text-secondary dark:bg-dark-surface dark:text-text-dark-muted">
+                <img src="/ads/leaderboard.jpg" className="h-full object-cover" alt="Ad" loading="lazy" width="728" height="90" />
+              </div>
+            </section>
+          </aside>
+        </div>
       </section>
 
       <section className="mx-auto w-full max-w-7xl px-4 py-10">
@@ -290,15 +389,17 @@ const MukonoHome = () => {
 
         <div className="grid gap-6 md:grid-cols-2">
           <div className="rounded-2xl border border-dark-border bg-white p-4 shadow-card dark:bg-dark-surface">
-            <iframe
-              className="h-64 w-full rounded-xl"
-              src={featuredVideoUrl}
-              allowFullScreen
-              title={featuredVideoCaption || 'Featured MukonoTalks video'}
-              loading="lazy"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-            />
+            <div className="aspect-video overflow-hidden rounded-xl bg-black">
+              <iframe
+                className="w-full h-full min-h-[240px]"
+                src={featuredVideoUrl}
+                allowFullScreen
+                title={featuredVideoCaption || 'Featured MukonoTalks video'}
+                loading="lazy"
+                referrerPolicy="strict-origin-when-cross-origin"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              />
+            </div>
             <p className="mt-3 text-sm text-text-secondary">{featuredVideoCaption}</p>
             <a
               href={featuredVideoUrl}
@@ -400,5 +501,10 @@ const MukonoHome = () => {
   );
 };
 
-export default MukonoHome;
 // Designed by Trophy Developers Uganda : https://www.trophydevelopers.com/uganda-web-designers/
+
+export default MukonoHome;
+import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet';
+import { Search, Flame, BarChart3, PlayCircle, Briefcase, MessageCircle } from 'lucide-react';
