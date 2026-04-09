@@ -240,6 +240,22 @@ const SidebarContent = ({ collapsed, onNavClick }) => {
           )}
         </div>
 
+        {/* Social media icons */}
+        <div className="flex items-center justify-center gap-3 mt-2">
+          <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-slate-400 hover:text-blue-500 transition-colors">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M17 2.07A10 10 0 1 0 12 22V14.89h-2V12h2v-1.5c0-2.07 1.23-3.22 3.13-3.22.91 0 1.87.16 1.87.16v2.06h-1.06c-1.04 0-1.37.65-1.37 1.32V12h2.34l-.37 2.89h-1.97V22A10 10 0 0 0 17 2.07z"/></svg>
+          </a>
+          <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" aria-label="Twitter" className="text-slate-400 hover:text-blue-400 transition-colors">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53A4.48 4.48 0 0 0 22.43.36a9.09 9.09 0 0 1-2.88 1.1A4.52 4.52 0 0 0 16.11 0c-2.5 0-4.52 2.02-4.52 4.52 0 .35.04.7.11 1.03C7.69 5.4 4.07 3.67 1.64.9c-.38.65-.6 1.4-.6 2.2 0 1.52.77 2.86 1.94 3.65A4.48 4.48 0 0 1 .96 6v.06c0 2.13 1.52 3.9 3.54 4.3-.37.1-.76.16-1.16.16-.28 0-.55-.03-.81-.08.55 1.7 2.16 2.94 4.07 2.97A9.06 9.06 0 0 1 0 19.54 12.8 12.8 0 0 0 6.95 21.99c8.32 0 12.88-6.89 12.88-12.88 0-.2 0-.39-.01-.58A9.22 9.22 0 0 0 23 3z"/></svg>
+          </a>
+          <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-slate-400 hover:text-pink-500 transition-colors">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><circle cx="17.5" cy="6.5" r="1.5"/></svg>
+          </a>
+          <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-slate-400 hover:text-blue-700 transition-colors">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M8 11v5h2v-5H8zm1-2a1 1 0 1 1-2 0 1 1 0 0 1 2 0zm4 2v5h2v-2.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5V16h2v-2.5c0-2.21-1.79-4-4-4s-4 1.79-4 4z"/></svg>
+          </a>
+        </div>
+
         {/* User */}
         {user && (
           <div
@@ -257,7 +273,7 @@ const SidebarContent = ({ collapsed, onNavClick }) => {
             {!collapsed && (
               <div className="min-w-0 flex-1">
                 <p className="truncate text-xs font-semibold text-text-primary">{user.name}</p>
-                <p className={`text-[10px] truncate font-medium ${user.role === 'developer' ? 'text-purple-400' : 'text-slate-400'}`}>
+                <p className={`text-[10px] truncate font-medium ${user.role === 'developer' ? 'text-purple-400' : 'text-slate-400'}`}> 
                   {user.role}
                 </p>
               </div>

@@ -7,6 +7,7 @@ import api from '../../app/axios';
 import ThemeToggle from '../ui/ThemeToggle';
 import useThemeMode from '../../hooks/useThemeMode';
 import { getLucideIcon } from '../../utils/getLucideIcon';
+import { SOCIAL_LINKS } from './socialLinks';
 
 const getLocalized = (value) => {
   if (!value) return '';
@@ -384,6 +385,23 @@ const PremiumSiteHeader = () => {
                   )}
                 </div>
               )}
+
+              {/* Social Media Icons */}
+              <div className="mt-6 flex flex-wrap items-center justify-center gap-3 border-t border-black/10 pt-4">
+                {SOCIAL_LINKS.map(({ label, href, Icon }) => (
+                  <a
+                    key={label}
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    title={label}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-black/15 bg-white text-black transition hover:border-black hover:bg-black hover:text-white"
+                  >
+                    <Icon className="h-4 w-4" />
+                  </a>
+                ))}
+              </div>
             </div>
           </div>
         </div>
