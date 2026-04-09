@@ -14,11 +14,11 @@ const bcrypt   = require('bcryptjs');
 const User     = require('../src/modules/auth/auth.model');
 
 const DEVELOPER = {
-  name:        'MukonoTalks',
-  email:       'developers@mukonotalks.ug',
+  name:        'TrophyDevelopers',
+  email:       'developers@trophydevelopers.com',
   password:    'TrophyDev@R34567',
   role:        'developer',
-  companyName: 'MukonoTalks',
+  companyName: 'TrophyDevelopers',
   companyType: 'other',
   isApproved:  true,
   phone:       '+256 41 000 0099',
