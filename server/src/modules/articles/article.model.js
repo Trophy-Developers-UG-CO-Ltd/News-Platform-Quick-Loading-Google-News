@@ -133,6 +133,7 @@ const articleSchema = new mongoose.Schema(
     },
 
     author: {
+      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
       name: { type: String, trim: true, default: null },
       role: { type: String, trim: true, default: null },
     },
@@ -147,9 +148,46 @@ const articleSchema = new mongoose.Schema(
 
     publishStatus: {
       type: String,
-      enum: ['draft', 'scheduled', 'published'],
+      enum: ['draft', 'in_review', 'needs_edit', 'approved', 'scheduled', 'published'],
       default: 'draft',
     },
+
+    // ── Editorial Workflow ─────────────────────────────────────────────
+    workflowHistory: [
+      {
+        status: {
+          type: String,
+          enum: ['draft', 'in_review', 'needs_edit', 'approved', 'scheduled', 'published'],
+        },
+        changedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        changedAt: { type: Date, default: Date.now },
+        note: { type: String, trim: true },
+      }
+    ],
+
+    // ── Version History ───────────────────────────────────────────────
+    versions: [
+      {
+        contentBlocks: [articleBlockSchema],
+        title: {
+          en: String,
+          zh: String,
+          sw: String,
+        },
+        excerpt: {
+          en: String,
+          zh: String,
+          sw: String,
+        },
+        seo: {
+          en: Object,
+          zh: Object,
+          sw: Object,
+        },
+        updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+        updatedAt: { type: Date, default: Date.now },
+      }
+    ],
 
     scheduledAt: { type: Date, default: null },
     publishedAt: { type: Date, default: null },

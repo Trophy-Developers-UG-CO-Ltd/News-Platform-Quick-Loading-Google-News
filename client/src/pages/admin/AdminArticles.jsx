@@ -121,8 +121,8 @@ const AdminArticles = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Publishing Engine</h1>
-          <p className="text-sm text-gray-500 mt-1">
+          <h1 className="text-2xl font-bold text-white">Publishing Engine</h1>
+          <p className="text-sm text-white mt-1">
             Manage articles, insights, knowledge base, and announcements
           </p>
         </div>
@@ -146,13 +146,13 @@ const AdminArticles = () => {
       <div className="card p-4 mb-6">
         <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-white" />
             <input
               type="text"
               placeholder="Search articles..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm text-white placeholder-white bg-gray-900"
             />
           </div>
           <div className="flex gap-2">
@@ -178,7 +178,7 @@ const AdminArticles = () => {
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
-            <button type="submit" className="btn-primary px-4 py-2 text-sm">Search</button>
+            <button type="submit" className="btn-primary px-4 py-2 text-sm text-white">Search</button>
           </div>
         </form>
       </div>
@@ -188,8 +188,8 @@ const AdminArticles = () => {
         <div className="flex justify-center py-16"><Spinner size="lg" /></div>
       ) : !articles || articles.length === 0 ? (
         <div className="card p-12 text-center">
-          <p className="text-gray-500 mb-4">No articles found.</p>
-          <Link to="/admin/articles/new" className="btn-primary px-6 py-2">
+          <p className="text-white mb-4">No articles found.</p>
+          <Link to="/admin/articles/new" className="btn-primary px-6 py-2 text-white">
             Create Your First Article
           </Link>
         </div>
@@ -201,7 +201,7 @@ const AdminArticles = () => {
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-semibold text-gray-800 truncate">
+                      <h3 className="font-semibold text-white truncate">
                         {article.title?.en || 'Untitled'}
                       </h3>
                       <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${STATUS_COLORS[article.publishStatus]}`}>
@@ -211,7 +211,7 @@ const AdminArticles = () => {
                         {article.category}
                       </span>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-gray-500">
+                    <div className="flex items-center gap-3 text-xs text-white">
                       <span>/{article.localizedSlug?.en}</span>
                       {article.viewCount > 0 && (
                         <span className="flex items-center gap-1">

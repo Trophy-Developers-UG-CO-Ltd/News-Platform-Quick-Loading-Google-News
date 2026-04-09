@@ -79,10 +79,11 @@ const TEXT_WEIGHT_CLASS = {
 const PremiumSiteHeader = () => {
   const { isDarkMode, toggleTheme } = useThemeMode();
   const { pathname } = useLocation();
-  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
   const mobileSearchInputRef = useRef(null);
 
   const [mobilePanelOpen, setMobilePanelOpen] = useState(false);
+  const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState('');
@@ -239,15 +240,52 @@ const PremiumSiteHeader = () => {
           <div className="order-1">
             <ThemeToggle isDarkMode={isDarkMode} onToggle={toggleTheme} compactOnMobile />
           </div>
-          {/* Account Icon - Always Visible */}
-          <Link
-            to={isAuthenticated ? "/dashboard" : "/mukono11login"}
-            className="inline-flex items-center justify-center rounded-full border border-white/40 p-2 hover:border-white/80 transition"
-            aria-label={isAuthenticated ? "Account" : "Login"}
-            title={isAuthenticated ? "Account" : "Login"}
-          >
-            <FiUser size={20} />
-          </Link>
+          {/* Account Icon with Dropdown */}
+          <div className="relative">
+            {isAuthenticated ? (
+              <>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-full border border-white/40 p-2 hover:border-white/80 transition focus:outline-none"
+                  aria-label="Account menu"
+                  title="Account menu"
+                  onClick={() => setShowAccountDropdown((v) => !v)}
+                  onBlur={() => setTimeout(() => setShowAccountDropdown(false), 150)}
+                >
+                  <FiUser size={20} />
+                </button>
+                {showAccountDropdown && (
+                  <div className="absolute right-0 mt-2 w-44 rounded-md bg-white text-black shadow-lg ring-1 ring-black/10 z-50 dark:bg-black dark:text-white border border-black/10 dark:border-white/10">
+                    <Link
+                      to="/dashboard"
+                      className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition"
+                      onClick={() => setShowAccountDropdown(false)}
+                    >
+                      My Account
+                    </Link>
+                    {user?.role === 'admin' && (
+                      <Link
+                        to="/admin"
+                        className="block px-4 py-2 text-sm text-black dark:text-white hover:bg-gray-100 dark:hover:bg-white/10 transition"
+                        onClick={() => setShowAccountDropdown(false)}
+                      >
+                        Admin Dashboard
+                      </Link>
+                    )}
+                  </div>
+                )}
+              </>
+            ) : (
+              <Link
+                to="/mukono11login"
+                className="inline-flex items-center justify-center rounded-full border border-white/40 p-2 hover:border-white/80 transition"
+                aria-label="Login"
+                title="Login"
+              >
+                <FiUser size={20} />
+              </Link>
+            )}
+          </div>
           <Link
             to={desktopSearchHref}
             className="hidden cursor-pointer hover:text-white/70 md:inline-flex"

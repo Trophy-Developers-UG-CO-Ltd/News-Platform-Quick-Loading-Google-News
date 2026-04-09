@@ -123,7 +123,7 @@ const SidebarItem = ({ item, collapsed, onClick }) => {
         className={[
           'flex items-center gap-3 px-3 py-2 rounded-lg mx-2 text-sm font-medium transition-colors',
           active
-            ? 'bg-accent-blue text-text-primary'
+            ? 'bg-accent-blue text-white'
             : 'text-slate-300 hover:bg-slate-800 hover:text-text-primary',
         ].join(' ')}
       >

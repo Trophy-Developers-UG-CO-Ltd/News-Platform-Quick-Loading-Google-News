@@ -55,34 +55,26 @@ const MukonoHome = () => {
   const [opportunitiesSection, setOpportunitiesSection] = useState<any>(null);
   const [inquirySection, setInquirySection] = useState<any>(null);
 
+  // REAL API: Fetch homepage data
   useEffect(() => {
-    let mounted = true;
-
-    const loadHomepage = async () => {
-      const [heroRes, latestRes, trendingRes, videoRes, opportunitiesRes, inquiryRes] = await Promise.allSettled([
-        api.get('/hero/active'),
-        api.get('/articles', { params: { page: 1, limit: 12 } }),
-        api.get('/articles', { params: { page: 1, limit: 8, sort: 'viewCount' } }),
-        api.get('/homepage-sections/video'),
-        api.get('/homepage-sections/opportunities'),
-        api.get('/homepage-sections/inquiry'),
-      ]);
-
-      if (!mounted) return;
-
-      setHeroSlides(heroRes.status === 'fulfilled' ? (heroRes.value?.data || []) : []);
-      setArticles(latestRes.status === 'fulfilled' ? (latestRes.value?.data?.articles || []) : []);
-      setTrending(trendingRes.status === 'fulfilled' ? (trendingRes.value?.data?.articles || []) : []);
-      setVideoSection(videoRes.status === 'fulfilled' ? (videoRes.value?.data || null) : null);
-      setOpportunitiesSection(opportunitiesRes.status === 'fulfilled' ? (opportunitiesRes.value?.data || null) : null);
-      setInquirySection(inquiryRes.status === 'fulfilled' ? (inquiryRes.value?.data || null) : null);
-    };
-
-    loadHomepage();
-
-    return () => {
-      mounted = false;
-    };
+    fetch("/api/v1/home")
+      .then((res) => res.json())
+      .then((data) => {
+        setHeroSlides(data.heroSlides || []);
+        setArticles(data.articles || []);
+        setTrending(data.trending || []);
+        setVideoSection(data.videoSection || null);
+        setOpportunitiesSection(data.opportunitiesSection || null);
+        setInquirySection(data.inquirySection || null);
+      })
+      .catch(() => {
+        setHeroSlides([]);
+        setArticles([]);
+        setTrending([]);
+        setVideoSection(null);
+        setOpportunitiesSection(null);
+        setInquirySection(null);
+      });
   }, []);
 
   const mainHero = useMemo(() => {
@@ -165,30 +157,56 @@ const MukonoHome = () => {
 
       <section className="mx-auto grid w-full max-w-7xl gap-4 px-4 md:grid-cols-3">
         <div className="group relative overflow-hidden rounded-3xl shadow-card md:col-span-2">
-          <img src={mainHero.image || FALLBACK_IMAGE} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-
-          <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-dark-black via-black/40 to-transparent p-6">
-            <span className="w-fit rounded-full bg-white px-3 py-1 text-xs font-bold tracking-wide text-black">{mainHero.category}</span>
-
+          <img
+            src={getArticleImage(articles[0])}
+            alt=""
+            className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+          <div className="absolute inset-0 flex flex-col justify-end p-6">
+            <Link
+              to={`/news?category=${encodeURIComponent(mainHero.category)}`}
+              className="w-fit rounded-full bg-white px-3 py-1 text-xs font-bold tracking-wide text-black hover:bg-gray-200 transition-colors"
+            >
+              {mainHero.category}
+            </Link>
             <h2 className="text-2xl font-bold leading-tight md:text-3xl">
-              <Link to={mainHero.link} className="hover:underline">
+              <Link to={mainHero.link} className="hover:underline" onClick={() => {
+                if (articles[0]?._id) {
+                  fetch("/api/v1/track-view", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ postId: articles[0]._id }),
+                  });
+                }
+              }}>
                 {mainHero.title}
               </Link>
             </h2>
-
             <p className="mt-2 text-xs text-text-muted">{mainHero.meta}</p>
           </div>
         </div>
-
         <div className="flex flex-col gap-4">
           {sideStories.map((story) => (
             <div key={story._id} className="group relative overflow-hidden rounded-3xl shadow-soft">
               <img src={getArticleImage(story)} alt="" className="h-full w-full object-cover transition duration-500 group-hover:scale-105" />
-
               <div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-dark-black to-transparent p-4">
-                <span className="w-fit rounded-full bg-white px-2.5 py-1 text-xs font-bold tracking-wide text-black">{(story?.category || 'entertainment').toUpperCase()}</span>
+                <Link
+                  to={`/news?category=${encodeURIComponent(story?.category || 'entertainment')}`}
+                  className="w-fit rounded-full bg-white px-2.5 py-1 text-xs font-bold tracking-wide text-black hover:bg-gray-200 transition-colors"
+                >
+                  {(story?.category || 'entertainment').toUpperCase()}
+                </Link>
                 <h3 className="text-sm font-semibold">
-                  <Link to={`/news/${getArticleSlug(story)}`} className="hover:underline">
+                  <Link to={`/news/${getArticleSlug(story)}`} className="hover:underline" onClick={() => {
+                    if (story?._id) {
+                      fetch("/api/v1/track-view", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ postId: story._id }),
+                      });
+                    }
+                  }}>
                     {getArticleTitle(story)}
                   </Link>
                 </h3>
@@ -200,7 +218,7 @@ const MukonoHome = () => {
 
       <div className="mx-auto w-full max-w-7xl px-4 py-6">
         <div className="flex h-24 items-center justify-center rounded-2xl border border-dark-border bg-white text-text-secondary dark:bg-dark-surface dark:text-text-dark-muted">
-          Ad Space
+          <img src="/ads/leaderboard.jpg" className="h-full object-cover" alt="Ad" />
         </div>
       </div>
 
@@ -210,15 +228,23 @@ const MukonoHome = () => {
           <h3 className="text-lg font-semibold">Trending Now</h3>
         </div>
 
-        <div className="flex gap-4 overflow-x-auto">
+        <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-2">
           {trendingStories.map((story) => (
             <div
               key={story._id}
-              className="min-w-[220px] overflow-hidden rounded-2xl bg-white shadow-soft transition hover:bg-light-hover hover:shadow-card dark:bg-dark-surface dark:hover:bg-dark-hover"
+              className="snap-start min-w-[240px] overflow-hidden rounded-2xl bg-white shadow-soft transition hover:bg-light-hover hover:shadow-card dark:bg-dark-surface dark:hover:bg-dark-hover"
             >
               <img src={getArticleImage(story)} alt="" className="h-[120px] w-full object-cover" />
               <div className="p-3 text-sm text-text-secondary">
-                <Link to={`/news/${getArticleSlug(story)}`} className="hover:text-text-primary">
+                <Link to={`/news/${getArticleSlug(story)}`} className="hover:text-text-primary" onClick={() => {
+                  if (story?._id) {
+                    fetch("/api/v1/track-view", {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ postId: story._id }),
+                    });
+                  }
+                }}>
                   {getArticleTitle(story)}
                 </Link>
               </div>
@@ -237,15 +263,20 @@ const MukonoHome = () => {
                 className="w-full transition duration-500 group-hover:scale-105"
               />
             </div>
-
             <span className="mt-2 inline-block rounded-full bg-black px-3 py-1 text-xs font-bold tracking-wide text-white dark:bg-white dark:text-black">{(story?.category || 'news').toUpperCase()}</span>
-
             <h3 className="mt-1 line-clamp-2 font-semibold text-text-primary">
-              <Link to={`/news/${getArticleSlug(story)}`} className="hover:underline">
+              <Link to={`/news/${getArticleSlug(story)}`} className="hover:underline" onClick={() => {
+                if (story?._id) {
+                  fetch("/api/v1/track-view", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ postId: story._id }),
+                  });
+                }
+              }}>
                 {getArticleTitle(story)}
               </Link>
             </h3>
-
             <p className="mt-1 line-clamp-2 text-xs text-text-muted">{getArticleExcerpt(story)}</p>
           </div>
         ))}

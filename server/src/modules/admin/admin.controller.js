@@ -4,8 +4,41 @@
  */
 
 const adminService = require('./admin.service');
+const AuditService = require('../audit/audit.service');
 const { asyncHandler } = require('../../middlewares/error.middleware');
 const { cache } = require('../../middlewares/cache.middleware');
+/**
+ * @desc    Get audit logs (paginated, filterable)
+ * @route   GET /api/admin/audit
+ * @access  Admin
+ */
+const getAuditLogs = asyncHandler(async (req, res) => {
+  // Accept query params for filtering/pagination
+  const {
+    action,
+    performedBy,
+    targetModel,
+    targetId,
+    severity,
+    startDate,
+    endDate,
+    page = 1,
+    limit = 50,
+  } = req.query;
+
+  const result = await AuditService.query({
+    action,
+    performedBy,
+    targetModel,
+    targetId,
+    severity,
+    startDate,
+    endDate,
+    page: parseInt(page, 10),
+    limit: parseInt(limit, 10),
+  });
+  res.status(200).json({ success: true, ...result });
+});
 
 /**
  * @desc    Get admin dashboard stats
@@ -42,7 +75,7 @@ const clearCache = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, message: `Cache cleared — ${before} entries removed` });
 });
 
-module.exports = { getDashboardStats, getCacheStats, clearCache };
+module.exports = { getDashboardStats, getCacheStats, clearCache, getAuditLogs };
 
 // MukonoTalks
 

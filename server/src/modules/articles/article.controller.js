@@ -9,6 +9,34 @@ const articleService = require('./article.service');
 const { asyncHandler } = require('../../middlewares/error.middleware');
 
 /**
+ * Transition article status (review, approve, request edit, etc.)
+ * PATCH /api/articles/transition/:id
+ */
+const transitionArticleStatus = asyncHandler(async (req, res) => {
+  try {
+    const { newStatus, note } = req.body;
+    const article = await articleService.transitionArticleStatus(req.params.id, newStatus, req, note);
+    res.status(200).json({ success: true, article });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * Rollback to a previous version
+ * PATCH /api/articles/rollback/:id
+ */
+const rollbackArticleVersion = asyncHandler(async (req, res) => {
+  try {
+    const { versionIndex } = req.body;
+    const article = await articleService.rollbackArticleVersion(req.params.id, versionIndex, req);
+    res.status(200).json({ success: true, article });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
+  }
+});
+
+/**
  * Create a new article (Admin)
  * POST /api/articles
  */
@@ -149,6 +177,8 @@ module.exports = {
   getAllArticles,
   getArticleById,
   getArticleAnalytics,
+  transitionArticleStatus,
+  rollbackArticleVersion,
 };
 
 // MukonoTalks

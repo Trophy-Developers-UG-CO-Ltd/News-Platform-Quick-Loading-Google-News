@@ -1,4 +1,19 @@
 ﻿/**
+ * Transition article status (review, approve, request edit, etc.)
+ */
+const transitionArticleStatus = async (articleId, newStatus, note = '') => {
+  const response = await api.patch(`/articles/transition/${articleId}`, { newStatus, note });
+  return response.data;
+};
+
+/**
+ * Rollback to a previous version
+ */
+const rollbackArticleVersion = async (articleId, versionIndex) => {
+  const response = await api.patch(`/articles/rollback/${articleId}`, { versionIndex });
+  return response.data;
+};
+/**
  * Article API service
  * Publishing engine fetch operations for public and admin
  * @module features/articles/articleService
@@ -97,6 +112,8 @@ const articleService = {
   scheduleArticle,
   deleteArticle,
   getArticleAnalytics,
+  transitionArticleStatus,
+  rollbackArticleVersion,
 };
 
 export default articleService;

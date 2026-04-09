@@ -1,0 +1,36 @@
+// prisma/schema.prisma
+// MukonoTalks user and publisher profile schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("MONGO_URI")
+}
+
+model User {
+  id             String   @id @default(auto()) @map("_id")
+  name           String
+  email          String   @unique
+  phone          String?
+  companyName    String
+  companyType    String   // advertising, personal, media, agency, other
+  accountType    String   // advertiser, personal
+  passwordHash   String
+  role           String   // admin, editor, writer, advertiser, guest
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  profile        PublisherProfile?
+}
+
+model PublisherProfile {
+  id        String   @id @default(auto()) @map("_id")
+  userId    String   @unique
+  bio       String?
+  avatar    String?
+  settings  Json
+  createdAt DateTime @default(now())
+}

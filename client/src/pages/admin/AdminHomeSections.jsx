@@ -50,11 +50,11 @@ const SECTION_TABS = [
   { key: 'industries',         label: 'Industries',          icon: Factory,        color: 'text-blue-600'    },
   { key: 'products',           label: 'Products',            icon: Package,        color: 'text-green-600'   },
   { key: 'advantages',         label: 'Advantages',          icon: ShieldCheck,    color: 'text-purple-600'  },
-  { key: 'faq',                label: 'FAQ',                 icon: HelpCircle,     color: 'text-orange-600'  },
-  { key: 'cta',                label: 'CTA Banner',          icon: Megaphone,      color: 'text-pink-600'    },
-  { key: 'video',              label: 'Video',               icon: Video,          color: 'text-teal-600'    },
+  { key: 'video',              label: 'Video Highlights',    icon: Video,          color: 'text-teal-600'    },
+  { key: 'inquiry',            label: 'Contact/Advertise',   icon: MessageCircle,  color: 'text-emerald-600' },
+  { key: 'featured-products',  label: 'Featured News',       icon: ShoppingBag,    color: 'text-amber-600'   },
+  { key: 'values',             label: 'Pop Culture',         icon: Heart,          color: 'text-rose-600'    },
   { key: 'opportunities',      label: 'Opportunities',       icon: Briefcase,      color: 'text-cyan-600'    },
-  { key: 'inquiry',            label: 'Inquiry',             icon: MessageCircle,  color: 'text-emerald-600' },
 ];
 
 const SECTION_CONFIG = {
@@ -77,7 +77,7 @@ const SECTION_CONFIG = {
     hasBottomCta: false,
   },
   values: {
-    itemFields:  ['icon', 'title', 'description'],
+    itemFields:  ['icon', 'title', 'description', 'featuredImage'],
     itemLabel:   'Value Card',
     hasItems:    true,
     hasHeading:  true,
@@ -86,7 +86,7 @@ const SECTION_CONFIG = {
     hasBottomCta: false,
   },
   industries: {
-    itemFields:  ['icon', 'title', 'description'],
+    itemFields:  ['icon', 'title', 'description', 'featuredImage'],
     itemLabel:   'Industry Card',
     hasItems:    true,
     hasHeading:  true,
@@ -95,7 +95,7 @@ const SECTION_CONFIG = {
     hasBottomCta: false,
   },
   products: {
-    itemFields:  ['icon', 'title', 'description', 'link'],
+    itemFields:  ['icon', 'title', 'description', 'link', 'featuredImage'],
     itemLabel:   'Product Card',
     hasItems:    true,
     hasHeading:  true,
@@ -104,7 +104,7 @@ const SECTION_CONFIG = {
     hasBottomCta: true,
   },
   advantages: {
-    itemFields:  ['icon', 'title', 'description'],
+    itemFields:  ['icon', 'title', 'description', 'featuredImage'],
     itemLabel:   'Advantage Card',
     hasItems:    true,
     hasHeading:  true,
@@ -113,7 +113,7 @@ const SECTION_CONFIG = {
     hasBottomCta: false,
   },
   faq: {
-    itemFields:  ['title', 'description'],         // title = question, description = answer
+    itemFields:  ['title', 'description', 'featuredImage'],         // title = question, description = answer
     itemLabel:   'FAQ Item',
     hasItems:    true,
     hasHeading:  true,
@@ -124,7 +124,7 @@ const SECTION_CONFIG = {
     itemDescLabel:  'Answer',
   },
   cta: {
-    itemFields:  ['icon', 'label'],
+    itemFields:  ['icon', 'label', 'featuredImage'],
     itemLabel:   'Perk',
     hasItems:    true,
     hasHeading:  true,
@@ -133,7 +133,7 @@ const SECTION_CONFIG = {
     hasBottomCta: false,
   },
   video: {
-    itemFields:  [],
+    itemFields:  ['featuredImage'],
     itemLabel:   '',
     hasItems:    false,
     hasHeading:  true,
@@ -142,7 +142,7 @@ const SECTION_CONFIG = {
     hasBottomCta: false,
   },
   opportunities: {
-    itemFields:  ['icon', 'title', 'description', 'link'],
+    itemFields:  ['icon', 'title', 'description', 'link', 'featuredImage'],
     itemLabel:   'Opportunity',
     hasItems:    true,
     hasHeading:  true,
@@ -176,64 +176,34 @@ const IconPicker = ({ value, onChange }) => {
       })).filter((g) => g.icons.length > 0)
     : ICON_GROUPS;
 
-  const SelectedIcon = getLucideIcon(value);
-
   return (
-    <div className="relative">
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-2 px-3 py-2 border rounded-none bg-white hover:bg-gray-50 transition-colors w-full text-left"
-      >
-        <SelectedIcon size={18} className="text-gray-600 flex-shrink-0" />
-        <span className="text-sm text-gray-700 flex-1 min-w-0 truncate">{value || 'Select icon…'}</span>
-        <Pencil size={14} className="text-gray-400 flex-shrink-0" />
-      </button>
-
-      {open && (
-        <div className="absolute z-50 mt-1 top-full left-0 w-72 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden">
-          <div className="p-2 border-b">
-            <input
-              type="text"
-              placeholder="Search icons…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full px-3 py-1.5 text-sm border rounded-[48px] focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              autoFocus
-            />
+    <div>
+      {/* ...other IconPicker UI... */}
+      <div className="p-2 max-h-64 overflow-y-auto space-y-3">
+        {filtered.map((group) => (
+          <div key={group.label}>
+            <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400 mb-1 px-1">
+              {group.label}
+            </p>
+            <div className="grid grid-cols-8 gap-1">
+              {group.icons.map((name) => {
+                const Icon = getLucideIcon(name);
+                return (
+                  <button
+                    key={name}
+                    type="button"
+                    className="flex items-center gap-2 px-3 py-2 border rounded-none bg-white hover:bg-gray-50 transition-colors w-full text-left"
+                    onClick={() => onChange(name)}
+                  >
+                    <Icon size={16} className={value === name ? 'text-blue-600' : 'text-gray-600'} />
+                    <span className="text-xs">{name}</span>
+                  </button>
+                );
+              })}
+            </div>
           </div>
-          <div className="p-2 max-h-64 overflow-y-auto space-y-3">
-            {filtered.map((group) => (
-              <div key={group.label}>
-                <p className="text-[10px] font-bold tracking-widest uppercase text-gray-400 mb-1 px-1">
-                  {group.label}
-                </p>
-                <div className="grid grid-cols-8 gap-1">
-                  {group.icons.map((name) => {
-                    const Icon = getLucideIcon(name);
-                    return (
-                      <button
-                        key={name}
-                        type="button"
-                        title={name}
-                        onClick={() => { onChange(name); setOpen(false); setSearch(''); }}
-                        className={`p-1.5 rounded-none hover:bg-blue-50 transition-colors flex items-center justify-center ${value === name ? 'bg-blue-100 ring-2 ring-blue-500' : ''}`}
-                      >
-                        <Icon size={16} className={value === name ? 'text-blue-600' : 'text-gray-600'} />
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="p-2 border-t bg-gray-50">
-            <button type="button" onClick={() => { setOpen(false); setSearch(''); }} className="w-full text-xs text-gray-500 hover:text-gray-700 py-1">
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+        ))}
+      </div>
     </div>
   );
 };

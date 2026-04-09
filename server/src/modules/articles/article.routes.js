@@ -1,4 +1,5 @@
-﻿/**
+﻿
+/**
  * Article routes
  * Admin-protected CRUD + publish/schedule + public endpoints
  * Cache on public reads, invalidation on mutations
@@ -21,6 +22,22 @@ const {
   getPublicArticleSchema,
   listArticlesQuerySchema,
 } = require('./article.validation');
+
+// ─── Editorial Workflow: Status Transitions & Versioning ─────────────
+
+router.patch(
+  '/transition/:id',
+  protect,
+  authorize('writer', 'editor', 'admin', 'developer'),
+  articleController.transitionArticleStatus
+);
+
+router.patch(
+  '/rollback/:id',
+  protect,
+  authorize('editor', 'admin', 'developer'),
+  articleController.rollbackArticleVersion
+);
 
 // ─── Admin Routes (Protected — admin only) ─────────────────────
 

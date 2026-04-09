@@ -1,4 +1,107 @@
 ﻿/**
+ * Transition article status (review, approve, request edit, etc.)
+ * Only allowed by specific roles for each transition
+ */
+const transitionArticleStatus = async (articleId, newStatus, req, note = '') => {
+  const article = await Article.findById(articleId);
+  if (!article) {
+    const error = new Error('Article not found');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Role-based permission enforcement
+  const role = req.user.role;
+  const allowedTransitions = {
+    draft: ['in_review'],
+    in_review: ['needs_edit', 'approved'],
+    needs_edit: ['in_review'],
+    approved: ['scheduled', 'published'],
+    scheduled: ['published'],
+    published: ['draft'],
+  };
+  const canTransition = allowedTransitions[article.publishStatus]?.includes(newStatus);
+  if (!canTransition) {
+    const error = new Error(`Cannot transition from ${article.publishStatus} to ${newStatus}`);
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Only editors/admins can approve, schedule, or publish
+  if (["approved", "scheduled", "published"].includes(newStatus) && !['editor', 'admin', 'developer'].includes(role)) {
+    const error = new Error('Only editors or admins can approve, schedule, or publish');
+    error.statusCode = 403;
+    throw error;
+  }
+  // Only writers can submit for review or request edit
+  if (["in_review", "needs_edit"].includes(newStatus) && !['writer', 'editor', 'admin', 'developer'].includes(role)) {
+    const error = new Error('Only writers, editors, or admins can submit for review or request edit');
+    error.statusCode = 403;
+    throw error;
+  }
+
+  // Save workflow history
+  article.workflowHistory.push({
+    status: newStatus,
+    changedBy: req.user._id,
+    changedAt: new Date(),
+    note,
+  });
+  article.publishStatus = newStatus;
+  article.updatedBy = req.user._id;
+  await article.save();
+  return article;
+};
+
+/**
+ * Save previous version on update
+ */
+const saveVersionOnUpdate = async (article, req) => {
+  article.versions = article.versions || [];
+  article.versions.push({
+    contentBlocks: article.contentBlocks,
+    title: article.title,
+    excerpt: article.excerpt,
+    seo: article.seo,
+    updatedBy: req.user._id,
+    updatedAt: new Date(),
+  });
+  // Limit version history to last 20
+  if (article.versions.length > 20) article.versions = article.versions.slice(-20);
+  await article.save();
+};
+
+/**
+ * Rollback to a previous version
+ */
+const rollbackArticleVersion = async (articleId, versionIndex, req) => {
+  const article = await Article.findById(articleId);
+  if (!article) {
+    const error = new Error('Article not found');
+    error.statusCode = 404;
+    throw error;
+  }
+  if (!article.versions || !article.versions[versionIndex]) {
+    const error = new Error('Version not found');
+    error.statusCode = 404;
+    throw error;
+  }
+  // Only editors/admins can rollback
+  if (!['editor', 'admin', 'developer'].includes(req.user.role)) {
+    const error = new Error('Only editors or admins can rollback');
+    error.statusCode = 403;
+    throw error;
+  }
+  const version = article.versions[versionIndex];
+  article.contentBlocks = version.contentBlocks;
+  article.title = version.title;
+  article.excerpt = version.excerpt;
+  article.seo = version.seo;
+  article.updatedBy = req.user._id;
+  await article.save();
+  return article;
+};
+/**
  * Article service layer
  * Business logic for enterprise publishing engine
  * CRUD, publish/schedule workflow, slug validation, analytics, audit trail
@@ -599,6 +702,9 @@ module.exports = {
   getArticleById,
   getArticleAnalytics,
   processScheduledArticles,
+  transitionArticleStatus,
+  rollbackArticleVersion,
+  saveVersionOnUpdate,
 };
 
 // MukonoTalks

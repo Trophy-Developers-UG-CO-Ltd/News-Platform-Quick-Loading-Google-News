@@ -1,4 +1,25 @@
-﻿/**
+﻿export const transitionArticleStatus = createAsyncThunk(
+  'articles/transitionStatus',
+  async ({ articleId, newStatus, note }, thunkAPI) => {
+    try {
+      return await articleService.transitionArticleStatus(articleId, newStatus, note);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+
+export const rollbackArticleVersion = createAsyncThunk(
+  'articles/rollbackVersion',
+  async ({ articleId, versionIndex }, thunkAPI) => {
+    try {
+      return await articleService.rollbackArticleVersion(articleId, versionIndex);
+    } catch (error) {
+      return thunkAPI.rejectWithValue(error.response?.data?.message || error.message);
+    }
+  }
+);
+/**
  * Article Redux slice
  * State management for enterprise publishing engine
  * @module features/articles/articleSlice
@@ -125,6 +146,32 @@ const articleSlice = createSlice({
         state.analytics = action.payload.analytics;
       })
       .addCase(fetchArticleAnalytics.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Transition article status
+      .addCase(transitionArticleStatus.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(transitionArticleStatus.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.currentArticle = action.payload.article;
+      })
+      .addCase(transitionArticleStatus.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload;
+      })
+      // Rollback article version
+      .addCase(rollbackArticleVersion.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(rollbackArticleVersion.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.currentArticle = action.payload.article;
+      })
+      .addCase(rollbackArticleVersion.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload;
       });

@@ -54,8 +54,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ['customer', 'admin', 'developer'],
-      default: 'customer',
+      enum: ['guest', 'writer', 'editor', 'admin', 'developer', 'customer'],
+      default: 'guest',
     },
     isApproved: {
       type: Boolean,

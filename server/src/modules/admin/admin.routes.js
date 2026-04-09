@@ -14,7 +14,12 @@ const { authorize } = require('../../middlewares/role.middleware');
 // All admin routes require admin role — server-side enforced
 router.use(protect, authorize('admin'));
 
+
+// Admin dashboard
 router.get('/dashboard', adminController.getDashboardStats);
+
+// Audit logs endpoint
+router.get('/audit', adminController.getAuditLogs);
 
 // Cache management endpoints
 router.get('/cache/stats', adminController.getCacheStats);

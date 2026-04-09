@@ -204,14 +204,7 @@ const AdminDashboard = () => {
 
       {/* Quick Nav */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">
-        <Link to="/admin/products" className="card p-5 text-center hover:shadow-md transition-shadow">
-          <FiPackage className="h-8 w-8 text-primary-600 mx-auto mb-2" />
-          <p className="font-semibold">Manage Products</p>
-        </Link>
-        <Link to="/admin/orders" className="card p-5 text-center hover:shadow-md transition-shadow">
-          <FiShoppingCart className="h-8 w-8 text-primary-600 mx-auto mb-2" />
-          <p className="font-semibold">Manage Orders</p>
-        </Link>
+        {/* Removed Manage Products and Manage Orders quick nav cards */}
         <Link to="/admin/users" className="card p-5 text-center hover:shadow-md transition-shadow">
           <FiUsers className="h-8 w-8 text-primary-600 mx-auto mb-2" />
           <p className="font-semibold">Manage Users</p>

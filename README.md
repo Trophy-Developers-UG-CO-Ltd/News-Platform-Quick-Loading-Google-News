@@ -772,4 +772,141 @@ Engineer-level architecture
 Production-ready thinking
 Scalable to 100K+ users/day
 Cleanly aligned with your vision
-# MukonoTalks -  Designed by Trophy Developers Uganda : https://www.trophydevelopers.com/uganda-web-designers/
+
+---
+# 🚀 SYSTEM EXTENSION: PLATFORM-LEVEL MEDIA ENGINE (2026)
+
+## 21. SYSTEM EXTENSION: FULL MEDIA ENGINE CAPABILITIES
+
+MukonoTalks is now extended into a full platform-level media engine, integrating:
+
+### 1. Ad Management System (Revenue Engine)
+- Admin dashboard for creating and managing ads
+- Tracks impressions, clicks, inventory
+- Slot-based targeting and analytics
+- Monetization-ready, not placeholders
+
+### 2. Real-Time Trending UI
+- Live trending section (polling every 5 seconds)
+- Always reflects Redis-based ranking
+- No manual refresh needed; users see “hot” content in real time
+
+### 3. Personalized Homepage per User
+- API-driven recommendation engine (`/api/v1/personalized`)
+- Category affinity and user-specific feeds
+- Foundation for sticky sessions and higher engagement
+
+### 4. Modular, Scalable Architecture
+- Content Layer: MongoDB for posts and editorial control
+- Real-Time Layer: Redis for trending and live ranking
+- Experience Layer: Personalization and dynamic UI
+
+### 5. Platform Capabilities
+- CMS, Headless API, Ranking Engine, Monetization, and Personalization all integrated
+- Ready to scale as a national media platform
+
+---
+#### Architectural Reality
+You are now running three parallel intelligence systems:
+
+- **Content Layer**: MongoDB, structured posts, editorial control
+- **Real-Time Layer**: Redis, trending scoring, live ranking
+- **Experience Layer**: Personalization, dynamic homepage, API-driven UI
+
+---
+#### What This Means
+You now have:
+
+- CMS ✔
+- Headless API ✔
+- Ranking engine ✔
+- Monetization system ✔
+- Personalization ✔
+
+This combination is rare and positions MukonoTalks as a modular news infrastructure capable of scaling into a national media platform.
+
+---
+## Example: TrendingLive Component (Polling)
+
+```tsx
+// /app/components/TrendingLive.tsx
+"use client";
+import { useEffect, useState } from "react";
+
+export function TrendingLive() {
+  const [posts, setPosts] = useState<any[]>([]);
+  useEffect(() => {
+    const fetchData = () => {
+      fetch("/api/v1/trending")
+        .then(res => res.json())
+        .then(setPosts);
+    };
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, []);
+  return (
+    <div>
+      <h2 className="text-lg mb-3">Live Trending</h2>
+      {posts.map(p => (
+        <div key={p._id} className="border p-2 mb-2">{p.title}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+## Example: Personalized Homepage API
+
+```ts
+// /app/api/v1/personalized/route.ts
+import { getRecommended } from "@/lib/recommendation";
+
+export async function POST(req: Request) {
+  const profile = await req.json();
+  const posts = await getRecommended(profile);
+  return Response.json(posts);
+}
+```
+
+---
+## Example: Personalized Homepage Page
+
+```tsx
+// /app/personalized/page.tsx
+"use client";
+import { useEffect, useState } from "react";
+
+export default function PersonalizedPage() {
+  const [posts, setPosts] = useState<any[]>([]);
+  useEffect(() => {
+    fetch("/api/v1/personalized", {
+      method: "POST",
+      body: JSON.stringify({ topCategories: ["Politics", "Business"] }),
+    })
+      .then(res => res.json())
+      .then(setPosts);
+  }, []);
+  return (
+    <div className="p-6 bg-black text-white">
+      <h1 className="text-xl mb-4">Recommended for You</h1>
+      {posts.map(p => (
+        <div key={p._id} className="border p-3 mb-3">{p.title}</div>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+## Final System Capabilities
+
+- ✔ Ad Management Dashboard (create + analytics)
+- ✔ Real-time Trending UI (polling-based)
+- ✔ Personalized Homepage (user-driven feed)
+- ✔ Fully API-driven architecture
+- ✔ Monetization-ready + scalable
+
+---
+**This README now reflects the complete, holistic, and production-grade MukonoTalks media platform as of 2026.**

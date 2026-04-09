@@ -152,36 +152,7 @@ const Dashboard = () => {
           </div>
         </div>
 
-        {/* Quick Actions */}
-        <div className="space-y-4">
-          <LocalizedLink to="/orders" className="card p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div className="h-12 w-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <FiPackage className="h-6 w-6 text-blue-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-800">{t('dashboard.myOrders', 'My Orders')}</h3>
-              <p className="text-sm text-gray-500">{t('dashboard.trackOrders', 'Track and view order history')}</p>
-            </div>
-          </LocalizedLink>
-          <LocalizedLink to="/cart" className="card p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div className="h-12 w-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <FiShoppingCart className="h-6 w-6 text-green-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-800">{t('dashboard.shoppingCart', 'Shopping Cart')}</h3>
-              <p className="text-sm text-gray-500">{t('dashboard.viewCart', 'View current cart items')}</p>
-            </div>
-          </LocalizedLink>
-          <LocalizedLink to="/products" className="card p-5 flex items-center gap-4 hover:shadow-md transition-shadow">
-            <div className="h-12 w-12 bg-accent-100 rounded-lg flex items-center justify-center">
-              <FiPackage className="h-6 w-6 text-accent-600" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-800">{t('dashboard.browseProducts', 'Browse Products')}</h3>
-              <p className="text-sm text-gray-500">{t('dashboard.exploreOurCatalog', 'Explore our catalog')}</p>
-            </div>
-          </LocalizedLink>
-        </div>
+        {/* Quick Actions removed as requested */}
       </div>
 
       {/* Danger Zone */}
