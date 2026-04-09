@@ -79,3 +79,7 @@ module.exports = router;
 
 // MukonoTalks
 
+// Technical SEO API endpoints (sitemap, robots.txt, indexing, schema validation, core web vitals)
+const seoTechnicalRoutes = require('./modules/seo');
+router.use('/seo/technical', seoTechnicalRoutes.routes);
+

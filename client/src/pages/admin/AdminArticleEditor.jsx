@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useSearchParams } from 'react-router-dom';
 import articleService from '../../features/articles/articleService';
 import categoryService from '../../features/articles/categoryService';
 import api from '../../app/axios';
@@ -25,6 +25,7 @@ import {
   FiArrowLeft,
 } from 'react-icons/fi';
 import MediaUploadField from '../../components/admin/MediaUploadField';
+import VideoUploadField from '../../components/admin/VideoUploadField';
 
 const LANGS = ['en', 'zh', 'sw'];
 const LANG_LABELS = { en: 'English', zh: 'Chinese (中文)', sw: 'Swahili (Kiswahili)' };
@@ -36,14 +37,7 @@ const BLOCK_TYPES = [
   { value: 'list', label: 'List' },
   { value: 'video', label: 'Video' },
 ];
-const FALLBACK_CATEGORIES = [
-  { value: 'news', label: 'News' },
-  { value: 'entertainment', label: 'Entertainment' },
-  { value: 'politics', label: 'Politics' },
-  { value: 'lifestyle', label: 'Lifestyle' },
-  { value: 'opportunities', label: 'Opportunities' },
-  { value: 'knowledge-base', label: 'Knowledge Base' },
-];
+// No fallback categories: only allow CMS categories
 
 // Helper to normalize options from different sources
 const normalizeOptions = (arr, valueKey = 'slug', labelKey = 'name', fallbackLabel = 'Unnamed') =>
@@ -56,6 +50,23 @@ const normalizeOptions = (arr, valueKey = 'slug', labelKey = 'name', fallbackLab
     .filter((item) => item.value)
     .sort((a, b) => a.label.localeCompare(b.label));
 
+const emptyVideoMeta = {
+  enabled: false,
+  provider: '',
+  videoUrl: '',
+  embedUrl: '',
+  directVideoUrl: '',
+  posterImage: '',
+  thumbnailUrl: '',
+  caption: '',
+  captionFileUrl: '',
+  transcript: '',
+  duration: '',
+  uploadDate: '',
+};
+
+const isVideoCategory = (value = '') => String(value).toLowerCase().includes('video');
+
 const emptyArticle = {
   title: { en: '', zh: '', sw: '' },
   localizedSlug: { en: '', zh: '', sw: '' },
@@ -65,6 +76,7 @@ const emptyArticle = {
   tags: [],
   author: { name: '', role: '' },
   featuredImage: '',
+  videoMeta: emptyVideoMeta,
   seo: {
     en: { title: '', description: '' },
     zh: { title: '', description: '' },
@@ -90,13 +102,16 @@ const sanitizeSlugInput = (str) =>
 const AdminArticleEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const isEditing = Boolean(id);
+  const preferredCategory = searchParams.get('category') || '';
+  const requestedVideoMode = searchParams.get('mode') === 'video';
 
   const [article, setArticle] = useState(emptyArticle);
   const [activeLang, setActiveLang] = useState('en');
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [categoryOptions, setCategoryOptions] = useState(FALLBACK_CATEGORIES);
+  const [categoryOptions, setCategoryOptions] = useState([]);
   const [tagInput, setTagInput] = useState('');
   const [showSchedule, setShowSchedule] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
@@ -140,13 +155,41 @@ const AdminArticleEditor = () => {
           setCategoryOptions(mergedOptions);
           setArticle((prev) => ({
             ...prev,
-            category: mergedOptions.some((option) => option.value === prev.category)
-              ? prev.category
-              : mergedOptions[0].value,
+            category: (() => {
+              if (!isEditing && preferredCategory && mergedOptions.some((option) => option.value === preferredCategory)) {
+                return preferredCategory;
+              }
+              if (!isEditing && requestedVideoMode) {
+                return mergedOptions.find((option) => isVideoCategory(option.value))?.value || prev.category;
+              }
+              return mergedOptions.some((option) => option.value === prev.category)
+                ? prev.category
+                : mergedOptions[0].value;
+            })(),
+            videoMeta: (() => {
+              const targetCategory =
+                (!isEditing && preferredCategory && mergedOptions.some((option) => option.value === preferredCategory))
+                  ? preferredCategory
+                  : (!isEditing && requestedVideoMode
+                    ? (mergedOptions.find((option) => isVideoCategory(option.value))?.value || prev.category)
+                    : prev.category);
+
+              if (!isVideoCategory(targetCategory)) {
+                return prev.videoMeta || emptyVideoMeta;
+              }
+
+              return {
+                ...emptyVideoMeta,
+                ...(prev.videoMeta || {}),
+                enabled: prev.videoMeta?.enabled || !isEditing,
+                posterImage: prev.videoMeta?.posterImage || prev.featuredImage || '',
+                thumbnailUrl: prev.videoMeta?.thumbnailUrl || prev.featuredImage || '',
+              };
+            })(),
           }));
         }
       } catch (err) {
-        if (mounted) setCategoryOptions(FALLBACK_CATEGORIES);
+        if (mounted) setCategoryOptions([]);
       }
     };
 
@@ -172,6 +215,7 @@ const AdminArticleEditor = () => {
             tags: a.tags || [],
             author: a.author || { name: '', role: '' },
             featuredImage: a.featuredImage || '',
+            videoMeta: { ...emptyVideoMeta, ...(a.videoMeta || {}) },
             seo: a.seo || { en: {}, zh: {}, sw: {} },
             relatedProducts: a.relatedProducts || [],
             attachments: a.attachments || [],
@@ -212,6 +256,29 @@ const AdminArticleEditor = () => {
       obj[keys[keys.length - 1]] = value;
       return updated;
     });
+  };
+
+  const handleCategoryChange = (value) => {
+    setArticle((prev) => {
+      const next = JSON.parse(JSON.stringify(prev));
+      next.category = value;
+
+      if (isVideoCategory(value)) {
+        next.videoMeta = {
+          ...emptyVideoMeta,
+          ...(next.videoMeta || {}),
+          enabled: true,
+          posterImage: next.videoMeta?.posterImage || next.featuredImage || '',
+          thumbnailUrl: next.videoMeta?.thumbnailUrl || next.featuredImage || '',
+        };
+      }
+
+      return next;
+    });
+  };
+
+  const updateVideoMeta = (field, value) => {
+    updateField(`videoMeta.${field}`, value);
   };
 
   // ─── Block Management ─────────────────────────────────
@@ -324,6 +391,15 @@ const AdminArticleEditor = () => {
     if (!article.title.en) return toast.error('English title is required');
     if (!article.localizedSlug.en) return toast.error('English slug is required');
     if (!article.category) return toast.error('Category is required');
+    if (isVideoCategory(article.category) && !article.videoMeta?.enabled) {
+      return toast.error('Enable the primary video section for video articles');
+    }
+    if (
+      isVideoCategory(article.category) &&
+      !(article.videoMeta?.videoUrl || article.videoMeta?.embedUrl || article.videoMeta?.directVideoUrl)
+    ) {
+      return toast.error('Video articles require a video URL, embed URL, or direct uploaded video');
+    }
 
     // Diagnostic log
     // eslint-disable-next-line no-console
@@ -336,8 +412,23 @@ const AdminArticleEditor = () => {
 
     setIsSaving(true);
     try {
+      const payload = {
+        ...article,
+        videoMeta: {
+          ...emptyVideoMeta,
+          ...(article.videoMeta || {}),
+        },
+      };
+
+      if (isVideoCategory(payload.category)) {
+        payload.videoMeta.enabled = true;
+        if (!payload.featuredImage) {
+          payload.featuredImage = payload.videoMeta.posterImage || payload.videoMeta.thumbnailUrl || '';
+        }
+      }
+
       if (isEditing) {
-        await articleService.updateArticle(id, article);
+        await articleService.updateArticle(id, payload);
         toast.success('Article updated successfully');
         // Detect slug change and offer to sync redirects + nav menu
         const origSlug = originalSlugRef.current?.en;
@@ -351,7 +442,7 @@ const AdminArticleEditor = () => {
           originalSlugRef.current = { ...article.localizedSlug };
         }
       } else {
-        const res = await articleService.createArticle(article);
+        const res = await articleService.createArticle(payload);
         toast.success('Article created successfully');
         navigate(`/admin/articles/${res.article._id}/edit`);
       }
@@ -374,6 +465,7 @@ const AdminArticleEditor = () => {
     }
   };
 
+
   if (isLoading) {
     return (
       <div className="flex justify-center py-20">
@@ -381,6 +473,18 @@ const AdminArticleEditor = () => {
       </div>
     );
   }
+
+  if (!categoryOptions.length) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20">
+        <div className="text-2xl font-bold text-red-600 mb-4">No categories available</div>
+        <div className="text-gray-600 mb-6">You must create at least one category in the CMS before creating articles.</div>
+        <Link to="/admin/categories" className="btn-primary px-6 py-2">Go to Category Manager</Link>
+      </div>
+    );
+  }
+
+  const isVideoArticle = isVideoCategory(article.category);
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-5xl">
@@ -393,6 +497,11 @@ const AdminArticleEditor = () => {
           <h1 className="text-2xl font-bold text-gray-800">
             {isEditing ? 'Edit Article' : 'New Article'}
           </h1>
+          {isVideoArticle && (
+            <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-red-700">
+              Video Story
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-2">
           {isEditing && article.localizedSlug?.en && (
@@ -497,13 +606,18 @@ const AdminArticleEditor = () => {
             </label>
             <select
               value={article.category}
-              onChange={(e) => updateField('category', e.target.value)}
+              onChange={(e) => handleCategoryChange(e.target.value)}
               className="w-full px-3 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 text-sm bg-white"
             >
               {categoryOptions.map((c) => (
                 <option key={c.value} value={c.value}>{c.label}</option>
               ))}
             </select>
+            {isVideoArticle && (
+              <p className="mt-2 text-xs text-red-600">
+                Video category selected. A dedicated video publishing and SEO panel is now active below.
+              </p>
+            )}
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -554,6 +668,149 @@ const AdminArticleEditor = () => {
           </div>
         </div>
       </div>
+
+      {isVideoArticle && (
+        <div className="card p-6 mb-6 border border-red-200 bg-red-50/40">
+          <div className="mb-4">
+            <h2 className="text-lg font-semibold text-gray-800">Primary Video Experience</h2>
+            <p className="mt-1 text-sm text-gray-600">
+              Video stories get a dedicated SEO package. Fill this section to power the main player, poster art,
+              direct upload, captions, transcript, and schema-ready metadata.
+            </p>
+          </div>
+
+          <div className="mb-5 rounded-xl border border-red-100 bg-white p-4">
+            <label className="flex items-start gap-3">
+              <input
+                type="checkbox"
+                checked={article.videoMeta?.enabled || false}
+                onChange={(e) => updateVideoMeta('enabled', e.target.checked)}
+                className="mt-1 rounded border-gray-300"
+              />
+              <div>
+                <span className="text-sm font-semibold text-gray-800">Enable primary video player and SEO bundle</span>
+                <p className="text-xs text-gray-500">
+                  Required for articles in a video category. This drives the main video source and rich media metadata.
+                </p>
+              </div>
+            </label>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Video Provider</label>
+              <input
+                type="text"
+                value={article.videoMeta?.provider || ''}
+                onChange={(e) => updateVideoMeta('provider', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 text-sm"
+                placeholder="YouTube, Vimeo, TikTok, Self Hosted..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Duration</label>
+              <input
+                type="text"
+                value={article.videoMeta?.duration || ''}
+                onChange={(e) => updateVideoMeta('duration', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 text-sm"
+                placeholder="PT2M34S"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Public Video URL</label>
+              <input
+                type="url"
+                value={article.videoMeta?.videoUrl || ''}
+                onChange={(e) => updateVideoMeta('videoUrl', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 text-sm"
+                placeholder="https://youtube.com/watch?v=..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Embed URL</label>
+              <input
+                type="url"
+                value={article.videoMeta?.embedUrl || ''}
+                onChange={(e) => updateVideoMeta('embedUrl', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 text-sm"
+                placeholder="https://www.youtube.com/embed/..."
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Upload Date</label>
+              <input
+                type="datetime-local"
+                value={article.videoMeta?.uploadDate ? new Date(article.videoMeta.uploadDate).toISOString().slice(0, 16) : ''}
+                onChange={(e) => updateVideoMeta('uploadDate', e.target.value ? new Date(e.target.value).toISOString() : '')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 text-sm"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Caption File URL</label>
+              <input
+                type="url"
+                value={article.videoMeta?.captionFileUrl || ''}
+                onChange={(e) => updateVideoMeta('captionFileUrl', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 text-sm"
+                placeholder="https://cdn.example.com/subtitles.vtt"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <VideoUploadField
+                label="Direct Video Upload"
+                hint="Upload the MP4/WebM source for self-hosted playback"
+                folder="articles/videos"
+                value={article.videoMeta?.directVideoUrl || ''}
+                onChange={(url) => updateVideoMeta('directVideoUrl', url)}
+              />
+            </div>
+            <div>
+              <MediaUploadField
+                label="Poster Image"
+                hint="Shown before the video starts"
+                folder="articles/posters"
+                recommendedSize="1280×720"
+                value={article.videoMeta?.posterImage || ''}
+                onChange={(url) => {
+                  updateVideoMeta('posterImage', url);
+                  if (!article.featuredImage) updateField('featuredImage', url);
+                }}
+              />
+            </div>
+            <div>
+              <MediaUploadField
+                label="Thumbnail Image"
+                hint="Used for previews and schema"
+                folder="articles/thumbnails"
+                recommendedSize="1280×720"
+                value={article.videoMeta?.thumbnailUrl || ''}
+                onChange={(url) => updateVideoMeta('thumbnailUrl', url)}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Video Caption</label>
+              <input
+                type="text"
+                value={article.videoMeta?.caption || ''}
+                onChange={(e) => updateVideoMeta('caption', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-[48px] focus:ring-2 focus:ring-primary-500 text-sm"
+                placeholder="Short on-page caption for the player"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Transcript</label>
+              <textarea
+                value={article.videoMeta?.transcript || ''}
+                onChange={(e) => updateVideoMeta('transcript', e.target.value)}
+                rows={6}
+                className="w-full px-3 py-2 border border-gray-300 rounded-[24px] focus:ring-2 focus:ring-primary-500 text-sm"
+                placeholder="Paste a transcript for accessibility, indexing, and richer SEO."
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Tags */}
       <div className="card p-6 mb-6">
@@ -1040,4 +1297,3 @@ const VideoBlockEditor = ({ data, onChange }) => (
 export default AdminArticleEditor;
 
 // MukonoTalks
-

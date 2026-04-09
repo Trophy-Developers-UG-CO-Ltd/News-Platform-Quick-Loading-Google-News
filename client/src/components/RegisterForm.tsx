@@ -10,7 +10,7 @@ const registerSchema = z.object({
   email: z.string().email("Invalid email address"),
   // companyName removed
   accountType: z.enum(["advertising", "personal", "media", "agency", "other"], {
-    errorMap: () => ({ message: "Please select account type" }),
+    message: "Please select account type",
   }),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string(),
@@ -55,7 +55,7 @@ export default function RegisterForm() {
           // companyName removed
           accountType: data.accountType,
           password: data.password,
-          accountType: data.companyType === "advertising" ? "advertiser" : "personal",
+          confirmPassword: data.confirmPassword,
         }),
       });
 

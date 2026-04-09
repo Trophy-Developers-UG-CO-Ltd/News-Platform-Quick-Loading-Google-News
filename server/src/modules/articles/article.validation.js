@@ -53,6 +53,28 @@ const attachmentSchema = Joi.object({
   fileType: Joi.string().max(50).allow('', null).default(''),
 });
 
+const videoMetaSchema = Joi.object({
+  enabled: Joi.boolean().default(false),
+  provider: Joi.string().max(100).allow('', null).default(null),
+  videoUrl: Joi.string().max(1000).allow('', null).default(null),
+  embedUrl: Joi.string().max(1000).allow('', null).default(null),
+  directVideoUrl: Joi.string().max(1000).allow('', null).default(null),
+  posterImage: Joi.string().max(1000).allow('', null).default(null),
+  thumbnailUrl: Joi.string().max(1000).allow('', null).default(null),
+  caption: Joi.string().max(500).allow('', null).default(null),
+  captionFileUrl: Joi.string().max(1000).allow('', null).default(null),
+  transcript: Joi.string().allow('', null).default(null),
+  duration: Joi.string().max(50).allow('', null).default(null),
+  uploadDate: Joi.date().iso().allow(null).default(null),
+}).custom((value, helpers) => {
+  if (value?.enabled && !(value.videoUrl || value.embedUrl || value.directVideoUrl)) {
+    return helpers.error('custom.videoSourceRequired');
+  }
+  return value;
+}).messages({
+  'custom.videoSourceRequired': 'Primary video metadata requires a video URL, embed URL, or direct video upload URL',
+});
+
 /**
  * Create article validation
  */
@@ -109,11 +131,25 @@ const createArticleSchema = {
       zh: seoLangSchema.default({}),
       sw: seoLangSchema.default({}),
     }).default({}),
+    videoMeta: videoMetaSchema.default({}),
 
     // Knowledge base extensions
     relatedProducts: Joi.array().items(relatedProductSchema).default([]),
     attachments: Joi.array().items(attachmentSchema).default([]),
     technicalReferences: Joi.array().items(Joi.string().max(500)).default([]),
+  }).custom((value, helpers) => {
+    if (String(value.category || '').includes('video')) {
+      if (!value.videoMeta?.enabled) {
+        return helpers.error('custom.videoMetaRequired');
+      }
+      if (!(value.videoMeta.videoUrl || value.videoMeta.embedUrl || value.videoMeta.directVideoUrl)) {
+        return helpers.error('custom.videoSourceRequired');
+      }
+    }
+    return value;
+  }).messages({
+    'custom.videoMetaRequired': 'Video articles must enable the primary video section',
+    'custom.videoSourceRequired': 'Video articles require a video URL, embed URL, or direct video upload URL',
   }),
 };
 
@@ -174,11 +210,26 @@ const updateArticleSchema = {
       zh: seoLangSchema,
       sw: seoLangSchema,
     }),
+    videoMeta: videoMetaSchema,
 
     relatedProducts: Joi.array().items(relatedProductSchema),
     attachments: Joi.array().items(attachmentSchema),
     technicalReferences: Joi.array().items(Joi.string().max(500)),
-  }).min(1).messages({ 'object.min': 'At least one field must be provided for update' }),
+  }).min(1).custom((value, helpers) => {
+    if (String(value.category || '').includes('video')) {
+      if (!value.videoMeta?.enabled) {
+        return helpers.error('custom.videoMetaRequired');
+      }
+      if (!(value.videoMeta.videoUrl || value.videoMeta.embedUrl || value.videoMeta.directVideoUrl)) {
+        return helpers.error('custom.videoSourceRequired');
+      }
+    }
+    return value;
+  }).messages({
+    'object.min': 'At least one field must be provided for update',
+    'custom.videoMetaRequired': 'Video articles must enable the primary video section',
+    'custom.videoSourceRequired': 'Video articles require a video URL, embed URL, or direct video upload URL',
+  }),
 };
 
 /**
@@ -247,4 +298,3 @@ module.exports = {
 };
 
 // MukonoTalks
-

@@ -53,8 +53,9 @@
     "workbox-window": "^7.4.0"
   },
   "scripts": {
+  
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && tsc",
     "build:preview": "vite build --mode preview",
     "preview": "vite preview",
     "preview:hosted": "vite preview --mode preview",
@@ -66,4 +67,6 @@
   "devDependencies": {
     "playwright": "^1.59.1"
   }
+
+ 
 }

@@ -26,10 +26,12 @@ const getEmbedUrl = (url) => {
 };
 
 const ArticleVideoBlock = ({ data }) => {
-  if (!data || !data.url) return null;
+  const primaryUrl = data?.directVideoUrl || data?.url || data?.videoUrl || data?.embedUrl;
+  if (!data || !primaryUrl) return null;
 
-  const embedUrl = getEmbedUrl(data.url);
-  const isEmbed = embedUrl !== data.url;
+  const explicitEmbedUrl = data.embedUrl || null;
+  const derivedEmbedUrl = explicitEmbedUrl || getEmbedUrl(primaryUrl);
+  const isEmbed = Boolean(explicitEmbedUrl) || derivedEmbedUrl !== primaryUrl;
 
   return (
     <div className="article-video-block">
@@ -39,7 +41,7 @@ const ArticleVideoBlock = ({ data }) => {
       <div className="relative w-full overflow-hidden rounded-lg shadow-md" style={{ paddingBottom: '56.25%' }}>
         {isEmbed ? (
           <iframe
-            src={embedUrl}
+            src={derivedEmbedUrl}
             title={data.title || 'Video'}
             className="absolute top-0 left-0 w-full h-full"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -47,10 +49,10 @@ const ArticleVideoBlock = ({ data }) => {
           />
         ) : (
           <video
-            src={data.url}
+            src={primaryUrl}
             controls
             className="absolute top-0 left-0 w-full h-full object-cover"
-            poster={data.poster || undefined}
+            poster={data.poster || data.posterImage || data.thumbnailUrl || undefined}
           >
             Your browser does not support video playback.
           </video>

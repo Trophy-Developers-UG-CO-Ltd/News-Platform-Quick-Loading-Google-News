@@ -20,11 +20,27 @@ const AdminDashboard = () => {
   const [cacheStats, setCacheStats] = useState(null);
   const [cacheLoading, setCacheLoading] = useState(false);
   const [clearing, setClearing] = useState(false);
+  const [analytics, setAnalytics] = useState(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+
 
   useEffect(() => {
     dispatch(fetchDashboardStats());
     loadCacheStats();
+    loadAnalytics();
   }, [dispatch]);
+
+  const loadAnalytics = async () => {
+    setAnalyticsLoading(true);
+    try {
+      const res = await adminService.getAnalyticsDashboard();
+      setAnalytics(res.data);
+    } catch {
+      setAnalytics(null);
+    } finally {
+      setAnalyticsLoading(false);
+    }
+  };
 
   const loadCacheStats = async () => {
     setCacheLoading(true);
@@ -62,15 +78,13 @@ const AdminDashboard = () => {
 
   const statCards = [
     { label: 'Total Users', value: stats.totalUsers, icon: FiUsers, color: 'bg-blue-100 text-blue-600' },
-    { label: 'Total Products', value: stats.totalProducts, icon: FiPackage, color: 'bg-green-100 text-green-600' },
-    { label: 'Total Orders', value: stats.totalOrders, icon: FiShoppingCart, color: 'bg-purple-100 text-purple-600' },
-    {
-      label: 'Total Revenue',
-      value: `$${(stats.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-      icon: FiDollarSign,
-      color: 'bg-accent-100 text-accent-600',
+    analytics && {
+      label: 'Article Views',
+      value: analytics.totalPageViews?.toLocaleString() ?? '--',
+      icon: FiBarChart2,
+      color: 'bg-green-100 text-green-600',
     },
-  ];
+  ].filter(Boolean);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -94,6 +108,9 @@ const AdminDashboard = () => {
             </div>
           </div>
         ))}
+        {analyticsLoading && (
+          <div className="card p-5 flex items-center justify-center text-gray-400">Loading analytics…</div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -4,6 +4,8 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import api from '../app/axios';
 import SchemaInjector from '../seo/components/SchemaInjector';
 import BannerAdSlot from '../components/ads/BannerAdSlot';
+import ArticleVideoBlock from '../features/articles/blocks/ArticleVideoBlock';
+import { buildArticleVideoSchema } from '../seo/utils/schemaBuilders';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://mukonotalks.ug';
 const LANGS = ['en', 'sw', 'zh'];
@@ -114,6 +116,8 @@ const NewsArticlePage = () => {
     ],
   };
 
+  const videoSchema = buildArticleVideoSchema(article);
+
   return (
     <article className="mx-auto w-full max-w-3xl px-4 py-10">
       <Helmet>
@@ -134,7 +138,7 @@ const NewsArticlePage = () => {
         <link rel="alternate" hrefLang="x-default" href={canonicalUrl} />
       </Helmet>
 
-      <SchemaInjector schemas={[newsSchema, breadcrumbSchema]} />
+      <SchemaInjector schemas={[newsSchema, breadcrumbSchema, videoSchema].filter(Boolean)} />
 
       <Link to="/news" className="text-sm font-medium text-primary-700 hover:text-primary-900">
         Back to news
@@ -150,6 +154,22 @@ const NewsArticlePage = () => {
         <time dateTime={article?.publishedAt || ''}>{publishedDate}</time>
       </div>
       {excerpt ? <p className="mt-3 text-lg text-gray-600">{excerpt}</p> : null}
+
+      {article.videoMeta?.enabled ? (
+        <div className="mt-6">
+          <ArticleVideoBlock
+            data={{
+              title,
+              caption: article.videoMeta.caption,
+              embedUrl: article.videoMeta.embedUrl,
+              directVideoUrl: article.videoMeta.directVideoUrl,
+              videoUrl: article.videoMeta.videoUrl,
+              posterImage: article.videoMeta.posterImage || article.videoMeta.thumbnailUrl,
+              thumbnailUrl: article.videoMeta.thumbnailUrl,
+            }}
+          />
+        </div>
+      ) : null}
 
       <BannerAdSlot slotKey="articleInline" className="my-6" />
 

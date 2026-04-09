@@ -128,6 +128,12 @@ const AdminArticles = () => {
         </div>
         <div className="flex gap-2">
           <Link
+            to="/admin/articles/new?category=videos&mode=video"
+            className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+          >
+            <FiPlus className="h-4 w-4" /> New Video Article
+          </Link>
+          <Link
             to="/admin/articles/analytics"
             className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
           >
@@ -307,4 +313,3 @@ const AdminArticles = () => {
 export default AdminArticles;
 
 // MukonoTalks
-

@@ -1,3 +1,22 @@
+# Article Model Deduplication
+
+## Mongoose Model Pattern
+
+To avoid OverwriteModelError, the Article model is defined only once in `server/src/models/article.model.js`:
+
+```js
+module.exports = mongoose.models.Article || mongoose.model("Article", articleSchema);
+```
+
+All other usages (including `server/src/modules/articles/article.model.js`) must import the model using:
+
+```js
+module.exports = require('../../models/article.model');
+```
+
+**Never redefine the Article model elsewhere.**
+
+This ensures a single source of truth and prevents Mongoose model overwrite errors during development and production.
 # MukonoTalks
 # MukonoTalks -  Designed by Trophy Developers Uganda : https://www.trophydevelopers.com/uganda-web-designers/
 MukonoTalks is a lean MERN digital publishing platform focused on:

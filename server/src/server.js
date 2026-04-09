@@ -27,6 +27,7 @@ const { maintenanceMiddleware } = require("./middlewares/maintenance.middleware"
 
 const routes = require("./routes");
 const authRoutes = require("./modules/auth/auth.routes");
+const analyticsRoutes = require("./routes/analytics.routes");
 
 // Validate environment variables
 validateEnv();
@@ -34,6 +35,10 @@ validateEnv();
 const app = express();
 
 const PORT = env.PORT || 5000;
+
+// New category/article system (CommonJS)
+const categoryRoutes = require("./routes/category.routes");
+const articleRoutes = require("./routes/article.routes");
 
 // ─────────────────────────────────────────
 // Trust Proxy
@@ -301,6 +306,7 @@ app.use(maintenanceMiddleware);
 app.use(languageMiddleware);
 app.use("/api", routes);
 app.use("/auth", authRoutes);
+app.use("/api/analytics", analyticsRoutes);
 
 // ─────────────────────────────────────────
 // Health Check

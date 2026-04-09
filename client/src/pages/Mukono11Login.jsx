@@ -63,7 +63,7 @@ const Mukono11Login = () => {
             <FiShield className="h-7 w-7 text-[#0a0a0a] dark:text-[#f4f4f4]" />
           </div>
           <h1 className="font-display text-2xl font-bold text-[#0a0a0a] dark:text-[#f4f4f4]">
-            MukonoTalks Portal
+            MukonoTalks Login Now
           </h1>
           <p className="mt-1 text-sm text-text-muted">
             Login with your account to access exclusive features and manage your MukonoTalks experience.
@@ -147,7 +147,15 @@ const Mukono11Login = () => {
 
         {/* Subtle branding */}
         <p className="mt-6 text-center text-xs text-text-muted/50">
-          MukonoTalks &mdash; restricted portal
+          MukonoTalks &mdash; Subscribers and Admin Portal. Designed by{' '}
+          <a
+            href="https://www.trophydevelopers.com/uganda-web-designers"
+            target="_blank"
+            rel="noopener "
+            className="text-blue-500 hover:underline"
+          >
+            Trophy Developers Uganda
+          </a>.
         </p>
       </div>
     </div>

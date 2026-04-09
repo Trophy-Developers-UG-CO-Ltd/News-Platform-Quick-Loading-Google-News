@@ -40,6 +40,7 @@ const AdminDocuments = lazy(() => import('../pages/admin/AdminDocuments'));
 const AdminCategories = lazy(() => import('../pages/admin/AdminCategories'));
 const AdminSEO = lazy(() => import('../pages/admin/AdminSEO'));
 const AdminSeoOverview = lazy(() => import('../pages/admin/seo/overview'));
+const AdminSeoTechnical = lazy(() => import('../pages/admin/seo/technical'));
 const AdminRedirects = lazy(() => import('../pages/admin/AdminRedirects'));
 const AdminTranslationDashboard = lazy(() => import('../pages/admin/AdminTranslationDashboard'));
 const AdminAnalytics = lazy(() => import('../pages/admin/AdminAnalytics'));
@@ -124,6 +125,7 @@ const AppRoutes = () => {
           <Route path="categories" element={<AdminCategories />} />
           <Route path="seo" element={<AdminSEO />} />
           <Route path="seo/overview" element={<AdminSeoOverview />} />
+          <Route path="seo/technical" element={<AdminSeoTechnical />} />
           <Route path="redirects" element={<AdminRedirects />} />
           <Route path="translation-dashboard" element={<AdminTranslationDashboard />} />
           <Route path="analytics" element={<AdminAnalytics />} />

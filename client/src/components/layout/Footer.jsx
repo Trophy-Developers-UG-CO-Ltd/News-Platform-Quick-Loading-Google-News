@@ -58,7 +58,7 @@ const Footer = () => {
           {/* Brand */}
           <div className="col-span-1 md:col-span-1">
             <div className="flex items-center mb-4">
-              <img src="/mukonotalks.png" alt="MukonoTalks" className="h-12 w-auto" />
+              <SafeImage src="/mukonotalks.png" alt="MukonoTalks" className="h-12 w-auto" />
             </div>
             <p className="mb-4 text-sm text-text-muted">
                 {tagline || t('footer.tagline', 'MukonoTalks publishes local news, entertainment, community updates, and video stories for Mukono audiences.')}

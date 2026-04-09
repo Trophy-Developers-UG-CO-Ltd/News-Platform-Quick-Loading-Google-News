@@ -14,6 +14,20 @@ const BASE_URL =
   (typeof import.meta !== 'undefined' && import.meta.env?.VITE_BASE_URL) ||
   'https://mukonotalks.ug';
 
+const getEmbeddableVideoUrl = (url) => {
+  if (!url) return '';
+
+  const youtubeMatch = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+  );
+  if (youtubeMatch) return `https://www.youtube.com/embed/${youtubeMatch[1]}`;
+
+  const vimeoMatch = url.match(/vimeo\.com\/(\d+)/);
+  if (vimeoMatch) return `https://player.vimeo.com/video/${vimeoMatch[1]}`;
+
+  return url;
+};
+
 // ─── Availability mapping ────────────────────────────────────────────────────
 const AVAILABILITY_MAP = {
   in_stock:      'https://schema.org/InStock',
@@ -308,6 +322,36 @@ export const buildArticleSchema = (article, lang = 'en') => {
       },
     },
     ...(article.tags?.length ? { keywords: article.tags.join(', ') } : {}),
+  };
+};
+
+export const buildArticleVideoSchema = (article) => {
+  if (!article?._id || !article?.videoMeta?.enabled) return null;
+
+  const primaryUrl =
+    article.videoMeta.directVideoUrl ||
+    article.videoMeta.videoUrl ||
+    article.videoMeta.embedUrl;
+
+  if (!primaryUrl) return null;
+
+  const embedUrl = article.videoMeta.embedUrl || getEmbeddableVideoUrl(primaryUrl);
+  const thumbnailUrl =
+    article.videoMeta.thumbnailUrl ||
+    article.videoMeta.posterImage ||
+    article.featuredImage ||
+    '';
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'VideoObject',
+    name: article.title || 'MukonoTalks Video',
+    description: article.seo?.description || article.excerpt || article.title || '',
+    thumbnailUrl,
+    uploadDate: article.videoMeta.uploadDate || article.publishedAt || article.createdAt,
+    ...(article.videoMeta.duration ? { duration: article.videoMeta.duration } : {}),
+    ...(article.videoMeta.directVideoUrl ? { contentUrl: article.videoMeta.directVideoUrl } : {}),
+    ...(embedUrl ? { embedUrl } : {}),
   };
 };
 

@@ -23,8 +23,9 @@ import {
   FiShare2,
 } from 'react-icons/fi';
 import SchemaInjector from '../seo/components/SchemaInjector';
-import { buildArticleSchema, buildBreadcrumbSchema } from '../seo/utils/schemaBuilders';
+import { buildArticleSchema, buildArticleVideoSchema, buildBreadcrumbSchema } from '../seo/utils/schemaBuilders';
 import Reveal from '../components/ui/Reveal';
+import ArticleVideoBlock from '../features/articles/blocks/ArticleVideoBlock';
 
 const CATEGORY_LABELS = {
   blog: 'Blog',
@@ -199,13 +200,14 @@ const ArticlePage = () => {
       {/* Article + Breadcrumb schemas */}
       <SchemaInjector schemas={[
         buildArticleSchema(article, validLang),
+        buildArticleVideoSchema(article),
         buildBreadcrumbSchema([
           { name: 'Home', url: `${BASE_URL}` },
           { name: 'Blog', url: `${BASE_URL}/blog` },
           ...(category ? [{ name: CATEGORY_LABELS[category] || category, url: `${BASE_URL}/blog?category=${category}` }] : []),
           { name: title },
         ]),
-      ]} />
+      ].filter(Boolean)} />
 
       {/* Article Content */}
       <article className="container mx-auto px-4 py-8 max-w-4xl">
@@ -320,6 +322,24 @@ const ArticlePage = () => {
           </Reveal>
         )}
 
+        {article.videoMeta?.enabled && (
+          <Reveal variant="fade-up" delay={125}>
+          <div className="mb-10">
+            <ArticleVideoBlock
+              data={{
+                title,
+                caption: article.videoMeta.caption,
+                embedUrl: article.videoMeta.embedUrl,
+                directVideoUrl: article.videoMeta.directVideoUrl,
+                videoUrl: article.videoMeta.videoUrl,
+                posterImage: article.videoMeta.posterImage || article.videoMeta.thumbnailUrl,
+                thumbnailUrl: article.videoMeta.thumbnailUrl,
+              }}
+            />
+          </div>
+          </Reveal>
+        )}
+
         {/* Content Blocks */}
         <Reveal variant="fade-up" delay={150}>
         <div className="prose prose-lg max-w-none">
@@ -391,4 +411,3 @@ const ArticlePage = () => {
 export default ArticlePage;
 
 // MukonoTalks
-

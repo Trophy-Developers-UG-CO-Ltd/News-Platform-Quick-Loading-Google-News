@@ -151,6 +151,7 @@ const saveVersionOnUpdate = async (article, req) => {
     title: article.title,
     excerpt: article.excerpt,
     seo: article.seo,
+    videoMeta: article.videoMeta,
     updatedBy: req.user._id,
     updatedAt: new Date(),
   });
@@ -185,6 +186,7 @@ const rollbackArticleVersion = async (articleId, versionIndex, req) => {
   article.title = version.title;
   article.excerpt = version.excerpt;
   article.seo = version.seo;
+  article.videoMeta = version.videoMeta || article.videoMeta;
   article.updatedBy = req.user._id;
   await article.save();
   return article;
@@ -495,6 +497,7 @@ const getPublicArticle = async (lang, slug) => {
     author: article.author,
     featuredImage: article.featuredImage,
     seo: article.seo[lang] || article.seo.en || {},
+    videoMeta: article.videoMeta || {},
     publishedAt: article.publishedAt,
     viewCount: article.viewCount,
     relatedProducts: article.relatedProducts || [],
@@ -734,4 +737,3 @@ module.exports = {
 };
 
 // MukonoTalks
-

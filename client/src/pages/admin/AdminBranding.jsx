@@ -104,7 +104,7 @@ const AdminBranding = () => {
           style={{ backgroundColor: form.primaryColor }}
         >
           {form.logoUrl ? (
-            <img src={form.logoUrl} alt="logo" className="w-6 h-6 object-contain" />
+            <SafeImage src={form.logoUrl} alt="logo" className="w-6 h-6 object-contain" />
           ) : (
             <span className="text-white font-bold text-sm">{(form.platformName || 'T')[0].toUpperCase()}</span>
           )}

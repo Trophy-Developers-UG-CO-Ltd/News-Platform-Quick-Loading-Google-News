@@ -57,6 +57,25 @@ const attachmentSchema = new mongoose.Schema(
   { _id: false }
 );
 
+// ─── Primary Video Metadata ───────────────────────────────────
+const videoMetaSchema = new mongoose.Schema(
+  {
+    enabled: { type: Boolean, default: false },
+    provider: { type: String, trim: true, default: null },
+    videoUrl: { type: String, trim: true, default: null },
+    embedUrl: { type: String, trim: true, default: null },
+    directVideoUrl: { type: String, trim: true, default: null },
+    posterImage: { type: String, trim: true, default: null },
+    thumbnailUrl: { type: String, trim: true, default: null },
+    caption: { type: String, trim: true, maxlength: 500, default: null },
+    captionFileUrl: { type: String, trim: true, default: null },
+    transcript: { type: String, default: null },
+    duration: { type: String, trim: true, default: null },
+    uploadDate: { type: Date, default: null },
+  },
+  { _id: false }
+);
+
 // ─── Main Article Schema ───────────────────────────────────────
 const articleSchema = new mongoose.Schema(
   {
@@ -139,6 +158,7 @@ const articleSchema = new mongoose.Schema(
     },
 
     featuredImage: { type: String, trim: true, default: null },
+    videoMeta: { type: videoMetaSchema, default: () => ({}) },
 
     seo: {
       en: { type: seoSchema, default: () => ({}) },
@@ -184,6 +204,7 @@ const articleSchema = new mongoose.Schema(
           zh: Object,
           sw: Object,
         },
+        videoMeta: videoMetaSchema,
         updatedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         updatedAt: { type: Date, default: Date.now },
       }
@@ -222,8 +243,9 @@ articleSchema.index({ viewCount: -1 });
 articleSchema.index({ publishStatus: 1, category: 1, publishedAt: -1 });
 articleSchema.index({ 'title.en': 'text', 'excerpt.en': 'text', tags: 'text' });
 
-const Article = mongoose.model('Article', articleSchema);
-module.exports = Article;
+// Safe model export: prevents OverwriteModelError in dev
+module.exports =
+  mongoose.models.Article ||
+  mongoose.model('Article', articleSchema);
 
 // MukonoTalks
-

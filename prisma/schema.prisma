@@ -34,3 +34,22 @@ model PublisherProfile {
   settings  Json
   createdAt DateTime @default(now())
 }
+
+model Category {
+  id        String   @id @default(auto()) @map("_id")
+  name      String   @unique
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  articles  Article[]
+}
+
+model Article {
+  id         String   @id @default(auto()) @map("_id")
+  title      String
+  content    String
+  slug       String   @unique
+  categoryId String
+  published  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  category   Category @relation(fields: [categoryId], references: [id])
+}

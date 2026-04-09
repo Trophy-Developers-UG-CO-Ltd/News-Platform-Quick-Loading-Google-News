@@ -187,7 +187,7 @@ const SidebarContent = ({ collapsed, onNavClick }) => {
           style={{ backgroundColor: accentColor }}
         >
           {logoUrl
-            ? <img src={logoUrl} alt="logo" className="w-6 h-6 object-contain" />
+            ? <SafeImage src={logoUrl} alt="logo" className="w-6 h-6 object-contain" />
             : <span className="font-bold text-sm text-text-primary">{initial}</span>
           }
         </div>

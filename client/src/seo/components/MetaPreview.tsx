@@ -6,6 +6,7 @@
  * @module components/seo/MetaPreview
  */
 
+import SafeImage from 'components/common/SafeImage';
 import React from 'react';
 
 interface MetaPreviewProps {
@@ -62,7 +63,7 @@ const OgPreview: React.FC<{ title: string; description: string; image?: string; 
 }) => (
   <div className="border border-gray-200 rounded-lg overflow-hidden max-w-sm font-sans bg-white">
     {image && (
-      <img src={image} alt="OG Preview" className="w-full h-40 object-cover" />
+      <SafeImage src={image} alt="OG Preview" className="w-full h-40 object-cover" />
     )}
     {!image && (
       <div className="w-full h-40 bg-gray-100 flex items-center justify-center text-gray-400 text-sm">
@@ -83,7 +84,7 @@ const TwitterPreview: React.FC<{ title: string; description: string; image?: str
 }) => (
   <div className="border border-gray-200 rounded-2xl overflow-hidden max-w-sm font-sans bg-white">
     {image && (
-      <img src={image} alt="Twitter Preview" className="w-full h-48 object-cover" />
+      <SafeImage src={image} alt="Twitter Preview" className="w-full h-48 object-cover" />
     )}
     {!image && (
       <div className="w-full h-32 bg-gray-50 flex items-center justify-center text-gray-400 text-sm">

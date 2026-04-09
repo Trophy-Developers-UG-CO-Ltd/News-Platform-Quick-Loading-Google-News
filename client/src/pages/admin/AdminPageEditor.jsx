@@ -81,7 +81,7 @@ const GooglePreview = ({ title, description, slug, lang }) => {
 const OgPreview = ({ ogTitle, ogDescription, ogImage, title, description }) => (
   <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
     {ogImage
-      ? <img src={ogImage} alt="OG" className="w-full h-36 object-cover" />
+      ? <SafeImage src={ogImage} alt="OG" className="w-full h-36 object-cover" />
       : <div className="w-full h-36 bg-gradient-to-br from-primary-100 to-primary-200 flex items-center justify-center text-primary-400 text-xs">No OG image set</div>
     }
     <div className="p-3">

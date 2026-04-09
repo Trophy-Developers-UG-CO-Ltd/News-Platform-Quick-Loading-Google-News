@@ -22,6 +22,16 @@ const {
   getPublicArticleSchema,
   listArticlesQuerySchema,
 } = require('./article.validation');
+const { redis } = require('../../config/redis');
+
+const clearHomepageCategoriesCache = async () => {
+  if (!redis?.del) return;
+
+  await Promise.allSettled([
+    redis.del('homepage:v2'),
+    redis.del('homepage:categories'),
+  ]);
+};
 
 // ─── Editorial Workflow: Status Transitions & Versioning ─────────────
 
@@ -68,6 +78,10 @@ router.post(
   authorize('admin'),
   validate(createArticleSchema),
   invalidateCache('/api/articles'),
+  async (req, res, next) => {
+    await clearHomepageCategoriesCache();
+    next();
+  },
   articleController.createArticle
 );
 
@@ -77,6 +91,10 @@ router.put(
   authorize('admin'),
   validate(updateArticleSchema),
   invalidateCache('/api/articles'),
+  async (req, res, next) => {
+    await clearHomepageCategoriesCache();
+    next();
+  },
   articleController.updateArticle
 );
 
@@ -86,6 +104,10 @@ router.patch(
   authorize('admin'),
   validate(publishArticleSchema),
   invalidateCache('/api/articles'),
+  async (req, res, next) => {
+    await clearHomepageCategoriesCache();
+    next();
+  },
   articleController.publishArticle
 );
 
@@ -95,6 +117,10 @@ router.patch(
   authorize('admin'),
   validate(scheduleArticleSchema),
   invalidateCache('/api/articles'),
+  async (req, res, next) => {
+    await clearHomepageCategoriesCache();
+    next();
+  },
   articleController.scheduleArticle
 );
 
@@ -103,6 +129,10 @@ router.delete(
   protect,
   authorize('admin'),
   invalidateCache('/api/articles'),
+  async (req, res, next) => {
+    await clearHomepageCategoriesCache();
+    next();
+  },
   articleController.deleteArticle
 );
 
@@ -125,4 +155,3 @@ router.get(
 module.exports = router;
 
 // MukonoTalks
-
