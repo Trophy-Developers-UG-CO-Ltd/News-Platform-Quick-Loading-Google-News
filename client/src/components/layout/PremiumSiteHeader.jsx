@@ -38,13 +38,13 @@ const MOBILE_MENU_LINKS = [
 ];
 
 const DEFAULT_TICKER_ITEMS = [
-  { label: 'Trending',         href: '/news?category=trending',         icon: 'TrendingUp',    iconPosition: 'before', textWeight: 'semibold', isExternal: false, openInNewTab: false },
-  { label: 'Politics update',  href: '/news?category=politics-update',  icon: 'Landmark',      iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
-  { label: 'Celebrity news',   href: '/news?category=celebrity-news',   icon: 'Sparkles',      iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
-  { label: 'Jobs released',    href: '/news?category=jobs-released',    icon: 'Briefcase',     iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
-  { label: 'Campus trends',    href: '/news?category=campus-trends',    icon: 'GraduationCap', iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
-  { label: 'Business stories', href: '/news?category=business-stories', icon: 'BarChart2',     iconPosition: 'after',  textWeight: 'semibold', isExternal: false, openInNewTab: false },
-  { label: 'City News',        href: '/news?category=city-news',        icon: 'Building2',     iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
+  { label: 'Trending',         href: '/category/trending',         icon: 'TrendingUp',    iconPosition: 'before', textWeight: 'semibold', isExternal: false, openInNewTab: false },
+  { label: 'Politics update',  href: '/category/politics-update',  icon: 'Landmark',      iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
+  { label: 'Entertainment',    href: '/category/entertainment',    icon: 'Sparkles',      iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
+  { label: 'Jobs',             href: '/category/jobs',             icon: 'Briefcase',     iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
+  { label: 'Campus trends',    href: '/category/campus-trends',    icon: 'GraduationCap', iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
+  { label: 'Lifestyle',        href: '/category/lifestyle',        icon: 'Coffee',        iconPosition: 'after',  textWeight: 'semibold', isExternal: false, openInNewTab: false },
+  { label: 'News',             href: '/category/news',             icon: 'Building2',     iconPosition: 'before', textWeight: 'medium',   isExternal: false, openInNewTab: false },
 ];
 
 /** Map slug/name keywords → Lucide icon name for auto-assigned category icons */

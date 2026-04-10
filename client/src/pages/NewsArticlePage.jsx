@@ -81,6 +81,7 @@ const NewsArticlePage = () => {
   const authorName = article?.author?.name || 'MukonoTalks Editorial Desk';
   const publishedDate = formatDate(article?.publishedAt);
   const category = formatCategory(article?.category);
+  const categorySlug = article?.category || '';
 
   const newsSchema = {
     '@context': 'https://schema.org',
@@ -112,7 +113,8 @@ const NewsArticlePage = () => {
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE_URL}/` },
       { '@type': 'ListItem', position: 2, name: 'News', item: `${BASE_URL}/news` },
-      { '@type': 'ListItem', position: 3, name: title, item: canonicalUrl },
+      ...(categorySlug ? [{ '@type': 'ListItem', position: 3, name: category, item: `${BASE_URL}/category/${categorySlug}` }] : []),
+      { '@type': 'ListItem', position: categorySlug ? 4 : 3, name: title, item: canonicalUrl },
     ],
   };
 
@@ -146,9 +148,18 @@ const NewsArticlePage = () => {
 
       <h1 className="mt-3 text-4xl font-bold leading-tight text-gray-900">{title}</h1>
       <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-gray-600">
-        <span className="inline-flex rounded-full bg-black px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-brand-white">
-          {category}
-        </span>
+        {categorySlug ? (
+          <Link
+            to={`/category/${categorySlug}`}
+            className="inline-flex rounded-full bg-black px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-brand-white transition hover:bg-black/80"
+          >
+            {category}
+          </Link>
+        ) : (
+          <span className="inline-flex rounded-full bg-black px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-brand-white">
+            {category}
+          </span>
+        )}
         <span>By {authorName}</span>
         <span aria-hidden="true">•</span>
         <time dateTime={article?.publishedAt || ''}>{publishedDate}</time>

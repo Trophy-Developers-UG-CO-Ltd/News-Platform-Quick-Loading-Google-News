@@ -204,7 +204,7 @@ const ArticlePage = () => {
         buildBreadcrumbSchema([
           { name: 'Home', url: `${BASE_URL}` },
           { name: 'Blog', url: `${BASE_URL}/blog` },
-          ...(category ? [{ name: CATEGORY_LABELS[category] || category, url: `${BASE_URL}/blog?category=${category}` }] : []),
+          ...(category ? [{ name: CATEGORY_LABELS[category] || category, url: `${BASE_URL}/category/${category}` }] : []),
           { name: title },
         ]),
       ].filter(Boolean)} />
@@ -230,7 +230,7 @@ const ArticlePage = () => {
                 <li>/</li>
                 <li>
                   <Link
-                    to={`/blog?category=${category}`}
+                    to={`/category/${category}`}
                     className="hover:text-primary-600 transition-colors"
                   >
                     {categoryLabel}

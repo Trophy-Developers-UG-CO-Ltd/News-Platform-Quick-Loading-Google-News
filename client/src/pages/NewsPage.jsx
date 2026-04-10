@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import api from '../app/axios';
 import SchemaInjector from '../seo/components/SchemaInjector';
@@ -35,8 +35,14 @@ const formatCategory = (value) => {
 };
 
 const NewsPage = () => {
+  const [searchParams] = useSearchParams();
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const categorySlug = searchParams.get('category')?.trim();
+
+  if (categorySlug) {
+    return <Navigate to={`/category/${categorySlug}`} replace />;
+  }
 
   useEffect(() => {
     let mounted = true;

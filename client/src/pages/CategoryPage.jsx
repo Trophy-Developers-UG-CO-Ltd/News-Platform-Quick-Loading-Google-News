@@ -62,7 +62,7 @@ const CategoryPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {articles.map((article) => (
-            <Link key={article._id} to={"/blog/" + (article.localizedSlug?.en || article.localizedSlug)} className="block border rounded-lg p-4 hover:shadow-md transition">
+            <Link key={article._id} to={"/news/" + (article.localizedSlug?.en || article.localizedSlug)} className="block border rounded-lg p-4 hover:shadow-md transition">
               <div className="font-semibold text-lg mb-2">{resolveText(article.title)}</div>
               <div className="text-gray-600 text-sm mb-1">{article.author?.name}</div>
               <div className="text-gray-500 text-xs">{new Date(article.publishedAt).toLocaleDateString()}</div>
