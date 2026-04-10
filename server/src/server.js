@@ -349,7 +349,16 @@ app.get(["/maintenance", "/admin/maintenance"], (req, res, next) => {
 if (env.NODE_ENV === "production") {
   app.use(express.static(CLIENT_BUILD_DIR));
 
-  app.get("*", (req, res) => {
+  app.get("*", (req, res, next) => {
+    if (
+      req.path === "/api" ||
+      req.path.startsWith("/api/") ||
+      req.path === "/auth" ||
+      req.path.startsWith("/auth/")
+    ) {
+      return next();
+    }
+
     res.sendFile(path.resolve(CLIENT_INDEX_FILE));
   });
 }

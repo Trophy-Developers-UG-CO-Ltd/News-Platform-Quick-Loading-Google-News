@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 
 const AdminMaintenance = () => {
   const dispatch = useDispatch();
-  const { isEnabled, message, estimatedEnd, isLoading, isSaving } = useSelector(
+  const { isEnabled, message, estimatedEnd, isLoading, isSaving, error } = useSelector(
     (s) => s.maintenance
   );
 
@@ -91,6 +91,12 @@ const AdminMaintenance = () => {
           </p>
         </div>
       </div>
+
+      {error ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          {error}
+        </div>
+      ) : null}
 
       {/* Status banner */}
       {isEnabled && (

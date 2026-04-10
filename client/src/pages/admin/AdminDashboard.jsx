@@ -16,7 +16,7 @@ import toast from 'react-hot-toast';
 
 const AdminDashboard = () => {
   const dispatch = useDispatch();
-  const { stats, isLoading } = useSelector((state) => state.admin);
+  const { stats, isLoading, error } = useSelector((state) => state.admin);
   const [cacheStats, setCacheStats] = useState(null);
   const [cacheLoading, setCacheLoading] = useState(false);
   const [clearing, setClearing] = useState(false);
@@ -68,10 +68,33 @@ const AdminDashboard = () => {
     }
   };
 
-  if (isLoading || !stats) {
+  if (isLoading) {
     return (
       <div className="flex justify-center py-20">
         <Spinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!stats) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="mx-auto max-w-2xl rounded-2xl border border-red-200 bg-red-50 p-6 text-red-900">
+          <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+          <p className="mt-3 text-sm">
+            Dashboard data could not be loaded.
+          </p>
+          <p className="mt-2 text-sm">
+            {error || 'The admin API returned an unexpected response.'}
+          </p>
+          <button
+            type="button"
+            onClick={() => dispatch(fetchDashboardStats())}
+            className="mt-4 inline-flex items-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+          >
+            Retry
+          </button>
+        </div>
       </div>
     );
   }
@@ -278,4 +301,3 @@ const AdminDashboard = () => {
 export default AdminDashboard;
 
 // MukonoTalks
-

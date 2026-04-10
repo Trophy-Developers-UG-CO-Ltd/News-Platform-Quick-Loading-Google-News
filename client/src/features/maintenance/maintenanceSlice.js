@@ -8,12 +8,21 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../app/axios';
 
+const normalizeMaintenance = (payload = {}) => ({
+  isEnabled: Boolean(payload?.isEnabled),
+  message: payload?.message || '',
+  estimatedEnd: payload?.estimatedEnd || null,
+});
+
 export const fetchMaintenanceStatus = createAsyncThunk(
   'maintenance/fetchStatus',
   async (_, { rejectWithValue }) => {
     try {
       const { data } = await api.get('/maintenance');
-      return data.maintenance;
+      if (!data || typeof data.maintenance !== 'object' || data.maintenance === null) {
+        return rejectWithValue('Maintenance endpoint returned an unexpected response');
+      }
+      return normalizeMaintenance(data.maintenance);
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Failed to check maintenance status');
     }
@@ -25,7 +34,10 @@ export const toggleMaintenance = createAsyncThunk(
   async (updates, { rejectWithValue }) => {
     try {
       const { data } = await api.put('/maintenance', updates);
-      return data.maintenance;
+      if (!data || typeof data.maintenance !== 'object' || data.maintenance === null) {
+        return rejectWithValue('Maintenance update returned an unexpected response');
+      }
+      return normalizeMaintenance(data.maintenance);
     } catch (err) {
       return rejectWithValue(err.response?.data?.message || 'Failed to update maintenance mode');
     }
@@ -47,6 +59,7 @@ const maintenanceSlice = createSlice({
     builder
       .addCase(fetchMaintenanceStatus.pending, (state) => {
         state.isLoading = true;
+        state.error = null;
       })
       .addCase(fetchMaintenanceStatus.fulfilled, (state, action) => {
         state.isLoading = false;
@@ -54,8 +67,9 @@ const maintenanceSlice = createSlice({
         state.message = action.payload.message;
         state.estimatedEnd = action.payload.estimatedEnd;
       })
-      .addCase(fetchMaintenanceStatus.rejected, (state) => {
+      .addCase(fetchMaintenanceStatus.rejected, (state, action) => {
         state.isLoading = false;
+        state.error = action.payload || 'Failed to check maintenance status';
       })
       .addCase(toggleMaintenance.pending, (state) => {
         state.isSaving = true;
