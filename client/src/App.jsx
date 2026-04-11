@@ -12,6 +12,7 @@ import { fetchMaintenanceStatus } from './features/maintenance/maintenanceSlice'
 
 const MAINTENANCE_BYPASS_PATHS = new Set(['/login', '/mukono11login', '/maintenance']);
 const MaintenancePage = lazy(() => import('./pages/MaintenancePage'));
+let appBootstrapRequested = false;
 
 const App = () => {
   const dispatch = useDispatch();
@@ -24,6 +25,8 @@ const App = () => {
   } = useSelector((state) => state.maintenance);
 
   useEffect(() => {
+    if (appBootstrapRequested) return;
+    appBootstrapRequested = true;
     dispatch(loadUser());
     dispatch(fetchMaintenanceStatus());
   }, [dispatch]);
@@ -38,6 +41,7 @@ const App = () => {
 
   const isDeveloper = user?.role === 'developer';
   const isBypassedPath = MAINTENANCE_BYPASS_PATHS.has(location.pathname);
+  const isAdminRoute = location.pathname === '/admin' || location.pathname.startsWith('/admin/');
 
   if (isMaintenanceEnabled && !isDeveloper && !isBypassedPath) {
     return (
@@ -56,11 +60,11 @@ const App = () => {
   return (
     <div className="flex min-h-screen w-full max-w-full flex-col bg-light-body text-text-light-primary dark:bg-dark-charcoal dark:text-text-dark-primary">
       <AdSenseScript />
-      <PremiumSiteHeader />
+      {!isAdminRoute ? <PremiumSiteHeader /> : null}
       <main className="flex-grow">
         <AppRoutes />
       </main>
-      <PremiumSiteFooter />
+      {!isAdminRoute ? <PremiumSiteFooter /> : null}
     </div>
   );
 };

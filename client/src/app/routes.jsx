@@ -3,6 +3,7 @@ const CategoryPage = lazy(() => import('../pages/CategoryPage'));
 import { Routes, Route } from 'react-router-dom';
 import Spinner from '../components/ui/Spinner';
 import AdminRoute from '../components/protected/AdminRoute';
+import DeveloperRoute from '../components/protected/DeveloperRoute';
 import ProtectedRoute from '../components/protected/ProtectedRoute';
 import AdminLayout from '../components/layout/AdminLayout';
 
@@ -132,7 +133,14 @@ const AppRoutes = () => {
           <Route path="audit" element={<AdminAuditLogs />} />
           <Route path="download-logs" element={<AdminDownloadLogs />} />
           <Route path="branding" element={<AdminBranding />} />
-          <Route path="maintenance" element={<AdminMaintenance />} />
+          <Route
+            path="maintenance"
+            element={(
+              <DeveloperRoute>
+                <AdminMaintenance />
+              </DeveloperRoute>
+            )}
+          />
           <Route path="advertise-inquiries" element={<AdminAdvertiseInquiries />} />
           <Route path="*" element={<NotFound />} />
         </Route>
@@ -147,4 +155,3 @@ const AppRoutes = () => {
 export default AppRoutes;
 
 // MukonoTalks
-

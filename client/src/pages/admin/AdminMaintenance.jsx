@@ -12,7 +12,7 @@ import toast from 'react-hot-toast';
 
 const AdminMaintenance = () => {
   const dispatch = useDispatch();
-  const { isEnabled, message, estimatedEnd, isLoading, isSaving, error } = useSelector(
+  const { isEnabled, message, estimatedEnd, isLoading, isSaving, error, hasLoaded } = useSelector(
     (s) => s.maintenance
   );
 
@@ -35,8 +35,9 @@ const AdminMaintenance = () => {
 
   // Fetch on mount
   useEffect(() => {
+    if (hasLoaded) return;
     dispatch(fetchMaintenanceStatus());
-  }, [dispatch]);
+  }, [dispatch, hasLoaded]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

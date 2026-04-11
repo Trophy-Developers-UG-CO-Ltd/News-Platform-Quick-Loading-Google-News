@@ -7,7 +7,7 @@ const express = require('express');
 const router = express.Router();
 
 const authController = require('./auth.controller');
-const { protect } = require('../../middlewares/auth.middleware');
+const { protect, optionalAuth } = require('../../middlewares/auth.middleware');
 const { validate } = require('../../middlewares/validate.middleware');
 const { authLimiter } = require('../../middlewares/rateLimit.middleware');
 const {
@@ -22,7 +22,7 @@ router.post('/register', authLimiter, validate(registerSchema), authController.r
 router.post('/login', authLimiter, validate(loginSchema), authController.login);
 
 // Protected routes
-router.post('/logout', protect, authController.logout);
+router.post('/logout', optionalAuth, authController.logout);
 router.get('/me', protect, authController.getMe);
 router.put('/profile', protect, validate(updateProfileSchema), authController.updateProfile);
 router.put('/change-password', protect, validate(changePasswordSchema), authController.changePassword);

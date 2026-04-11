@@ -75,6 +75,11 @@ const TEXT_WEIGHT_CLASS = {
   bold: 'font-bold',
 };
 
+let cachedPrimaryNavItems = null;
+let primaryNavRequest = null;
+let cachedTickerItems = null;
+let tickerItemsRequest = null;
+
 const getLocalizedNavLabel = (item, lang) =>
   item?.localizedLabel?.[lang] ||
   item?.localizedLabel?.en ||
@@ -172,12 +177,25 @@ const PremiumSiteHeader = () => {
   useEffect(() => {
     let isMounted = true;
 
+    if (cachedPrimaryNavItems?.length) {
+      setNavItems(cachedPrimaryNavItems);
+      return () => {
+        isMounted = false;
+      };
+    }
+
     const fetchPrimaryNavItems = async () => {
       try {
-        const response = await api.get('/navigation');
-        const items = Array.isArray(response?.data?.data) ? response.data.data : [];
+        if (!primaryNavRequest) {
+          primaryNavRequest = api.get('/navigation')
+            .then((response) => (Array.isArray(response?.data?.data) ? response.data.data : []))
+            .catch(() => []);
+        }
+
+        const items = await primaryNavRequest;
 
         if (!isMounted || items.length === 0) return;
+        cachedPrimaryNavItems = items;
         setNavItems(items);
       } catch (_error) {
         if (isMounted) {
@@ -196,10 +214,22 @@ const PremiumSiteHeader = () => {
   useEffect(() => {
     let isMounted = true;
 
+    if (cachedTickerItems?.length) {
+      setTickerItems(cachedTickerItems);
+      return () => {
+        isMounted = false;
+      };
+    }
+
     const fetchTickerItems = async () => {
       try {
-        const response = await api.get('/categories');
-        const categories = Array.isArray(response?.data?.categories) ? response.data.categories : [];
+        if (!tickerItemsRequest) {
+          tickerItemsRequest = api.get('/categories')
+            .then((response) => (Array.isArray(response?.data?.categories) ? response.data.categories : []))
+            .catch(() => []);
+        }
+
+        const categories = await tickerItemsRequest;
 
         if (!isMounted || categories.length === 0) return;
 
@@ -222,6 +252,7 @@ const PremiumSiteHeader = () => {
           .filter((item) => item.label);
 
         if (normalized.length > 0) {
+          cachedTickerItems = normalized;
           setTickerItems(normalized);
         }
       } catch (_error) {

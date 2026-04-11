@@ -7,6 +7,7 @@
 
 const authService = require('./auth.service');
 const { sendTokenResponse } = require('../../utils/jwt');
+const { env } = require('../../config/env');
 const AuditService = require('../audit/audit.service');
 const { asyncHandler } = require('../../middlewares/error.middleware');
 const { sendWelcomeEmail } = require('../../utils/email');
@@ -85,6 +86,8 @@ const login = asyncHandler(async (req, res, next) => {
  * @access  Private
  */
 const logout = asyncHandler(async (req, res) => {
+  const isHttps = env.NODE_ENV === 'production' || !!process.env.CODESPACES;
+
   AuditService.log({
     action: 'USER_LOGOUT',
     req,
@@ -93,9 +96,10 @@ const logout = asyncHandler(async (req, res) => {
     targetIdentifier: req.user?.email,
   });
 
-  res.cookie('token', 'none', {
-    expires: new Date(Date.now() + 5 * 1000),
+  res.clearCookie('token', {
     httpOnly: true,
+    secure: isHttps,
+    sameSite: isHttps ? 'none' : 'lax',
   });
 
   res.status(200).json({
@@ -215,9 +219,11 @@ const deactivateAccount = asyncHandler(async (req, res) => {
     });
 
     // Clear authentication cookie
-    res.cookie('token', 'none', {
-      expires: new Date(Date.now() + 5 * 1000),
+    const isHttps = env.NODE_ENV === 'production' || !!process.env.CODESPACES;
+    res.clearCookie('token', {
       httpOnly: true,
+      secure: isHttps,
+      sameSite: isHttps ? 'none' : 'lax',
     });
 
     res.status(200).json({

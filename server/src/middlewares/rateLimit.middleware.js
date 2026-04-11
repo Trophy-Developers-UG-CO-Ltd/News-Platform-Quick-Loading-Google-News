@@ -8,12 +8,32 @@
 
 const rateLimit = require('express-rate-limit');
 
-/** Skip rate limiting in development and for admin routes / logged-in admins */
+/** Skip rate limiting in development and for non-API/static routes. */
 const globalSkip = (req) => {
   // Skip in development mode
   if (process.env.NODE_ENV === 'development') return true;
-  // Skip all /admin routes
+
+  const path = req.path || req.originalUrl || '';
+  const originalUrl = req.originalUrl || path;
+  const isApiRequest = path.startsWith('/api') || path.startsWith('/auth');
+
+  // Do not count static pages/assets toward API abuse limits.
+  if (!isApiRequest) return true;
+
+  // Skip all admin routes
   if (req.path.startsWith('/admin') || req.originalUrl.includes('/admin')) return true;
+
+  // Auth has its own dedicated limiter; maintenance/branding/health must stay reachable.
+  if (
+    originalUrl.startsWith('/api/auth') ||
+    originalUrl.startsWith('/auth') ||
+    originalUrl.startsWith('/api/maintenance') ||
+    originalUrl.startsWith('/api/branding') ||
+    originalUrl === '/health'
+  ) {
+    return true;
+  }
+
   return false;
 };
 

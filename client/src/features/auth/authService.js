@@ -23,8 +23,11 @@ const login = async (credentials) => {
 };
 
 const logout = async () => {
-  await api.post('/auth/logout');
-  localStorage.removeItem('token');
+  try {
+    await api.post('/auth/logout');
+  } finally {
+    localStorage.removeItem('token');
+  }
 };
 
 const getMe = async () => {
