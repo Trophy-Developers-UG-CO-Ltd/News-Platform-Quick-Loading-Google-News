@@ -50,8 +50,9 @@ const maintenanceSlice = createSlice({
     isEnabled: false,
     message: '',
     estimatedEnd: null,
-    isLoading: false,
+    isLoading: true,
     isSaving: false,
+    hasLoaded: false,
     error: null,
   },
   reducers: {},
@@ -63,12 +64,14 @@ const maintenanceSlice = createSlice({
       })
       .addCase(fetchMaintenanceStatus.fulfilled, (state, action) => {
         state.isLoading = false;
+        state.hasLoaded = true;
         state.isEnabled = action.payload.isEnabled;
         state.message = action.payload.message;
         state.estimatedEnd = action.payload.estimatedEnd;
       })
       .addCase(fetchMaintenanceStatus.rejected, (state, action) => {
         state.isLoading = false;
+        state.hasLoaded = true;
         state.error = action.payload || 'Failed to check maintenance status';
       })
       .addCase(toggleMaintenance.pending, (state) => {
@@ -77,6 +80,7 @@ const maintenanceSlice = createSlice({
       })
       .addCase(toggleMaintenance.fulfilled, (state, action) => {
         state.isSaving = false;
+        state.hasLoaded = true;
         state.isEnabled = action.payload.isEnabled;
         state.message = action.payload.message;
         state.estimatedEnd = action.payload.estimatedEnd;

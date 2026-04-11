@@ -7,6 +7,7 @@
 const maintenanceService = require('./maintenance.service');
 const AuditService = require('../audit/audit.service');
 const { asyncHandler } = require('../../middlewares/error.middleware');
+const { invalidateMaintenanceCache } = require('../../middlewares/maintenance.middleware');
 
 /**
  * @desc    Get maintenance status (public — needed by frontend to show maintenance page)
@@ -32,6 +33,7 @@ const getStatus = asyncHandler(async (req, res) => {
  */
 const updateStatus = asyncHandler(async (req, res) => {
   const status = await maintenanceService.updateStatus(req.body, req.user._id);
+  invalidateMaintenanceCache();
 
   AuditService.log({
     action: 'SETTINGS_CHANGE',

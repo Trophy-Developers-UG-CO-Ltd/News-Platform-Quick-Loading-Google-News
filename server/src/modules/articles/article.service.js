@@ -215,7 +215,7 @@ const SUPPORTED_LANGS = ['en', 'zh', 'sw'];
  * @param {object} data - Article data (mutated in-place)
  */
 async function _injectArticleTranslations(data) {
-  if (!process.env.GOOGLE_TRANSLATE_API_KEY) return;
+  if (!process.env.GOOGLE_TRANSLATE_API_KEY && !process.env.AI_TRANSLATION_API_KEY) return;
 
   try {
     // ── Scalar fields ────────────────────────────────────────────────────────

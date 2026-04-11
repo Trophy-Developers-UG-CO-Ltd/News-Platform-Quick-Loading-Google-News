@@ -15,6 +15,11 @@ const { env } = require('../config/env');
 let cachedStatus = null;
 let cacheExpiry = 0;
 
+const invalidateMaintenanceCache = () => {
+  cachedStatus = null;
+  cacheExpiry = 0;
+};
+
 const getMaintenanceStatus = async () => {
   const now = Date.now();
   if (cachedStatus !== null && now < cacheExpiry) {
@@ -78,7 +83,7 @@ const maintenanceMiddleware = async (req, res, next) => {
   });
 };
 
-module.exports = { maintenanceMiddleware };
+module.exports = { maintenanceMiddleware, invalidateMaintenanceCache };
 
 // MukonoTalks
 

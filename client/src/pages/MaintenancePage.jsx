@@ -1,6 +1,16 @@
-﻿import React from 'react';
- 
+import React from 'react';
+import { useSelector } from 'react-redux';
+
 export default function MaintenancePage() {
+  const { message, estimatedEnd } = useSelector((state) => state.maintenance);
+
+  const formattedEnd = estimatedEnd
+    ? new Date(estimatedEnd).toLocaleString('en-UG', {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })
+    : null;
+
   return (
     <div className="min-h-screen flex flex-col justify-between bg-[#0A0A0A] text-white">
       <div className="flex flex-col items-center justify-center flex-1 px-6 text-center">
@@ -9,14 +19,20 @@ export default function MaintenancePage() {
         </h1>
 
         <p className="mt-4 text-sm tracking-[0.3em] text-gray-400 uppercase">
-          Coming Soon
+          Under Maintenance
         </p>
 
         <div className="w-16 h-[1px] bg-[#2E2E2E] my-8"></div>
 
         <p className="text-gray-400 text-sm max-w-md">
-          We are preparing a better experience for you. Stay connected and be the first to know when we go live.
+          {message || 'We are currently performing scheduled maintenance. Please check back soon.'}
         </p>
+
+        {formattedEnd ? (
+          <p className="mt-4 text-xs uppercase tracking-[0.2em] text-gray-500">
+            Estimated Back: {formattedEnd}
+          </p>
+        ) : null}
 
         <a
           href="https://wa.me/256755303076"
@@ -36,4 +52,3 @@ export default function MaintenancePage() {
 }
 
 // MukonoTalks
-

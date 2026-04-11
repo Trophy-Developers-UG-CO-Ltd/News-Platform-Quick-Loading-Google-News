@@ -13,6 +13,7 @@ const RedirectService = require('../seo-redirects/redirect.service');
 const translationService = require('../../services/translationService');
 
 const SUPPORTED_LANGS = ['en', 'zh', 'sw'];
+const TARGET_TRANSLATION_LANGS = translationService.TARGET_LANGS || ['sw', 'zh'];
 
 const escapeRegExp = (value = '') => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -36,6 +37,66 @@ const normalizeSnippet = (value = '') =>
     .replace(/\s+/g, ' ')
     .trim();
 
+const hasTranslationProviderConfigured = () =>
+  Boolean(process.env.GOOGLE_TRANSLATE_API_KEY || process.env.AI_TRANSLATION_API_KEY);
+
+const hasLocalizedSeoValue = (seo, lang, field) => {
+  const englishValue = seo?.en?.[field];
+  if (!englishValue) return true;
+  return Boolean(seo?.[lang]?.[field]);
+};
+
+const hasLocalizedTranslatableBlocks = (contentBlocks, lang) => {
+  if (!Array.isArray(contentBlocks) || contentBlocks.length === 0) return true;
+
+  return contentBlocks.every((block) => {
+    if (!translationService.TRANSLATABLE_BLOCK_TYPES?.has(block.type)) return true;
+
+    const englishText = normalizeSnippet(collectTextFromUnknown(block.data?.en));
+    if (!englishText) return true;
+
+    const localizedText = normalizeSnippet(collectTextFromUnknown(block.data?.[lang]));
+    return Boolean(localizedText);
+  });
+};
+
+const hasLocalizedPageContent = (pageLike, lang) => {
+  if (!pageLike?.title?.[lang]) return false;
+  if (!hasLocalizedSeoValue(pageLike.seo, lang, 'title')) return false;
+  if (!hasLocalizedSeoValue(pageLike.seo, lang, 'description')) return false;
+  if (!hasLocalizedTranslatableBlocks(pageLike.contentBlocks, lang)) return false;
+  return true;
+};
+
+const syncPageTranslationState = (pageLike, { translationAttempted = false } = {}) => {
+  if (!pageLike.translationStatus) pageLike.translationStatus = {};
+  if (!pageLike.translationMeta) pageLike.translationMeta = {};
+  if (!pageLike.translationMeta.translatedAt) pageLike.translationMeta.translatedAt = {};
+  if (!pageLike.translationMeta.provider) pageLike.translationMeta.provider = {};
+
+  pageLike.translationStatus.en = 'completed';
+  pageLike.translationMeta.sourceLanguage = pageLike.translationMeta.sourceLanguage || 'en';
+
+  const providerLabel = hasTranslationProviderConfigured()
+    ? (translationService.TRANSLATION_PROVIDER || 'google')
+    : 'manual';
+
+  for (const lang of TARGET_TRANSLATION_LANGS) {
+    const isComplete = hasLocalizedPageContent(pageLike, lang);
+
+    if (isComplete) {
+      pageLike.translationStatus[lang] = 'completed';
+      pageLike.translationMeta.translatedAt[lang] =
+        pageLike.translationMeta.translatedAt[lang] || new Date();
+      pageLike.translationMeta.provider[lang] =
+        pageLike.translationMeta.provider[lang] || providerLabel;
+      continue;
+    }
+
+    pageLike.translationStatus[lang] = translationAttempted ? 'failed' : 'pending';
+  }
+};
+
 /**
  * Auto-translate page text fields and content blocks.
  * Translates: title, seo title/description, and translatable content blocks.
@@ -45,7 +106,7 @@ const normalizeSnippet = (value = '') =>
  * @param {object} data - Page data object (mutated in-place)
  */
 async function _injectPageTranslations(data) {
-  if (!process.env.GOOGLE_TRANSLATE_API_KEY) return;
+  if (!hasTranslationProviderConfigured()) return false;
 
   try {
     const fieldsToTranslate = {};
@@ -89,8 +150,11 @@ async function _injectPageTranslations(data) {
     if (data.contentBlocks?.length > 0) {
       data.contentBlocks = await translationService.translateContentBlocks(data.contentBlocks);
     }
+
+    return true;
   } catch (err) {
     logger.warn(`[PageService] Auto-translation failed (non-fatal): ${err.message}`);
+    return true;
   }
 }
 
@@ -107,7 +171,8 @@ const createPage = async (data, req) => {
   }
 
   // Auto-translate English content to Swahili and Chinese
-  await _injectPageTranslations(data);
+  const translationAttempted = await _injectPageTranslations(data);
+  syncPageTranslationState(data, { translationAttempted });
 
   const page = await Page.create({
     ...data,
@@ -150,7 +215,7 @@ const updatePage = async (pageId, data, req) => {
   }
 
   // Auto-translate English content to Swahili and Chinese
-  await _injectPageTranslations(data);
+  const translationAttempted = await _injectPageTranslations(data);
 
   // Track changes for audit
   const changes = {};
@@ -171,6 +236,7 @@ const updatePage = async (pageId, data, req) => {
 
   // Apply updates
   Object.assign(page, data);
+  syncPageTranslationState(page, { translationAttempted });
   page.updatedBy = req.user._id;
   await page.save();
 
@@ -296,6 +362,8 @@ const publishPage = async (pageId, action, req) => {
       error.statusCode = 400;
       throw error;
     }
+
+    syncPageTranslationState(page);
 
     // ── Strict multilingual completeness check ────────────────────────────────
     // Pages are strict-mode content: all translations must be completed
@@ -601,4 +669,3 @@ module.exports = {
 };
 
 // MukonoTalks
-
