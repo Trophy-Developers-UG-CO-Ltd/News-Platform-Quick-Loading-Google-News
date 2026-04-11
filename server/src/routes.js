@@ -27,6 +27,7 @@ const translationRoutes   = require('./modules/translation/translation.routes');
 const i18nRoutes          = require('./modules/i18n/i18n.routes');
 const siteSettingsRoutes  = require('./modules/site-settings/siteSettings.routes');
 const maintenanceRoutes   = require('./modules/maintenance/maintenance.routes');
+const uploadRoutes        = require('./modules/upload/upload.routes');
 const usersRoutes = require('./modules/users/users.routes');
 const adOrderRoutes = require('./modules/ad-orders/adOrder.routes');
 
@@ -64,6 +65,7 @@ router.use('/seo-analytics',   seoAnalyticsRoutes);
 
 router.use('/site-settings',   siteSettingsRoutes);
 router.use('/maintenance',     maintenanceRoutes);
+router.use('/upload',          uploadRoutes);
 router.use('/translation',     translationRoutes);
 router.use('/i18n',            i18nRoutes);
 
@@ -82,4 +84,3 @@ module.exports = router;
 // Technical SEO API endpoints (sitemap, robots.txt, indexing, schema validation, core web vitals)
 const seoTechnicalRoutes = require('./modules/seo');
 router.use('/seo/technical', seoTechnicalRoutes.routes);
-

@@ -13,6 +13,7 @@ import { fetchPublicArticle, clearArticle } from '../features/articles/articleSl
 import ArticleBlockRenderer from '../features/articles/ArticleBlockRenderer';
 import Spinner from '../components/ui/Spinner';
 import resolveImageUrl from '../utils/resolveImageUrl';
+import MonetizedAdSlot from '../components/ads/MonetizedAdSlot';
 import {
   FiArrowLeft,
   FiClock,
@@ -26,6 +27,7 @@ import SchemaInjector from '../seo/components/SchemaInjector';
 import { buildArticleSchema, buildArticleVideoSchema, buildBreadcrumbSchema } from '../seo/utils/schemaBuilders';
 import Reveal from '../components/ui/Reveal';
 import ArticleVideoBlock from '../features/articles/blocks/ArticleVideoBlock';
+import { trackArticleView } from '../utils/articleTracking';
 
 const CATEGORY_LABELS = {
   blog: 'Blog',
@@ -65,6 +67,11 @@ const ArticlePage = () => {
       dispatch(clearArticle());
     };
   }, [dispatch, validLang, slug]);
+
+  useEffect(() => {
+    if (!article?._id) return;
+    trackArticleView(article._id);
+  }, [article?._id]);
 
   /* Share handler */
   const handleShare = async () => {
@@ -343,9 +350,11 @@ const ArticlePage = () => {
         {/* Content Blocks */}
         <Reveal variant="fade-up" delay={150}>
         <div className="prose prose-lg max-w-none">
-          <ArticleBlockRenderer blocks={article.contentBlocks} />
+          <ArticleBlockRenderer blocks={article.contentBlocks} injectMidArticleAd />
         </div>
         </Reveal>
+
+        <MonetizedAdSlot slotKey="articleFooter" className="mt-10" />
 
         {/* Tags */}
         {article.tags && article.tags.length > 0 && (

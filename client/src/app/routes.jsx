@@ -42,6 +42,13 @@ const AdminCategories = lazy(() => import('../pages/admin/AdminCategories'));
 const AdminSEO = lazy(() => import('../pages/admin/AdminSEO'));
 const AdminSeoOverview = lazy(() => import('../pages/admin/seo/overview'));
 const AdminSeoTechnical = lazy(() => import('../pages/admin/seo/technical'));
+const AdminSeoMetadata = lazy(() => import('../features/seo-dashboard/pages/MetadataManager'));
+const AdminSeoSchema = lazy(() => import('../features/seo-dashboard/pages/SchemaManager'));
+const AdminSeoLinks = lazy(() => import('../features/seo-dashboard/pages/InternalLinks'));
+const AdminSeoSitemap = lazy(() => import('../features/seo-dashboard/pages/SitemapManager'));
+const AdminSeoIndexing = lazy(() => import('../features/seo-dashboard/pages/IndexingManager'));
+const AdminSeoAnalytics = lazy(() => import('../features/seo-dashboard/pages/SeoAnalytics'));
+const AdminSeoAnalyzer = lazy(() => import('../features/seo-dashboard/pages/ContentAnalyzer'));
 const AdminRedirects = lazy(() => import('../pages/admin/AdminRedirects'));
 const AdminTranslationDashboard = lazy(() => import('../pages/admin/AdminTranslationDashboard'));
 const AdminAnalytics = lazy(() => import('../pages/admin/AdminAnalytics'));
@@ -126,7 +133,14 @@ const AppRoutes = () => {
           <Route path="categories" element={<AdminCategories />} />
           <Route path="seo" element={<AdminSEO />} />
           <Route path="seo/overview" element={<AdminSeoOverview />} />
+          <Route path="seo/metadata" element={<AdminSeoMetadata />} />
+          <Route path="seo/schema" element={<AdminSeoSchema />} />
+          <Route path="seo/links" element={<AdminSeoLinks />} />
           <Route path="seo/technical" element={<AdminSeoTechnical />} />
+          <Route path="seo/sitemap" element={<AdminSeoSitemap />} />
+          <Route path="seo/indexing" element={<AdminSeoIndexing />} />
+          <Route path="seo/analytics" element={<AdminSeoAnalytics />} />
+          <Route path="seo/analyzer" element={<AdminSeoAnalyzer />} />
           <Route path="redirects" element={<AdminRedirects />} />
           <Route path="translation-dashboard" element={<AdminTranslationDashboard />} />
           <Route path="analytics" element={<AdminAnalytics />} />

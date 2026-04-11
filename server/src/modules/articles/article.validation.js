@@ -65,7 +65,7 @@ const videoMetaSchema = Joi.object({
   captionFileUrl: Joi.string().max(1000).allow('', null).default(null),
   transcript: Joi.string().allow('', null).default(null),
   duration: Joi.string().max(50).allow('', null).default(null),
-  uploadDate: Joi.date().iso().allow(null).default(null),
+  uploadDate: Joi.date().iso().allow(null).empty('').default(null),
 }).custom((value, helpers) => {
   if (value?.enabled && !(value.videoUrl || value.embedUrl || value.directVideoUrl)) {
     return helpers.error('custom.videoSourceRequired');

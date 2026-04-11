@@ -3,7 +3,7 @@ import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import api from '../app/axios';
 import SchemaInjector from '../seo/components/SchemaInjector';
-import BannerAdSlot from '../components/ads/BannerAdSlot';
+import MonetizedAdSlot from '../components/ads/MonetizedAdSlot';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://mukonotalks.ug';
 const LANGS = ['en', 'sw', 'zh'];
@@ -105,7 +105,7 @@ const NewsPage = () => {
         </p>
       </div>
 
-      <BannerAdSlot slotKey="newsTop" className="mb-6" />
+      <MonetizedAdSlot slotKey="newsTop" className="mb-8" />
 
       {loading ? (
         <p className="text-text-secondary">Loading news...</p>
@@ -113,7 +113,7 @@ const NewsPage = () => {
         <p className="text-text-secondary">No published stories yet.</p>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {articles.map((article) => {
+          {articles.map((article, index) => {
             const title = resolveLocalized(article?.title) || 'Untitled story';
             const slug = article?.localizedSlug?.en;
             const excerpt = resolveLocalized(article?.excerpt) || 'No summary available.';
@@ -124,24 +124,29 @@ const NewsPage = () => {
             if (!slug) return null;
 
             return (
-              <article key={article._id} className="rounded-2xl border border-dark-border bg-dark-slate p-5 shadow-card">
-                <p className="text-xs font-semibold uppercase tracking-wide text-category-news">{category}</p>
-                <h2 className="mt-2 line-clamp-2 text-xl font-semibold text-text-primary">{title}</h2>
-                <p className="mt-2 text-xs text-text-secondary">By {authorName} • {publishedDate}</p>
-                <p className="mt-3 line-clamp-3 text-sm text-text-secondary">{excerpt}</p>
-                <Link
-                  to={`/news/${slug}`}
-                  className="mt-4 inline-block text-sm font-semibold text-accent-blue transition-colors hover:text-category-news"
-                >
-                  Read story
-                </Link>
-              </article>
+              <React.Fragment key={article._id}>
+                <article className="rounded-2xl border border-dark-border bg-dark-slate p-5 shadow-card">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-category-news">{category}</p>
+                  <h2 className="mt-2 line-clamp-2 text-xl font-semibold text-text-primary">{title}</h2>
+                  <p className="mt-2 text-xs text-text-secondary">By {authorName} • {publishedDate}</p>
+                  <p className="mt-3 line-clamp-3 text-sm text-text-secondary">{excerpt}</p>
+                  <Link
+                    to={`/news/${slug}`}
+                    className="mt-4 inline-block text-sm font-semibold text-accent-blue transition-colors hover:text-category-news"
+                  >
+                    Read story
+                  </Link>
+                </article>
+                {(index + 1) % 6 === 0 ? (
+                  <div className="sm:col-span-2 lg:col-span-3">
+                    <MonetizedAdSlot slotKey="newsInFeed" className="mt-1" />
+                  </div>
+                ) : null}
+              </React.Fragment>
             );
           })}
         </div>
       )}
-
-      <BannerAdSlot slotKey="newsInFeed" className="mt-6" />
     </div>
   );
 };

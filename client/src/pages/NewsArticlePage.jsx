@@ -3,9 +3,10 @@ import { Helmet } from 'react-helmet-async';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import api from '../app/axios';
 import SchemaInjector from '../seo/components/SchemaInjector';
-import BannerAdSlot from '../components/ads/BannerAdSlot';
+import MonetizedAdSlot from '../components/ads/MonetizedAdSlot';
 import ArticleVideoBlock from '../features/articles/blocks/ArticleVideoBlock';
 import { buildArticleVideoSchema } from '../seo/utils/schemaBuilders';
+import { trackArticleView } from '../utils/articleTracking';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://mukonotalks.ug';
 const LANGS = ['en', 'sw', 'zh'];
@@ -61,6 +62,11 @@ const NewsArticlePage = () => {
     };
   }, [lang, slug]);
 
+  useEffect(() => {
+    if (!article?._id) return;
+    trackArticleView(article._id);
+  }, [article?._id]);
+
   if (loading) {
     return <div className="mx-auto w-full max-w-3xl px-4 py-12 text-gray-600">Loading story...</div>;
   }
@@ -82,6 +88,7 @@ const NewsArticlePage = () => {
   const publishedDate = formatDate(article?.publishedAt);
   const category = formatCategory(article?.category);
   const categorySlug = article?.category || '';
+  const inlineBreakIndex = blocks.length > 4 ? Math.ceil(blocks.length / 2) : -1;
 
   const newsSchema = {
     '@context': 'https://schema.org',
@@ -182,21 +189,27 @@ const NewsArticlePage = () => {
         </div>
       ) : null}
 
-      <BannerAdSlot slotKey="articleInline" className="my-6" />
-
       <div className="space-y-4 text-base leading-7 text-gray-800">
         {blocks.length > 0 ? (
           blocks.map((block, idx) => {
             const body = block?.data?.body || block?.data?.text || '';
             if (!body) return null;
-            return <p key={`${block?._id || 'block'}-${idx}`} dangerouslySetInnerHTML={{ __html: body }} />;
+
+            return (
+              <React.Fragment key={`${block?._id || 'block'}-${idx}`}>
+                <p dangerouslySetInnerHTML={{ __html: body }} />
+                {idx === inlineBreakIndex ? (
+                  <MonetizedAdSlot slotKey="articleInline" className="my-8" />
+                ) : null}
+              </React.Fragment>
+            );
           })
         ) : (
           <p>No body content available for this article.</p>
         )}
       </div>
 
-      <BannerAdSlot slotKey="articleFooter" className="mt-8" />
+      <MonetizedAdSlot slotKey="articleFooter" className="mt-10" />
     </article>
   );
 };

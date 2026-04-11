@@ -56,7 +56,10 @@ const NotFound = () => {
         <p className="text-gray-500 mt-2 max-w-md mx-auto">
           The page you&apos;re looking for doesn&apos;t exist or has been moved.
         </p>
-        <Link to="/" className="btn-primary inline-flex items-center gap-2 mt-6">
+        <Link
+          to="/"
+          className="mt-6 inline-flex items-center gap-2 rounded-full border border-black bg-black px-5 py-2.5 font-semibold text-white transition hover:bg-black/90 dark:border-white dark:bg-white dark:text-black dark:hover:bg-neutral-100"
+        >
           <FiHome className="h-5 w-5" /> Back to Home
         </Link>
       </div>

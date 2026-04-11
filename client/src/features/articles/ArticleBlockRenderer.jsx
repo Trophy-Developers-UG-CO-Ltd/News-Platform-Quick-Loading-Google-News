@@ -12,6 +12,7 @@ import ArticleQuoteBlock from './blocks/ArticleQuoteBlock';
 import ArticleCodeBlock from './blocks/ArticleCodeBlock';
 import ArticleListBlock from './blocks/ArticleListBlock';
 import ArticleVideoBlock from './blocks/ArticleVideoBlock';
+import MonetizedAdSlot from '../../components/ads/MonetizedAdSlot';
 
 const BLOCK_COMPONENTS = {
   text: ArticleTextBlock,
@@ -22,19 +23,29 @@ const BLOCK_COMPONENTS = {
   video: ArticleVideoBlock,
 };
 
-const ArticleBlockRenderer = ({ blocks }) => {
+const ArticleBlockRenderer = ({ blocks, injectMidArticleAd = false }) => {
   if (!blocks || blocks.length === 0) {
     return null;
   }
 
   const sortedBlocks = [...blocks].sort((a, b) => a.order - b.order);
+  const adInsertIndex = injectMidArticleAd && sortedBlocks.length > 4
+    ? Math.ceil(sortedBlocks.length / 2) - 1
+    : -1;
 
   return (
     <div className="article-blocks space-y-8">
-      {sortedBlocks.map((block) => {
+      {sortedBlocks.map((block, index) => {
         const Component = BLOCK_COMPONENTS[block.type];
         if (!Component) return null;
-        return <Component key={block._id || block.order} data={block.data} />;
+        return (
+          <React.Fragment key={block._id || block.order}>
+            <Component data={block.data} />
+            {index === adInsertIndex ? (
+              <MonetizedAdSlot slotKey="articleInline" className="my-10" />
+            ) : null}
+          </React.Fragment>
+        );
       })}
     </div>
   );

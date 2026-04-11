@@ -57,6 +57,9 @@ const env = {
   // Stripe
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  FLUTTERWAVE_SECRET_KEY: process.env.FLUTTERWAVE_SECRET_KEY || '',
+  FLUTTERWAVE_WEBHOOK_SECRET_HASH: process.env.FLUTTERWAVE_WEBHOOK_SECRET_HASH || '',
+  ADS_USD_TO_UGX_RATE: parseFloat(process.env.ADS_USD_TO_UGX_RATE) || 3800,
 
   // CORS
   CLIENT_URL: process.env.CLIENT_URL || 'http://localhost:3000',
@@ -146,4 +149,3 @@ const validateEnv = () => {
 module.exports = { env, validateEnv };
 
 // MukonoTalks
-

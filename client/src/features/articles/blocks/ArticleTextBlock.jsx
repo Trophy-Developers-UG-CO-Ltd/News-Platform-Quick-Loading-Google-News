@@ -9,13 +9,25 @@ import React from 'react';
 const asHtml = (value) => {
   if (!value) return '';
   if (Array.isArray(value)) return value.map((part) => `<p>${part}</p>`).join('');
-  return value;
+  return typeof value === 'string' ? value : '';
+};
+
+const resolveBodyHtml = (data) => {
+  if (!data) return '';
+  if (typeof data === 'string') return asHtml(data);
+
+  return (
+    asHtml(data.body) ||
+    asHtml(data.text) ||
+    asHtml(data.content) ||
+    asHtml(data.paragraphs)
+  );
 };
 
 const ArticleTextBlock = ({ data }) => {
   if (!data) return null;
 
-  const bodyHtml = asHtml(data.body);
+  const bodyHtml = resolveBodyHtml(data);
 
   return (
     <div className="article-text-block">
@@ -43,4 +55,3 @@ const ArticleTextBlock = ({ data }) => {
 export default ArticleTextBlock;
 
 // MukonoTalks
-

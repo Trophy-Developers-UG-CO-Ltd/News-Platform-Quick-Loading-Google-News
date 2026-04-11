@@ -417,6 +417,7 @@ const AdminArticleEditor = () => {
         videoMeta: {
           ...emptyVideoMeta,
           ...(article.videoMeta || {}),
+          uploadDate: article.videoMeta?.uploadDate || null,
         },
       };
 
@@ -447,7 +448,9 @@ const AdminArticleEditor = () => {
         navigate(`/admin/articles/${res.article._id}/edit`);
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to save article');
+      const apiError = error.response?.data;
+      const firstValidationMessage = Array.isArray(apiError?.errors) ? apiError.errors[0]?.message : '';
+      toast.error(firstValidationMessage || apiError?.message || 'Failed to save article');
     } finally {
       setIsSaving(false);
     }

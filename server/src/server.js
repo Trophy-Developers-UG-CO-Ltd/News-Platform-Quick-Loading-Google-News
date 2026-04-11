@@ -14,6 +14,10 @@ const logger = require("./utils/logger");
 const { errorHandler, notFound } = require("./middlewares/error.middleware");
 const { globalLimiter } = require("./middlewares/rateLimit.middleware");
 const {
+  handleStripeWebhook: handleAdOrderStripeWebhook,
+  handleFlutterwaveWebhook: handleAdOrderFlutterwaveWebhook,
+} = require("./modules/ad-orders/adOrder.controller");
+const {
   blockDirectFileAccess,
   additionalSecurityHeaders,
   requestId,
@@ -171,6 +175,18 @@ app.use((req, res, next) => {
 // ─────────────────────────────────────────
 // Body Parsers
 // ─────────────────────────────────────────
+app.post(
+  "/api/v1/ad-orders/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  handleAdOrderStripeWebhook
+);
+
+app.post(
+  "/api/v1/ad-orders/flutterwave/webhook",
+  express.raw({ type: "application/json" }),
+  handleAdOrderFlutterwaveWebhook
+);
+
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
