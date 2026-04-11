@@ -135,8 +135,8 @@ const RedirectModal = ({ initial, onSave, onClose, isSaving }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {field('fromPath', 'From Path (old URL)', '/en/products/old-product-slug', 'Exact path visitors try to reach')}
-          {field('toPath', 'To Path (new URL)', '/en/products/new-product-slug', 'Destination path they should be redirected to')}
+          {field('fromPath', 'From Path (old URL)', '/en/news/old-article-slug', 'Exact path visitors try to reach')}
+          {field('toPath', 'To Path (new URL)', '/en/news/new-article-slug', 'Destination path they should be redirected to')}
 
           {/* Status code */}
           <div>
@@ -563,7 +563,7 @@ const AdminRedirects = () => {
             <Zap className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
             <div>
               <p className="font-medium text-gray-600">Auto-generated</p>
-              <p>When a product, page, or article slug is edited, a redirect request is automatically raised.</p>
+              <p>When a page or article slug is edited, a redirect request is automatically raised.</p>
             </div>
           </div>
           <div className="flex gap-2">

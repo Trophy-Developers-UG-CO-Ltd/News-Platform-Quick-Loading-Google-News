@@ -37,6 +37,7 @@ const personalizationRoutes = require('./modules/personalization/personalization
 
 const analyticsRoutes = require('./modules/personalization/analytics.routes');
 const advertiseInquiryRoutes = require('./modules/advertise-inquiries/advertiseInquiry.routes');
+const analyticsV1Routes = require('./modules/analytics/analytics.routes');
 
 router.use('/auth', authRoutes);
 router.use('/contact', contactRoutes);
@@ -76,6 +77,7 @@ router.use('/v1/ad-orders', adOrderRoutes);
 router.use('/', personalizationRoutes);
 router.use('/', analyticsRoutes);
 router.use('/advertise',       advertiseInquiryRoutes);
+router.use('/v1', analyticsV1Routes);
 
 module.exports = router;
 

@@ -126,9 +126,6 @@ const AdminAuditLogs = () => {
           <option value="USER_LOGIN">User Login</option>
           <option value="USER_LOGIN_FAILED">Login Failed</option>
           <option value="USER_REGISTER">User Register</option>
-          <option value="PRODUCT_CREATE">Product Create</option>
-          <option value="PRODUCT_UPDATE">Product Update</option>
-          <option value="PRODUCT_DELETE">Product Delete</option>
           <option value="ORDER_STATUS_CHANGE">Order Status Change</option>
           <option value="USER_ROLE_CHANGE">Role Change</option>
           <option value="PASSWORD_CHANGE">Password Change</option>

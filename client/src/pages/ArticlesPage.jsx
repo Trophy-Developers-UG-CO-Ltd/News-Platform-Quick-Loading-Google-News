@@ -14,6 +14,7 @@ import {
 import api from '../app/axios';
 import Spinner from '../components/ui/Spinner';
 import SchemaInjector from '../seo/components/SchemaInjector';
+import { buildArticlePath, getArticleSlug } from '../features/articles/articleUrls';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://mukonotalks.ug';
 const FALLBACK_YOUTUBE = 'https://www.youtube.com/watch?v=ETOSTwqrFyU';
@@ -61,8 +62,6 @@ const resolveCategorySlug = (value) => {
   if (typeof value === 'object') return value.slug || normalizeCategoryKey(value);
   return String(value).trim().toLowerCase();
 };
-
-const getArticleSlug = (article) => article?.localizedSlug?.en || article?.localizedSlug || '';
 
 const getArticleTitle = (article) => resolveText(article?.title) || 'Untitled story';
 
@@ -144,6 +143,7 @@ const extractArticleVideos = (article) => {
         sourceUrl: rawUrl,
         platform: getVideoPlatform(rawUrl),
         articleSlug: getArticleSlug(article),
+        category: resolveCategorySlug(article?.category),
         articleTitle: getArticleTitle(article),
         publishedAt: article?.publishedAt,
       };
@@ -164,7 +164,7 @@ const buildCollectionSchema = (articles) => ({
       .map((article, index) => ({
         '@type': 'ListItem',
         position: index + 1,
-        url: `${BASE_URL}/blog/${getArticleSlug(article)}`,
+        url: `${BASE_URL}${buildArticlePath(article)}`,
         name: getArticleTitle(article),
       })),
   },
@@ -416,7 +416,7 @@ const ArticlesPage = () => {
               {latestUpdate ? `Updated ${formatDate(latestUpdate)}` : 'Waiting for the next dispatch'}
             </p>
             {leadArticle ? (
-              <Link to={`/blog/${getArticleSlug(leadArticle)}`} className="group mt-5 block rounded-[24px] border border-white/12 bg-black/40 p-5 transition hover:border-white/28 hover:bg-black/55">
+              <Link to={buildArticlePath(leadArticle)} className="group mt-5 block rounded-[24px] border border-white/12 bg-black/40 p-5 transition hover:border-white/28 hover:bg-black/55">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-brand-white/45">
                   {resolveCategoryLabel(leadArticle?.category)}
                 </p>
@@ -605,14 +605,13 @@ const StatCard = ({ icon: Icon, label, value }) => (
 );
 
 const ArticleRailCard = ({ article }) => {
-  const slug = getArticleSlug(article);
   const title = getArticleTitle(article);
   const excerpt = getArticleExcerpt(article);
   const image = article?.featuredImage;
 
   return (
     <article className="min-w-[280px] max-w-[280px] flex-shrink-0 overflow-hidden rounded-[26px] border border-white/10 bg-white text-black shadow-card transition hover:-translate-y-1 hover:shadow-glow dark:bg-[#f3f3ef]">
-      <Link to={`/blog/${slug}`} className="block">
+      <Link to={buildArticlePath(article)} className="block">
         <div className="h-44 w-full overflow-hidden bg-[#d9d9d4]">
           {image ? (
             <img
@@ -633,7 +632,7 @@ const ArticleRailCard = ({ article }) => {
         <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-black/45">
           {resolveCategoryLabel(article?.category)}
         </p>
-        <Link to={`/blog/${slug}`}>
+        <Link to={buildArticlePath(article)}>
           <h3 className="mt-2 line-clamp-3 text-lg font-semibold leading-snug">{title}</h3>
         </Link>
         <p className="mt-3 line-clamp-3 text-sm leading-6 text-black/68">{excerpt}</p>
@@ -663,7 +662,7 @@ const VideoSummaryCard = ({ video }) => (
         <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-black/55 dark:text-brand-white/55">
           <span>{formatDate(video.publishedAt, { day: 'numeric', month: 'short', year: 'numeric' })}</span>
           {video.articleSlug ? (
-            <Link to={`/blog/${video.articleSlug}`} className="inline-flex items-center gap-1 font-semibold text-black transition hover:gap-2 dark:text-brand-white">
+            <Link to={buildArticlePath({ category: video.category, localizedSlug: { en: video.articleSlug } })} className="inline-flex items-center gap-1 font-semibold text-black transition hover:gap-2 dark:text-brand-white">
               Open article <FiArrowRight className="h-3.5 w-3.5" />
             </Link>
           ) : (
@@ -683,4 +682,3 @@ const VideoSummaryCard = ({ video }) => (
 );
 
 export default ArticlesPage;
-

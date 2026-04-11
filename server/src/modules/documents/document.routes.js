@@ -10,7 +10,7 @@ const router = express.Router();
 const rateLimit = require('express-rate-limit');
 
 const documentController = require('./document.controller');
-const { protect, optionalAuth } = require('../../middlewares/auth.middleware');
+const { protect } = require('../../middlewares/auth.middleware');
 const { authorize } = require('../../middlewares/role.middleware');
 
 // Rate limiter specifically for document downloads
@@ -21,9 +21,6 @@ const downloadLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-
-// Public (restricted docs hidden for unauthenticated)
-router.get('/product/:productId', optionalAuth, documentController.getProductDocuments);
 
 // Authenticated download (secure access + rate limited)
 router.get('/download/:id', protect, downloadLimiter, documentController.downloadDocument);

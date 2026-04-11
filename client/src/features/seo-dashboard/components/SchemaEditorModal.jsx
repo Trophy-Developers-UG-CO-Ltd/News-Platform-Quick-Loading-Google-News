@@ -8,7 +8,7 @@ import React, { useState } from 'react';
 import { Code, RefreshCw } from 'lucide-react';
 
 const SCHEMA_TYPES = [
-  'Product', 'Article', 'Organization', 'LocalBusiness', 'FAQPage',
+  'Article', 'Organization', 'LocalBusiness', 'FAQPage',
   'VideoObject', 'NewsArticle', 'BreadcrumbList', 'CollectionPage',
   'JobPosting', 'Event', 'WebPage', 'WebSite', 'Person', 'HowTo',
   'Review', 'AggregateRating', 'Recipe', 'Course', 'Service',
@@ -50,7 +50,7 @@ export default function SchemaEditorModal({ initial, onClose, onSave, saving }) 
             <div>
               <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Page Slug</label>
               <input value={slug} onChange={(e) => setSlug(e.target.value)} disabled={!!initial}
-                placeholder="products/chemical-x"
+                placeholder="news/local-election-update"
                 className="w-full rounded-[48px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-60 font-mono" />
             </div>
             <div>

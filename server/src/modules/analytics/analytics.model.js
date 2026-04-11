@@ -106,11 +106,72 @@ const pageViewSchema = new mongoose.Schema(
 pageViewSchema.index({ path: 1, createdAt: -1 });
 pageViewSchema.index({ createdAt: 1 }, { expireAfterSeconds: 63072000 });
 
+const articleViewEventSchema = new mongoose.Schema(
+  {
+    article: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Article',
+      required: true,
+      index: true,
+    },
+    sessionId: {
+      type: String,
+      default: null,
+      index: true,
+    },
+    fingerprint: {
+      type: String,
+      default: null,
+      index: true,
+    },
+    ipHash: {
+      type: String,
+      default: null,
+      index: true,
+    },
+    userAgent: {
+      type: String,
+      default: '',
+    },
+    referrer: {
+      type: String,
+      default: '',
+    },
+    language: {
+      type: String,
+      default: 'en',
+    },
+    isBot: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    counted: {
+      type: Boolean,
+      default: true,
+      index: true,
+    },
+    viewedAt: {
+      type: Date,
+      default: Date.now,
+      index: true,
+    },
+  },
+  {
+    timestamps: true,
+    collection: 'article_view_events',
+  }
+);
+
+articleViewEventSchema.index({ article: 1, viewedAt: -1 });
+articleViewEventSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 });
+
 const ProductView = mongoose.model('ProductView', productViewSchema);
 const SearchTerm = mongoose.model('SearchTerm', searchTermSchema);
 const PageView = mongoose.model('PageView', pageViewSchema);
+const ArticleViewEvent = mongoose.model('ArticleViewEvent', articleViewEventSchema);
 
-module.exports = { ProductView, SearchTerm, PageView };
+module.exports = { ProductView, SearchTerm, PageView, ArticleViewEvent };
 
 // MukonoTalks
 

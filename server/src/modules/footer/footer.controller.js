@@ -8,16 +8,16 @@ const logger = require('../../utils/logger');
 const translationService = require('../../services/translationService');
 
 const DEFAULT = {
-  tagline: 'Premium industrial chemicals, paints, coatings and color solutions for businesses across Africa.',
+  tagline: 'Independent local news, community reporting, and editorial coverage for audiences across Mukono and beyond.',
   quickLinks: [
     { label: 'Home',             href: '/' },
-    { label: 'Products',         href: '/products' },
+    { label: 'Latest News',      href: '/news' },
     { label: 'Create Account',   href: '/register' },
     { label: 'Privacy Policy',   href: '/privacy' },
     { label: 'Terms & Conditions', href: '/terms' },
   ],
   serviceLinks: [
-    { label: 'Track Orders',     href: '/orders' },
+    { label: 'Advertise',        href: '/advertise' },
     { label: 'My Account',       href: '/dashboard' },
   ],
   contactEmail:   'info@mukonotalks.ug',

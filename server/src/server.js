@@ -33,6 +33,7 @@ const { maintenanceMiddleware } = require("./middlewares/maintenance.middleware"
 const routes = require("./routes");
 const authRoutes = require("./modules/auth/auth.routes");
 const analyticsRoutes = require("./routes/analytics.routes");
+const { startArticleAnalyticsJobs } = require("./jobs/articleAnalytics.job");
 
 // Validate environment variables
 validateEnv();
@@ -338,6 +339,35 @@ app.get("/health", (req, res) => {
   });
 });
 
+app.get("/blog/:slug", async (req, res, next) => {
+  try {
+    const Article = require("./modules/articles/article.model");
+    const article = await Article.findOne({
+      publishStatus: "published",
+      $or: [
+        { "localizedSlug.en": req.params.slug },
+        { "localizedSlug.zh": req.params.slug },
+        { "localizedSlug.sw": req.params.slug },
+      ],
+    })
+      .select("category localizedSlug")
+      .lean();
+
+    if (!article) return next();
+
+    const canonicalSlug =
+      article.localizedSlug?.en ||
+      article.localizedSlug?.zh ||
+      article.localizedSlug?.sw;
+
+    if (!canonicalSlug) return next();
+
+    return res.redirect(301, `/${String(article.category || "general").trim().toLowerCase()}/${canonicalSlug}`);
+  } catch {
+    return next();
+  }
+});
+
 // ─────────────────────────────────────────
 // Frontend Route Bridge (dev + prod)
 // Handles direct browser hits to frontend-only routes via API server origin.
@@ -432,6 +462,7 @@ const startServer = async () => {
 
     const { initTranslationQueue } = require("./queues/translation.queue");
     await initTranslationQueue();
+    startArticleAnalyticsJobs();
   } catch (error) {
     logger.error(`MongoDB connection failed: ${error.message}`);
   }

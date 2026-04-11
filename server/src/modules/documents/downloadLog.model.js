@@ -15,13 +15,6 @@ const downloadLogSchema = new mongoose.Schema(
       index: true,
     },
 
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
-      default: null,
-      index: true,
-    },
-
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

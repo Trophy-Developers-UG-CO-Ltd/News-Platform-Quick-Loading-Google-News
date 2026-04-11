@@ -38,15 +38,6 @@ const seoSchema = new mongoose.Schema(
   { _id: false }
 );
 
-// ─── Related Product Link ──────────────────────────────────────
-const relatedProductSchema = new mongoose.Schema(
-  {
-    product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
-    label: { type: String, trim: true },
-  },
-  { _id: false }
-);
-
 // ─── Attachment Schema (Knowledge Base) ────────────────────────
 const attachmentSchema = new mongoose.Schema(
   {
@@ -215,9 +206,11 @@ const articleSchema = new mongoose.Schema(
     publishedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
 
     viewCount: { type: Number, default: 0, min: 0 },
+    uniqueViewCount: { type: Number, default: 0, min: 0 },
+    trendingScore: { type: Number, default: 0, min: 0 },
+    lastViewedAt: { type: Date, default: null },
 
     // ─── Knowledge Base Extensions ───────────────────────────
-    relatedProducts: [relatedProductSchema],
     attachments: [attachmentSchema],
     technicalReferences: [{ type: String, trim: true }],
 
@@ -240,6 +233,9 @@ articleSchema.index({ category: 1 });
 articleSchema.index({ tags: 1 });
 articleSchema.index({ publishedAt: -1 });
 articleSchema.index({ viewCount: -1 });
+articleSchema.index({ uniqueViewCount: -1 });
+articleSchema.index({ trendingScore: -1, lastViewedAt: -1 });
+articleSchema.index({ lastViewedAt: -1 });
 articleSchema.index({ publishStatus: 1, category: 1, publishedAt: -1 });
 articleSchema.index({ 'title.en': 'text', 'excerpt.en': 'text', tags: 'text' });
 

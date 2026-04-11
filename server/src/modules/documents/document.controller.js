@@ -17,15 +17,6 @@ const getAllDocuments = asyncHandler(async (req, res) => {
   res.json({ success: true, ...result });
 });
 
-const getProductDocuments = asyncHandler(async (req, res) => {
-  const isAuthenticated = !!req.user;
-  const documents = await documentService.getProductDocuments(
-    req.params.productId,
-    isAuthenticated
-  );
-  res.status(200).json({ success: true, documents });
-});
-
 const downloadDocument = asyncHandler(async (req, res) => {
   const result = await documentService.getDocumentDownload(req.params.id, req.user, req);
 
@@ -72,7 +63,6 @@ const getDownloadStats = asyncHandler(async (req, res) => {
 
 module.exports = {
   getAllDocuments,
-  getProductDocuments,
   downloadDocument,
   createDocument,
   deleteDocument,

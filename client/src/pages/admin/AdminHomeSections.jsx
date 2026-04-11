@@ -45,10 +45,10 @@ import { getLucideIcon, ICON_GROUPS } from '../../utils/getLucideIcon';
 
 const SECTION_TABS = [
   { key: 'intro',              label: 'Intro',               icon: Type,           color: 'text-indigo-600'  },
-  { key: 'featured-products',  label: 'Featured Products',   icon: ShoppingBag,    color: 'text-amber-600'   },
+  { key: 'featured-products',  label: 'Featured News',       icon: ShoppingBag,    color: 'text-amber-600'   },
   { key: 'values',             label: 'Value Propositions',  icon: Heart,          color: 'text-rose-600'    },
   { key: 'industries',         label: 'Industries',          icon: Factory,        color: 'text-blue-600'    },
-  { key: 'products',           label: 'Products',            icon: Package,        color: 'text-green-600'   },
+  { key: 'products',           label: 'Coverage Cards',      icon: Package,        color: 'text-green-600'   },
   { key: 'advantages',         label: 'Advantages',          icon: ShieldCheck,    color: 'text-purple-600'  },
   { key: 'video',              label: 'Video Highlights',    icon: Video,          color: 'text-teal-600'    },
   { key: 'inquiry',            label: 'Contact/Advertise',   icon: MessageCircle,  color: 'text-emerald-600' },
@@ -96,7 +96,7 @@ const SECTION_CONFIG = {
   },
   products: {
     itemFields:  ['icon', 'title', 'description', 'link', 'featuredImage'],
-    itemLabel:   'Product Card',
+    itemLabel:   'Coverage Card',
     hasItems:    true,
     hasHeading:  true,
     hasCtaBtns:  false,
@@ -351,7 +351,7 @@ const ItemEditor = ({ item, index, config, total, onChange, onDelete, onMove }) 
               value={item.link || ''}
               onChange={(e) => onChange(index, { ...item, link: e.target.value })}
               className="w-full px-3 py-2 text-sm border rounded-[48px] focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              placeholder="/products?category=..."
+              placeholder="/news?category=local"
             />
           </div>
         )}
@@ -511,7 +511,7 @@ const VideoEditor = ({ form, onChange }) => (
 );
 
 /* ═══════════════════════════════════════════════════════════
-   BOTTOM CTA EDITOR (Products section)
+   BOTTOM CTA EDITOR (Coverage section)
 ═══════════════════════════════════════════════════════════ */
 
 const BottomCtaEditor = ({ form, onChange }) => (
@@ -528,7 +528,7 @@ const BottomCtaEditor = ({ form, onChange }) => (
           value={form.bottomCtaText || ''}
           onChange={(e) => onChange({ ...form, bottomCtaText: e.target.value })}
           className="w-full px-3 py-2 text-sm border rounded-[48px] focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          placeholder="View Full Product Catalogue"
+          placeholder="Read More Stories"
         />
       </div>
       <div>
@@ -538,7 +538,7 @@ const BottomCtaEditor = ({ form, onChange }) => (
           value={form.bottomCtaLink || ''}
           onChange={(e) => onChange({ ...form, bottomCtaLink: e.target.value })}
           className="w-full px-3 py-2 text-sm border rounded-[48px] focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          placeholder="/products"
+          placeholder="/news"
         />
       </div>
     </div>
@@ -693,7 +693,7 @@ const SectionEditor = ({ sectionKey, data, onSave, saving }) => {
         />
       )}
 
-      {/* Bottom CTA (Products section) */}
+      {/* Bottom CTA (Coverage section) */}
       {config.hasBottomCta && (
         <BottomCtaEditor form={form} onChange={(patch) => update(patch)} />
       )}
@@ -909,4 +909,3 @@ const AdminHomeSections = () => {
 export default AdminHomeSections;
 
 // MukonoTalks
-

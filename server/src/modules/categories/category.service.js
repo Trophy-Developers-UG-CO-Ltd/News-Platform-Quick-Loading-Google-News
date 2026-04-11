@@ -59,7 +59,6 @@ async function _injectCategoryTranslations(data) {
  */
 const getAllCategories = async () => {
   const categories = await Category.find({ isActive: true })
-    .populate('products')
     .populate('parent', 'name slug')
     .sort({ sortOrder: 1, name: 1 });
   return categories;
@@ -70,7 +69,6 @@ const getAllCategories = async () => {
  */
 const getAllCategoriesAdmin = async () => {
   const categories = await Category.find({})
-    .populate('products')
     .populate('parent', 'name slug')
     .sort({ sortOrder: 1, name: 1 });
 
@@ -83,7 +81,6 @@ const getAllCategoriesAdmin = async () => {
  */
 const getCategoryTree = async () => {
   const all = await Category.find({ isActive: true })
-    .populate('products')
     .sort({ sortOrder: 1, name: 1 })
     .lean();
 
@@ -161,4 +158,3 @@ module.exports = {
 };
 
 // MukonoTalks
-

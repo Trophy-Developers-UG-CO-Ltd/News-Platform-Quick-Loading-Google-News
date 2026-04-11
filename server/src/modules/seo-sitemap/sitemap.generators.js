@@ -17,6 +17,7 @@ async function generateSitemapIndex() {
   const entries = [
     sitemapIndexEntry(`${SITE_URL}/sitemap-pages.xml`,      now),
     sitemapIndexEntry(`${SITE_URL}/sitemap-articles.xml`,   now),
+    sitemapIndexEntry(`${SITE_URL}/sitemap-categories.xml`, now),
     sitemapIndexEntry(`${SITE_URL}/news-sitemap.xml`,       now),
     sitemapIndexEntry(`${SITE_URL}/video-sitemap.xml`,      now),
   ];
@@ -53,42 +54,25 @@ async function generatePagesSitemap() {
   return wrapSitemap(entries);
 }
 
-// ─── Products ──────────────────────────────────────────────────
-
-async function generateProductsSitemap() {
-  let Product;
-  try { Product = require('../products/product.model'); } catch { return wrapSitemap([]); }
-
-  const products = await Product.find({ status: 'active' }, 'slug name images updatedAt').lean();
-  const entries = products.map(p => {
-    const slug = typeof p.slug === 'object' ? p.slug.en : p.slug;
-    const images = (p.images || []).slice(0, 10).map(img => ({
-      url:   img.startsWith('http') ? img : `${SITE_URL}${img}`,
-      title: typeof p.name === 'object' ? p.name.en : p.name,
-    }));
-    return urlEntry({ loc: `${SITE_URL}/products/${slug}`, lastmod: p.updatedAt, changefreq: 'weekly', priority: 0.8, images });
-  });
-  return wrapSitemap(entries, { hasImage: entries.some(e => e.includes('<image:')) });
-}
-
 // ─── Articles ──────────────────────────────────────────────────
 
 async function generateArticlesSitemap() {
   let Article;
   try { Article = require('../articles/article.model'); } catch { return wrapSitemap([]); }
 
-  const articles = await Article.find({ publishStatus: 'published' }, 'localizedSlug title featuredImage updatedAt publishedAt').lean();
+  const articles = await Article.find({ publishStatus: 'published' }, 'localizedSlug title featuredImage updatedAt publishedAt category').lean();
   const entries = articles.map(a => {
     const slug   = a.localizedSlug?.en;
     if (!slug) return null;
+    const category = String(a.category || 'general').trim().toLowerCase();
     const imageUrl = a.featuredImage;
     const images = imageUrl ? [{ url: imageUrl.startsWith('http') ? imageUrl : `${SITE_URL}${imageUrl}`, title: a.title?.en || '' }] : [];
     return urlEntry({
-      loc: `${SITE_URL}/news/${slug}`, lastmod: a.updatedAt, changefreq: 'hourly', priority: 0.9, images,
+      loc: `${SITE_URL}/${category}/${slug}`, lastmod: a.updatedAt, changefreq: 'hourly', priority: 0.9, images,
       hreflang: {
-        en: `${SITE_URL}/news/${a.localizedSlug?.en || slug}?lang=en`,
-        ...(a.localizedSlug?.zh && { zh: `${SITE_URL}/news/${a.localizedSlug.zh}?lang=zh` }),
-        ...(a.localizedSlug?.sw && { sw: `${SITE_URL}/news/${a.localizedSlug.sw}?lang=sw` }),
+        en: `${SITE_URL}/${category}/${a.localizedSlug?.en || slug}`,
+        ...(a.localizedSlug?.zh && { zh: `${SITE_URL}/${category}/${a.localizedSlug.zh}` }),
+        ...(a.localizedSlug?.sw && { sw: `${SITE_URL}/${category}/${a.localizedSlug.sw}` }),
       },
     });
   }).filter(Boolean);
@@ -115,13 +99,13 @@ async function generateNewsSitemap() {
   const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000);
   const articles = await Article.find(
     { publishStatus: 'published', publishedAt: { $gte: twoDaysAgo } },
-    'localizedSlug title publishedAt tags'
+    'localizedSlug title publishedAt tags category'
   ).lean();
 
   const entries = articles
     .filter((a) => a.localizedSlug?.en)
     .map(a => urlEntry({
-      loc:     `${SITE_URL}/news/${a.localizedSlug.en}`,
+      loc:     `${SITE_URL}/${String(a.category || 'general').trim().toLowerCase()}/${a.localizedSlug.en}`,
       lastmod: a.publishedAt,
       news: {
         publication: seoConfig.siteName, language: 'en',
@@ -141,7 +125,6 @@ async function generateVideoSitemap() {
 module.exports = {
   generateSitemapIndex,
   generatePagesSitemap,
-  generateProductsSitemap,
   generateArticlesSitemap,
   generateCategoriesSitemap,
   generateNewsSitemap,

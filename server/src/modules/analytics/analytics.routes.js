@@ -11,6 +11,8 @@ const { authorize } = require('../../middlewares/role.middleware');
 const {
   trackProductView,
   trackSearch,
+  trackArticleView,
+  getTrendingArticles,
   getDashboardSummary,
   getTopProducts,
   getTopSearches,
@@ -21,6 +23,8 @@ const {
 // Public tracking endpoints (fire-and-forget)
 router.post('/product-view/:productId', optionalAuth, trackProductView);
 router.post('/search', optionalAuth, trackSearch);
+router.post('/track-view', optionalAuth, trackArticleView);
+router.get('/trending', getTrendingArticles);
 
 // Admin reporting endpoints
 router.get('/dashboard', protect, authorize('admin'), getDashboardSummary);

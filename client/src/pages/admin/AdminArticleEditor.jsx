@@ -26,6 +26,7 @@ import {
 } from 'react-icons/fi';
 import MediaUploadField from '../../components/admin/MediaUploadField';
 import VideoUploadField from '../../components/admin/VideoUploadField';
+import { buildArticlePathFromParts } from '../../features/articles/articleUrls';
 
 const LANGS = ['en', 'zh', 'sw'];
 const LANG_LABELS = { en: 'English', zh: 'Chinese (中文)', sw: 'Swahili (Kiswahili)' };
@@ -82,7 +83,6 @@ const emptyArticle = {
     zh: { title: '', description: '' },
     sw: { title: '', description: '' },
   },
-  relatedProducts: [],
   attachments: [],
   technicalReferences: [],
 };
@@ -112,6 +112,7 @@ const AdminArticleEditor = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [categoryOptions, setCategoryOptions] = useState([]);
+  const [categoryLoadError, setCategoryLoadError] = useState('');
   const [tagInput, setTagInput] = useState('');
   const [showSchedule, setShowSchedule] = useState(false);
   const [scheduleDate, setScheduleDate] = useState('');
@@ -125,20 +126,28 @@ const AdminArticleEditor = () => {
 
     const loadAllCategorySources = async () => {
       try {
-        // Fetch all in parallel
-        const [catRes, sectionRes, navRes] = await Promise.all([
+        const [catRes, sectionRes, navRes] = await Promise.allSettled([
           api.get('/categories/admin/all'),
           api.get('/homepage-sections'),
           api.get('/navigation/admin'),
         ]);
 
-        // Normalize
-        const catOptions = normalizeOptions(catRes.data?.categories || [], 'slug', 'name', 'Unnamed category');
-        const sectionOptions = normalizeOptions(sectionRes.data || [], 'sectionKey', 'title', 'Homepage Section');
-        // Navigation: flatten tree if needed
-        let navItems = navRes.data?.data || [];
-        if (Array.isArray(navItems)) {
-          navItems = navItems.flatMap((item) => [item, ...(item.items || [])]);
+        if (catRes.status !== 'fulfilled') {
+          throw catRes.reason;
+        }
+
+        const catOptions = normalizeOptions(catRes.value.data?.categories || [], 'slug', 'name', 'Unnamed category');
+        const sectionOptions =
+          sectionRes.status === 'fulfilled'
+            ? normalizeOptions(sectionRes.value.data || [], 'sectionKey', 'title', 'Homepage Section')
+            : [];
+
+        let navItems = [];
+        if (navRes.status === 'fulfilled') {
+          navItems = navRes.value.data?.data || [];
+          if (Array.isArray(navItems)) {
+            navItems = navItems.flatMap((item) => [item, ...(item.items || [])]);
+          }
         }
         const navOptions = normalizeOptions(navItems, 'slug', 'label', 'Navigation');
 
@@ -152,6 +161,7 @@ const AdminArticleEditor = () => {
         });
 
         if (mounted && mergedOptions.length) {
+          setCategoryLoadError('');
           setCategoryOptions(mergedOptions);
           setArticle((prev) => ({
             ...prev,
@@ -187,9 +197,15 @@ const AdminArticleEditor = () => {
               };
             })(),
           }));
+        } else if (mounted) {
+          setCategoryOptions([]);
+          setCategoryLoadError('No CMS categories were returned by the backend.');
         }
       } catch (err) {
-        if (mounted) setCategoryOptions([]);
+        if (mounted) {
+          setCategoryOptions([]);
+          setCategoryLoadError(err?.response?.data?.message || 'Failed to load CMS categories.');
+        }
       }
     };
 
@@ -217,12 +233,14 @@ const AdminArticleEditor = () => {
             featuredImage: a.featuredImage || '',
             videoMeta: { ...emptyVideoMeta, ...(a.videoMeta || {}) },
             seo: a.seo || { en: {}, zh: {}, sw: {} },
-            relatedProducts: a.relatedProducts || [],
             attachments: a.attachments || [],
             technicalReferences: a.technicalReferences || [],
           });
           // capture for slug-change detection
-          originalSlugRef.current = { ...(a.localizedSlug || { en: '', zh: '', sw: '' }) };
+          originalSlugRef.current = {
+            localizedSlug: { ...(a.localizedSlug || { en: '', zh: '', sw: '' }) },
+            category: a.category || '',
+          };
           if (a.scheduledAt) {
             setScheduleDate(new Date(a.scheduledAt).toISOString().slice(0, 16));
             setShowSchedule(true);
@@ -432,15 +450,18 @@ const AdminArticleEditor = () => {
         await articleService.updateArticle(id, payload);
         toast.success('Article updated successfully');
         // Detect slug change and offer to sync redirects + nav menu
-        const origSlug = originalSlugRef.current?.en;
+        const origSlug = originalSlugRef.current?.localizedSlug?.en;
         const newSlug  = article.localizedSlug?.en;
         if (origSlug && newSlug && origSlug !== newSlug) {
           setSlugDialog({
             open:    true,
-            oldPath: `/blog/${origSlug}`,
-            newPath: `/blog/${newSlug}`,
+            oldPath: buildArticlePathFromParts({ category: originalSlugRef.current?.category || article.category, slug: origSlug }),
+            newPath: buildArticlePathFromParts({ category: article.category, slug: newSlug }),
           });
-          originalSlugRef.current = { ...article.localizedSlug };
+          originalSlugRef.current = {
+            localizedSlug: { ...article.localizedSlug },
+            category: article.category,
+          };
         }
       } else {
         const res = await articleService.createArticle(payload);
@@ -481,7 +502,10 @@ const AdminArticleEditor = () => {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className="text-2xl font-bold text-red-600 mb-4">No categories available</div>
-        <div className="text-gray-600 mb-6">You must create at least one category in the CMS before creating articles.</div>
+        <div className="text-gray-600 mb-2">You must create at least one category in the CMS before creating articles.</div>
+        {categoryLoadError ? (
+          <div className="mb-6 max-w-xl text-center text-sm text-red-500">{categoryLoadError}</div>
+        ) : null}
         <Link to="/admin/categories" className="btn-primary px-6 py-2">Go to Category Manager</Link>
       </div>
     );
@@ -509,7 +533,7 @@ const AdminArticleEditor = () => {
         <div className="flex items-center gap-2">
           {isEditing && article.localizedSlug?.en && (
             <Link
-              to={`/blog/${article.localizedSlug.en}`}
+              to={buildArticlePathFromParts({ category: article.category, slug: article.localizedSlug.en })}
               target="_blank"
               className="flex items-center gap-1 px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
             >

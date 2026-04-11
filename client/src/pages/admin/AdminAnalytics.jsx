@@ -9,7 +9,8 @@ import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
 } from 'recharts';
-import { BarChart2, TrendingUp, Eye, Search, ShoppingCart, Users, AlertTriangle, ExternalLink, RefreshCw, Save } from 'lucide-react';
+import { BarChart2, TrendingUp, Eye, Search, Users, AlertTriangle, ExternalLink, RefreshCw, Save, FileText } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import adminService from '../../features/admin/adminService';
 import useDocTitle from '../../hooks/useDocTitle';
 import Spinner from '../../components/ui/Spinner';
@@ -60,7 +61,6 @@ const AdminAnalytics = () => {
   const [days, setDays] = useState(30);
   const [dashboard, setDashboard] = useState(null);
   const [traffic, setTraffic] = useState([]);
-  const [topProducts, setTopProducts] = useState([]);
   const [topSearches, setTopSearches] = useState([]);
   const [zeroResults, setZeroResults] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -75,20 +75,17 @@ const AdminAnalytics = () => {
     if (isRefresh) setRefreshing(true);
     else setLoading(true);
     try {
-      const [dashData, trafficData, productsData, searchesData, zeroData] = await Promise.all([
+      const [dashData, trafficData, searchesData, zeroData] = await Promise.all([
         adminService.getAnalyticsDashboard(),
         adminService.getTrafficOverview({ days }),
-        adminService.getTopProducts({ limit: 10, days }),
         adminService.getTopSearches({ limit: 15, days }),
         adminService.getZeroResultSearches({ limit: 10, days }).catch(() => ({ data: [] })),
       ]);
       setDashboard(dashData?.data || dashData);
       setTraffic(mergeTimeSeries({
-        'Product Views': trafficData?.data?.productViews || [],
         'Page Views':    trafficData?.data?.pageViews    || [],
         'Searches':      trafficData?.data?.searches     || [],
       }));
-      setTopProducts(productsData?.data || productsData?.products || []);
       setTopSearches(searchesData?.data || searchesData?.searches || []);
       setZeroResults(Array.isArray(zeroData?.data) ? zeroData.data : []);
     } catch {
@@ -141,16 +138,11 @@ const AdminAnalytics = () => {
   }
 
   const kpis = [
-    { label: 'Product Views', value: (dashboard?.totalProductViews || 0).toLocaleString(), icon: Eye,          color: 'bg-blue-100 text-blue-600' },
+    { label: 'Tracked Views', value: (dashboard?.totalPageViews || 0).toLocaleString(), icon: Eye,          color: 'bg-blue-100 text-blue-600' },
     { label: 'Searches',      value: (dashboard?.totalSearches     || 0).toLocaleString(), icon: Search,        color: 'bg-green-100 text-green-600' },
-    { label: 'Page Views',    value: (dashboard?.totalPageViews    || 0).toLocaleString(), icon: TrendingUp,    color: 'bg-purple-100 text-purple-600' },
+    { label: 'View Trend',    value: traffic.length.toLocaleString(), icon: TrendingUp,    color: 'bg-purple-100 text-purple-600' },
     { label: 'Zero-result',  value: zeroResults.length,                                    icon: AlertTriangle, color: 'bg-red-100 text-red-600' },
   ];
-
-  const pieData = topProducts.slice(0, 5).map((p, i) => ({
-    name: p.productTitle || p._id || `Product ${i + 1}`,
-    value: p.totalViews || p.count || 0,
-  }));
 
   const { data: interactionData, loading: loadingInteractions, error: errorInteractions } = useInteractionAnalytics();
 
@@ -199,7 +191,7 @@ const AdminAnalytics = () => {
       <Card>
         <CardHeader>
           <CardTitle>Traffic Trend — Last {days} Days</CardTitle>
-          <CardDescription>Daily product views, page views, and search activity</CardDescription>
+          <CardDescription>Daily page views, search activity, and newsroom traffic trends</CardDescription>
         </CardHeader>
         <CardContent>
           {traffic.length === 0 ? (
@@ -212,7 +204,6 @@ const AdminAnalytics = () => {
                 <YAxis tick={{ fontSize: 11 }} />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="Product Views" stroke={CHART_COLORS[0]} strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="Page Views"    stroke={CHART_COLORS[2]} strokeWidth={2} dot={false} />
                 <Line type="monotone" dataKey="Searches"      stroke={CHART_COLORS[1]} strokeWidth={2} dot={false} />
               </LineChart>
@@ -221,74 +212,7 @@ const AdminAnalytics = () => {
         </CardContent>
       </Card>
 
-      {/* Bar + Pie */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Eye className="h-4 w-4 text-blue-500" />
-              Top Viewed Products
-            </CardTitle>
-            <CardDescription>Most viewed products in the last {days} days</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {topProducts.length === 0 ? (
-              <p className="text-sm text-gray-400 py-6 text-center">No product view data yet</p>
-            ) : (
-              <ResponsiveContainer width="100%" height={260}>
-                <BarChart data={topProducts.slice(0, 8)} layout="vertical" margin={{ left: 10, right: 10 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                  <XAxis type="number" tick={{ fontSize: 11 }} />
-                  <YAxis
-                    type="category"
-                    dataKey="productTitle"
-                    tick={{ fontSize: 10 }}
-                    width={120}
-                    tickFormatter={(v) => v ? (v.length > 18 ? v.slice(0, 18) + '…' : v) : '—'}
-                  />
-                  <Tooltip />
-                  <Bar dataKey="totalViews" fill={CHART_COLORS[0]} radius={[0, 4, 4, 0]} name="Views" />
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Product Views Share</CardTitle>
-            <CardDescription>Top 5 products by view count</CardDescription>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center">
-            {pieData.length === 0 ? (
-              <p className="text-sm text-gray-400 py-6 text-center">No data yet</p>
-            ) : (
-              <>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
-                      {pieData.map((_, i) => (
-                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(v) => [`${v} views`]} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex flex-wrap justify-center gap-2 mt-2">
-                  {pieData.map((p, i) => (
-                    <span key={i} className="flex items-center gap-1 text-xs text-gray-600">
-                      <span className="inline-block w-2 h-2 rounded-full" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
-                      {p.name.length > 20 ? p.name.slice(0, 20) + '…' : p.name}
-                    </span>
-                  ))}
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Searches */}
+      {/* Search + Content */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
@@ -320,6 +244,31 @@ const AdminAnalytics = () => {
           </CardContent>
         </Card>
 
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-4 w-4 text-blue-500" />
+              Editorial Analytics
+            </CardTitle>
+            <CardDescription>Open the dedicated newsroom analytics dashboard</CardDescription>
+          </CardHeader>
+          <CardContent className="flex h-full flex-col justify-between gap-5">
+            <p className="text-sm leading-6 text-gray-600">
+              Product analytics have been removed. Use the article analytics workspace for
+              views, categories, top stories, and newsroom performance.
+            </p>
+            <Link
+              to="/admin/articles/analytics"
+              className="inline-flex items-center gap-2 self-start rounded-full border border-black bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-black/90"
+            >
+              <TrendingUp className="h-4 w-4" />
+              Open Article Analytics
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -361,7 +310,7 @@ const AdminAnalytics = () => {
             )}
           </CardTitle>
           <CardDescription>
-            Enter your GA4 Measurement ID to activate page-view tracking on every route change. Events tracked: page_view, view_item, add_to_cart, begin_checkout, purchase, search, generate_lead, sign_up, login.
+            Enter your GA4 Measurement ID to activate page-view tracking on every route change. Events tracked: page_view, search, generate_lead, sign_up, and login.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -422,10 +371,10 @@ const AdminAnalytics = () => {
               rel="noopener noreferrer"
               className="flex items-center gap-3 p-4 border border-gray-200 rounded-none hover:bg-gray-50 transition-colors group"
             >
-              <ShoppingCart className="h-8 w-8 text-green-500 shrink-0" />
+              <TrendingUp className="h-8 w-8 text-green-500 shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-gray-900 group-hover:text-primary-600">E-commerce Report</p>
-                <p className="text-xs text-gray-500">Purchases &amp; revenue</p>
+                <p className="text-sm font-semibold text-gray-900 group-hover:text-primary-600">Engagement Report</p>
+                <p className="text-xs text-gray-500">Traffic, sessions &amp; content performance</p>
               </div>
               <ExternalLink className="h-4 w-4 text-gray-400 ml-auto shrink-0" />
             </a>
@@ -507,4 +456,3 @@ const AdminAnalytics = () => {
 export default AdminAnalytics;
 
 // MukonoTalks
-

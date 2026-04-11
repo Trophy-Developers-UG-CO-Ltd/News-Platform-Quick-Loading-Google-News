@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import api from '../app/axios';
 import SchemaInjector from '../seo/components/SchemaInjector';
 import MonetizedAdSlot from '../components/ads/MonetizedAdSlot';
 import ArticleVideoBlock from '../features/articles/blocks/ArticleVideoBlock';
 import { buildArticleVideoSchema } from '../seo/utils/schemaBuilders';
 import { trackArticleView } from '../utils/articleTracking';
+import { buildArticlePath } from '../features/articles/articleUrls';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://mukonotalks.ug';
 const LANGS = ['en', 'sw', 'zh'];
@@ -83,7 +84,8 @@ const NewsArticlePage = () => {
   const title = article.title || 'Untitled story';
   const excerpt = article.excerpt || '';
   const blocks = Array.isArray(article.contentBlocks) ? article.contentBlocks : [];
-  const canonicalUrl = `${BASE_URL}/news/${article.slug || slug}`;
+  const canonicalPath = buildArticlePath(article);
+  const canonicalUrl = `${BASE_URL}${canonicalPath}`;
   const authorName = article?.author?.name || 'MukonoTalks Editorial Desk';
   const publishedDate = formatDate(article?.publishedAt);
   const category = formatCategory(article?.category);
@@ -127,6 +129,10 @@ const NewsArticlePage = () => {
 
   const videoSchema = buildArticleVideoSchema(article);
 
+  if (canonicalPath !== `/news/${article.slug || slug}`) {
+    return <Navigate to={canonicalPath} replace />;
+  }
+
   return (
     <article className="mx-auto w-full max-w-3xl px-4 py-10">
       <Helmet>
@@ -140,7 +146,7 @@ const NewsArticlePage = () => {
               key={supportedLang}
               rel="alternate"
               hrefLang={supportedLang}
-              href={`${BASE_URL}/news/${localizedSlug}?lang=${supportedLang}`}
+              href={`${BASE_URL}/${article.category}/${localizedSlug}`}
             />
           );
         })}

@@ -158,7 +158,7 @@ const AdminFooter = () => {
           <h2 className="font-semibold text-gray-800 flex items-center gap-2 text-base">
             <Link2 className="w-4 h-4 text-gray-400" /> Quick Links
           </h2>
-          <p className="text-xs text-gray-500">Shown in the first link column. Use internal paths (e.g. <code>/products</code>) or full URLs.</p>
+          <p className="text-xs text-gray-500">Shown in the first link column. Use internal paths (e.g. <code>/news</code>) or full URLs.</p>
           <LinkListEditor
             links={form.quickLinks || []}
             onChange={(v) => patch('quickLinks', v)}
@@ -264,4 +264,3 @@ const AdminFooter = () => {
 export default AdminFooter;
 
 // MukonoTalks
-

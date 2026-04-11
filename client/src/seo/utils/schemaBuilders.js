@@ -297,7 +297,7 @@ export const buildWebSiteSchema = (lang = 'en') => ({
  */
 export const buildArticleSchema = (article, lang = 'en') => {
   if (!article?._id) return null;
-  const canonicalUrl = `${BASE_URL}/news/${article.slug}`;
+  const canonicalUrl = `${BASE_URL}/${String(article.category || 'general').trim().toLowerCase()}/${article.slug}`;
   const primaryImage  = article.coverImage?.url || article.featuredImage;
 
   return {

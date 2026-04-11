@@ -35,7 +35,6 @@ const getAllDocuments = async (query = {}) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit))
-      .populate('product', 'title slug')
       .lean(),
     Document.countDocuments(filter),
   ]);
@@ -52,24 +51,10 @@ const getAllDocuments = async (query = {}) => {
 };
 
 /**
- * Get documents for a product (authenticated users only for restricted docs)
- */
-const getProductDocuments = async (productId, isAuthenticated = false) => {
-  const filter = { product: productId, isActive: true };
-
-  if (!isAuthenticated) {
-    filter.isRestricted = false;
-  }
-
-  const documents = await Document.find(filter).select('-fileUrl');
-  return documents;
-};
-
-/**
  * Get secure download URL (authenticated route) — with full audit logging
  */
 const getDocumentDownload = async (documentId, user, req) => {
-  const document = await Document.findById(documentId).populate('product', 'title slug');
+  const document = await Document.findById(documentId);
   const ipAddress = req ? (req.headers['x-forwarded-for'] || req.connection?.remoteAddress || req.ip) : null;
   const userAgent = req ? req.headers['user-agent'] : null;
 
@@ -156,8 +141,6 @@ const getDocumentDownload = async (documentId, user, req) => {
     targetId: document._id,
     targetIdentifier: document.title,
     metadata: {
-      productId: document.product?._id,
-      productTitle: document.product?.title,
       companyName: user.companyName,
       documentCategory: document.category,
     },
@@ -199,7 +182,7 @@ const createDocument = async (data, adminUser, req) => {
     targetModel: 'Document',
     targetId: document._id,
     targetIdentifier: document.title,
-    metadata: { fileType: data.fileType, category: data.category, productId: data.product },
+    metadata: { fileType: data.fileType, category: data.category },
   });
 
   return document;
@@ -258,7 +241,6 @@ const getDownloadHistory = async (query = {}) => {
       .skip(skip)
       .limit(parseInt(limit))
       .populate('document', 'title category')
-      .populate('product', 'title slug')
       .populate('user', 'name email companyName')
       .lean(),
     DownloadLog.countDocuments(filter),
@@ -309,7 +291,6 @@ async function _logDownload({ document, user, status, denialReason = null, ipAdd
   try {
     await DownloadLog.create({
       document: document._id,
-      product: document.product?._id || document.product || null,
       user: user._id,
       userName: user.name,
       userEmail: user.email,
@@ -328,7 +309,6 @@ async function _logDownload({ document, user, status, denialReason = null, ipAdd
 
 module.exports = {
   getAllDocuments,
-  getProductDocuments,
   getDocumentDownload,
   createDocument,
   deleteDocument,

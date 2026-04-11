@@ -46,6 +46,39 @@ const trackSearch = asyncHandler(async (req, res) => {
 });
 
 /**
+ * @route POST /api/v1/track-view
+ * @desc Track a published article view
+ * @access Public
+ */
+const trackArticleView = asyncHandler(async (req, res) => {
+  try {
+    const { articleId, sessionId = null, fingerprint = null } = req.body || {};
+    const result = await AnalyticsService.trackArticleView(articleId, req, {
+      sessionId,
+      fingerprint,
+    });
+    res.status(200).json({ success: true, message: 'View tracked', ...result });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
+  }
+});
+
+/**
+ * @route GET /api/v1/trending
+ * @desc Get trending published articles
+ * @access Public
+ */
+const getTrendingArticles = asyncHandler(async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit, 10) || 10, 50);
+    const articles = await AnalyticsService.getTrendingArticles(limit);
+    res.json({ success: true, count: articles.length, articles });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ success: false, message: error.message });
+  }
+});
+
+/**
  * @route GET /api/analytics/dashboard
  * @desc Get analytics dashboard summary
  * @access Admin
@@ -125,6 +158,8 @@ const getTrafficOverview = asyncHandler(async (req, res) => {
 module.exports = {
   trackProductView,
   trackSearch,
+  trackArticleView,
+  getTrendingArticles,
   getDashboardSummary,
   getTopProducts,
   getTopSearches,

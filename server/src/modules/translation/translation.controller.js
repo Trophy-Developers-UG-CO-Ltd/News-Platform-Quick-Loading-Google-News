@@ -34,14 +34,6 @@ const logger = require('../../utils/logger');
  * Each entry maps to a Mongoose model and its translatable English fields.
  */
 const SUPPORTED_MODELS = {
-  Product: {
-    require: '../products/product.model',
-    fields: [
-      { enSource: (doc) => doc.localizedTitle?.en || doc.title,            targetPath: 'localizedTitle'       },
-      { enSource: (doc) => doc.localizedDescription?.en || doc.description, targetPath: 'localizedDescription' },
-      { enSource: (doc) => doc.localizedOverview?.en || doc.overview,       targetPath: 'localizedOverview'    },
-    ],
-  },
   Category: {
     require: '../categories/category.model',
     fields: [
@@ -313,7 +305,7 @@ const requestTranslation = asyncHandler(async (req, res) => {
  * @access Admin
  *
  * Body:
- *   model?   — target a single model (Product | Category | Article | Page | Hero)
+ *   model?   — target a single model (Category | Article | Page | Hero)
  *   force?   — re-translate even if sw/zh already exist (default: false)
  *   dryRun?  — preview what would be translated (default: false)
  *   limit?   — max docs per model (default: 200, max: 1000)
@@ -406,7 +398,7 @@ const runBatch = asyncHandler(async (req, res) => {
  * @route POST /api/translation/document
  * @access Admin
  *
- * Body: { model: 'Product', docId: '...', force?: true }
+ * Body: { model: 'Article', docId: '...', force?: true }
  */
 const translateDocument = asyncHandler(async (req, res) => {
   const { model: modelName, docId, force = false } = req.body;
@@ -447,7 +439,7 @@ const translateDocument = asyncHandler(async (req, res) => {
 
 /**
  * @desc  Get translation status for a single document
- * @route GET /api/translation/document-status?model=Product&docId=...
+ * @route GET /api/translation/document-status?model=Article&docId=...
  * @access Admin
  */
 const getDocumentTranslationStatus = asyncHandler(async (req, res) => {

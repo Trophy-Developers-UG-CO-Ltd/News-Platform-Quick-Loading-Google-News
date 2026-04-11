@@ -61,7 +61,6 @@ const AdminDocuments = () => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    product: '',
     fileUrl: '',
     fileType: 'pdf',
     fileSize: '',
@@ -98,7 +97,6 @@ const AdminDocuments = () => {
     setUploading(true);
     try {
       const payload = { ...formData };
-      if (!payload.product) delete payload.product;
       if (payload.fileSize) payload.fileSize = parseInt(payload.fileSize);
       await adminService.createDocument(payload);
       toast.success('Document created successfully');
@@ -106,7 +104,6 @@ const AdminDocuments = () => {
       setFormData({
         title: '',
         description: '',
-        product: '',
         fileUrl: '',
         fileType: 'pdf',
         fileSize: '',
@@ -275,16 +272,6 @@ const AdminDocuments = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Product ID (optional)</label>
-              <input
-                type="text"
-                value={formData.product}
-                onChange={(e) => setFormData({ ...formData, product: e.target.value })}
-                className="w-full border border-gray-300 rounded-[48px] px-3 py-2 text-sm"
-                placeholder="MongoDB ObjectId of linked product"
-              />
-            </div>
-            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">File Size (bytes)</label>
               <input
                 type="number"
@@ -380,9 +367,6 @@ const AdminDocuments = () => {
                       Category
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Product
-                    </th>
-                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Access
                     </th>
                     <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -415,9 +399,6 @@ const AdminDocuments = () => {
                         <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${CATEGORY_COLORS[doc.category] || CATEGORY_COLORS.other}`}>
                           {CATEGORY_LABELS[doc.category] || doc.category}
                         </span>
-                      </td>
-                      <td className="px-4 py-3 text-sm text-gray-600">
-                        {doc.product?.title || '—'}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center space-x-1">

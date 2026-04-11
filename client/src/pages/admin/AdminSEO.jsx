@@ -14,7 +14,6 @@ import {
   Globe,
   ArrowLeft,
   Code2,
-  ShieldCheck,
   Search,
   LayoutList,
   BookOpen,
@@ -48,7 +47,6 @@ const TYPE_ICONS = {
   WebSite:        Search,
   CollectionPage: LayoutList,
   FAQPage:        BookOpen,
-  Product:        ShieldCheck,
   Article:        BookOpen,
   BlogPosting:    BookOpen,
 };
@@ -63,7 +61,6 @@ const SCHEMA_BADGES = {
   WebSite:        { label: 'WebSite',          color: 'bg-violet-100 text-violet-700' },
   CollectionPage: { label: 'CollectionPage',   color: 'bg-emerald-100 text-emerald-700' },
   FAQPage:        { label: 'FAQPage',          color: 'bg-amber-100 text-amber-700' },
-  Product:        { label: 'Product',          color: 'bg-rose-100 text-rose-700' },
   DefinedTerm:    { label: 'DefinedTerm',      color: 'bg-orange-100 text-orange-700' },
 };
 
@@ -433,7 +430,7 @@ const AdminSEO = () => {
         <Info className="h-4 w-4 text-amber-500 mt-0.5 flex-shrink-0" />
         <p className="text-xs text-amber-700">
           <strong>Global schemas</strong> are injected on every page of the website.
-          Page-specific schemas (Products, Articles, etc.) are generated automatically from content data.
+          Page-specific schemas for articles and pages are generated automatically from content data.
           After saving, validate with{' '}
           <a href="https://search.google.com/test/rich-results" target="_blank" rel="noopener noreferrer" className="underline font-medium">
             Google's Rich Results Test

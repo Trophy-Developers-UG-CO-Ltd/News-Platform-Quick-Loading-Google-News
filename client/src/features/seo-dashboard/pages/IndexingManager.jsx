@@ -86,7 +86,7 @@ export default function IndexingManager() {
             rows={5}
             value={urlsInput}
             onChange={(e) => setUrlsInput(e.target.value)}
-            placeholder="https://example.com/products/chemical-x&#10;https://example.com/blog/new-article"
+            placeholder="https://example.com/news/local-election-update&#10;https://example.com/blog/editorial-analysis"
             className="w-full rounded-[48px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"
           />
         </div>

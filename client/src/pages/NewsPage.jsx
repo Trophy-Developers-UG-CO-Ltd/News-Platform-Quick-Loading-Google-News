@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import api from '../app/axios';
 import SchemaInjector from '../seo/components/SchemaInjector';
 import MonetizedAdSlot from '../components/ads/MonetizedAdSlot';
+import { buildArticlePath } from '../features/articles/articleUrls';
 
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://mukonotalks.ug';
 const LANGS = ['en', 'sw', 'zh'];
@@ -78,7 +79,7 @@ const NewsPage = () => {
         .map((article, index) => ({
           '@type': 'ListItem',
           position: index + 1,
-          url: `${BASE_URL}/news/${article.localizedSlug.en}`,
+          url: `${BASE_URL}${buildArticlePath(article)}`,
           name: resolveLocalized(article.title),
         })),
     },
@@ -131,7 +132,7 @@ const NewsPage = () => {
                   <p className="mt-2 text-xs text-text-secondary">By {authorName} • {publishedDate}</p>
                   <p className="mt-3 line-clamp-3 text-sm text-text-secondary">{excerpt}</p>
                   <Link
-                    to={`/news/${slug}`}
+                    to={buildArticlePath(article)}
                     className="mt-4 inline-block text-sm font-semibold text-accent-blue transition-colors hover:text-category-news"
                   >
                     Read story

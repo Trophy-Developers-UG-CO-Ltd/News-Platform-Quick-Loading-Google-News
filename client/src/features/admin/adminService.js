@@ -50,37 +50,6 @@ const createUser = async (data) => {
   return response.data;
 };
 
-// Admin product CRUD
-const getProducts = async (params) => {
-  const response = await api.get('/products', { params });
-  return response.data;
-};
-
-const createProduct = async (productData) => {
-  const response = await api.post('/products', productData);
-  return response.data;
-};
-
-const updateProduct = async (productId, productData) => {
-  const response = await api.put(`/products/${productId}`, productData);
-  return response.data;
-};
-
-const deleteProduct = async (productId) => {
-  const response = await api.delete(`/products/${productId}`);
-  return response.data;
-};
-
-const bulkDeleteProducts = async (ids) => {
-  const response = await api.delete('/products/bulk', { data: { ids } });
-  return response.data;
-};
-
-const getProductById = async (productId) => {
-  const response = await api.get(`/products/${productId}`);
-  return response.data;
-};
-
 // Admin categories
 const createCategory = async (categoryData) => {
   const response = await api.post('/categories', categoryData);
@@ -111,11 +80,6 @@ const getSecurityEvents = async (params) => {
 // ─── Analytics ─────────────────────────────────────────────────
 const getAnalyticsDashboard = async () => {
   const response = await api.get('/analytics/dashboard');
-  return response.data;
-};
-
-const getTopProducts = async (params) => {
-  const response = await api.get('/analytics/top-products', { params });
   return response.data;
 };
 
@@ -446,12 +410,6 @@ const adminService = {
   updateUser,
   deleteUser,
   createUser,
-  getProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  bulkDeleteProducts,
-  getProductById,
   // Categories (full CRUD + tree)
   getCategories,
   getCategoryTree,
@@ -462,7 +420,6 @@ const adminService = {
   getAuditLogs,
   getSecurityEvents,
   getAnalyticsDashboard,
-  getTopProducts,
   getTopSearches,
   getTrafficOverview,
   getZeroResultSearches,
@@ -520,4 +477,3 @@ const adminService = {
 export default adminService;
 
 // MukonoTalks
-

@@ -37,14 +37,6 @@ const seoLangSchema = Joi.object({
 });
 
 /**
- * Related product schema
- */
-const relatedProductSchema = Joi.object({
-  product: Joi.string().required(),
-  label: Joi.string().max(200).allow('', null).default(''),
-});
-
-/**
  * Attachment schema
  */
 const attachmentSchema = Joi.object({
@@ -134,7 +126,6 @@ const createArticleSchema = {
     videoMeta: videoMetaSchema.default({}),
 
     // Knowledge base extensions
-    relatedProducts: Joi.array().items(relatedProductSchema).default([]),
     attachments: Joi.array().items(attachmentSchema).default([]),
     technicalReferences: Joi.array().items(Joi.string().max(500)).default([]),
   }).custom((value, helpers) => {
@@ -212,7 +203,6 @@ const updateArticleSchema = {
     }),
     videoMeta: videoMetaSchema,
 
-    relatedProducts: Joi.array().items(relatedProductSchema),
     attachments: Joi.array().items(attachmentSchema),
     technicalReferences: Joi.array().items(Joi.string().max(500)),
   }).min(1).custom((value, helpers) => {

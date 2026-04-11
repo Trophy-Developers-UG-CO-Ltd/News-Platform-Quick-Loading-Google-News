@@ -17,11 +17,6 @@ const documentSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    product: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Product',
-      index: true,
-    },
     fileUrl: {
       type: String,
       required: [true, 'File URL is required'],
@@ -60,7 +55,7 @@ const documentSchema = new mongoose.Schema(
   }
 );
 
-documentSchema.index({ product: 1, category: 1 });
+documentSchema.index({ category: 1, createdAt: -1 });
 
 const Document = mongoose.model('Document', documentSchema);
 

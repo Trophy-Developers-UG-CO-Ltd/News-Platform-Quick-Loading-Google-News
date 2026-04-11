@@ -33,6 +33,7 @@ const updateArticle = async (articleId, data, req) => {
   }
   // Snapshot old slugs before applying update
   const oldLocalizedSlug = { ...article.localizedSlug.toObject?.() ?? article.localizedSlug };
+  const oldCategory = article.category;
   if (data.contentBlocks) {
     changes.blocksCount = { from: article.contentBlocks.length, to: data.contentBlocks.length };
   }
@@ -55,8 +56,8 @@ const updateArticle = async (articleId, data, req) => {
       .filter((lang) => oldLocalizedSlug[lang] && newSlugs[lang] && oldLocalizedSlug[lang] !== newSlugs[lang])
       .map((lang) =>
         RedirectService.createRedirect({
-          fromPath: `/${lang}/blog/${oldLocalizedSlug[lang]}`,
-          toPath: `/${lang}/blog/${newSlugs[lang]}`,
+          fromPath: buildArticlePath(oldCategory, oldLocalizedSlug[lang]),
+          toPath: buildArticlePath(article.category, newSlugs[lang]),
           statusCode: 301,
           source: 'auto',
           resourceType: 'article',
@@ -64,7 +65,30 @@ const updateArticle = async (articleId, data, req) => {
           createdBy: userId,
         }).catch((err) => logger.warn('[ArticleService] Failed to queue redirect:', err.message))
       );
+    if (oldLocalizedSlug.en && newSlugs.en) {
+      redirectTasks.push(
+        RedirectService.createRedirect({
+          fromPath: `/blog/${oldLocalizedSlug.en}`,
+          toPath: buildArticlePath(article.category, newSlugs.en),
+          statusCode: 301,
+          source: 'auto',
+          resourceType: 'article',
+          resourceId: article._id,
+          createdBy: userId,
+        }).catch((err) => logger.warn('[ArticleService] Failed to queue legacy blog redirect:', err.message))
+      );
+    }
     await Promise.all(redirectTasks);
+  } else if (changes.category && oldLocalizedSlug.en && article.localizedSlug?.en) {
+    await RedirectService.createRedirect({
+      fromPath: buildArticlePath(oldCategory, oldLocalizedSlug.en),
+      toPath: buildArticlePath(article.category, article.localizedSlug.en),
+      statusCode: 301,
+      source: 'auto',
+      resourceType: 'article',
+      resourceId: article._id,
+      createdBy: req.user?._id ?? null,
+    }).catch((err) => logger.warn('[ArticleService] Failed to queue category redirect:', err.message));
   }
 
   const actions = [];
@@ -205,6 +229,7 @@ const RedirectService = require('../seo-redirects/redirect.service');
 const translationService = require('../../services/translationService');
 
 const SUPPORTED_LANGS = ['en', 'zh', 'sw'];
+const buildArticlePath = (category, slug) => `/${String(category || 'general').trim().toLowerCase()}/${String(slug || '').trim().toLowerCase()}`;
 
 /**
  * Auto-translate article text fields and content blocks.
@@ -429,7 +454,6 @@ const scheduleArticle = async (articleId, scheduledAt, req) => {
 /**
  * Get public article by language and slug
  * Only returns published articles (not draft or scheduled)
- * Increments view count atomically
  */
 
 const getPublicArticle = async (lang, slug) => {
@@ -448,14 +472,8 @@ const getPublicArticle = async (lang, slug) => {
   };
   logger.debug(`[getPublicArticle] Query: ${JSON.stringify(query)}`);
 
-  // Atomically increment view count and return document
-  const article = await Article.findOneAndUpdate(
-    query,
-    { $inc: { viewCount: 1 } },
-    { new: true }
-  )
+  const article = await Article.findOne(query)
     .select('-__v -createdBy -updatedBy -publishedBy')
-    .populate('relatedProducts.product', 'name slug price featuredImage')
     .lean();
 
   if (!article) {
@@ -482,6 +500,7 @@ const getPublicArticle = async (lang, slug) => {
   const localizedArticle = {
     _id: article._id,
     slug: article.localizedSlug[lang] || article.localizedSlug.en,
+    localizedSlug: article.localizedSlug,
     title: article.title[lang] || article.title.en,
     excerpt: article.excerpt[lang] || article.excerpt.en || null,
     contentBlocks: article.contentBlocks
@@ -499,8 +518,9 @@ const getPublicArticle = async (lang, slug) => {
     seo: article.seo[lang] || article.seo.en || {},
     videoMeta: article.videoMeta || {},
     publishedAt: article.publishedAt,
+    createdAt: article.createdAt,
+    updatedAt: article.updatedAt,
     viewCount: article.viewCount,
-    relatedProducts: article.relatedProducts || [],
     attachments: article.attachments || [],
     technicalReferences: article.technicalReferences || [],
     availableSlugs: article.localizedSlug,
@@ -574,8 +594,7 @@ const getArticleById = async (articleId) => {
   const article = await Article.findById(articleId)
     .populate('createdBy', 'name email')
     .populate('updatedBy', 'name email')
-    .populate('publishedBy', 'name email')
-    .populate('relatedProducts.product', 'name slug price');
+    .populate('publishedBy', 'name email');
 
   if (!article) {
     const error = new Error('Article not found');
@@ -595,6 +614,8 @@ const getArticleAnalytics = async () => {
     publishedCount,
     draftCount,
     scheduledCount,
+    totalViewsAgg,
+    totalUniqueViewsAgg,
     topByViews,
     byCategory,
     topTags,
@@ -603,15 +624,30 @@ const getArticleAnalytics = async () => {
     Article.countDocuments({ publishStatus: 'published' }),
     Article.countDocuments({ publishStatus: 'draft' }),
     Article.countDocuments({ publishStatus: 'scheduled' }),
+    Article.aggregate([
+      { $match: { publishStatus: 'published' } },
+      { $group: { _id: null, total: { $sum: '$viewCount' } } },
+    ]),
+    Article.aggregate([
+      { $match: { publishStatus: 'published' } },
+      { $group: { _id: null, total: { $sum: '$uniqueViewCount' } } },
+    ]),
     Article.find({ publishStatus: 'published' })
-      .sort({ viewCount: -1 })
+      .sort({ trendingScore: -1, viewCount: -1 })
       .limit(10)
-      .select('title.en localizedSlug.en category viewCount publishedAt')
+      .select('title.en localizedSlug.en category viewCount uniqueViewCount trendingScore publishedAt lastViewedAt')
       .lean(),
     Article.aggregate([
       { $match: { publishStatus: 'published' } },
-      { $group: { _id: '$category', count: { $sum: 1 }, totalViews: { $sum: '$viewCount' } } },
-      { $sort: { totalViews: -1 } },
+      {
+        $group: {
+          _id: '$category',
+          count: { $sum: 1 },
+          totalViews: { $sum: '$viewCount' },
+          totalUniqueViews: { $sum: '$uniqueViewCount' },
+        },
+      },
+      { $sort: { totalViews: -1, totalUniqueViews: -1 } },
     ]),
     Article.aggregate([
       { $match: { publishStatus: 'published' } },
@@ -627,6 +663,8 @@ const getArticleAnalytics = async () => {
     publishedCount,
     draftCount,
     scheduledCount,
+    totalViews: totalViewsAgg[0]?.total || 0,
+    totalUniqueViews: totalUniqueViewsAgg[0]?.total || 0,
     topByViews,
     byCategory,
     topTags,

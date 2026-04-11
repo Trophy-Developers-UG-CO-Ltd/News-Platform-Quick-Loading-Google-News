@@ -32,13 +32,6 @@ router.get('/sitemap-pages.xml', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
-router.get('/sitemap-products.xml', async (req, res, next) => {
-  try {
-    const xml = await SitemapService.generateProductsSitemap();
-    xmlResponse(res, xml);
-  } catch (err) { next(err); }
-});
-
 router.get('/sitemap-articles.xml', async (req, res, next) => {
   try {
     const xml = await SitemapService.generateArticlesSitemap();

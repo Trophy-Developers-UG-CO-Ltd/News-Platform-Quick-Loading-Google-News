@@ -119,7 +119,7 @@ const HeroBlockEditor = ({ data, onChange }) => (
     <label className="block text-xs font-semibold text-gray-500">CTA Text</label>
     <input className="input" value={data.ctaText || ''} onChange={(e) => onChange({ ...data, ctaText: e.target.value })} />
     <label className="block text-xs font-semibold text-gray-500">CTA Link</label>
-    <input className="input" value={data.ctaLink || ''} onChange={(e) => onChange({ ...data, ctaLink: e.target.value })} placeholder="/products" />
+    <input className="input" value={data.ctaLink || ''} onChange={(e) => onChange({ ...data, ctaLink: e.target.value })} placeholder="/news" />
   </div>
 );
 
@@ -146,7 +146,7 @@ const PageHeroBlockEditor = ({ data, onChange }) => (
       </div>
       <div>
         <label className="block text-xs font-semibold text-gray-500">Primary Button Link</label>
-        <input className="input" value={data.ctaLink || ''} onChange={(e) => onChange({ ...data, ctaLink: e.target.value })} placeholder="/products" />
+        <input className="input" value={data.ctaLink || ''} onChange={(e) => onChange({ ...data, ctaLink: e.target.value })} placeholder="/news" />
       </div>
       <div>
         <label className="block text-xs font-semibold text-gray-500">Secondary Button Text</label>
@@ -962,4 +962,3 @@ const AdminPageEditor = () => {
 export default AdminPageEditor;
 
 // MukonoTalks
-

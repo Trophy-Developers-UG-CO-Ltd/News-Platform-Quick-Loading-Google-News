@@ -33,7 +33,6 @@ import {
   ShieldCheck,
   BarChart3,
   FileText,
-  Package,
   Layers,
   Search,
   Eye,
@@ -62,7 +61,7 @@ import toast from 'react-hot-toast';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const SUPPORTED_MODELS = ['Product', 'Category', 'Article', 'Page', 'Hero', 'HomepageSection', 'NavItem', 'FooterSettings'];
+const SUPPORTED_MODELS = ['Category', 'Article', 'Page', 'Hero', 'HomepageSection', 'NavItem', 'FooterSettings'];
 
 const LANG_LABELS = { en: 'English', sw: 'Kiswahili', zh: 'Chinese', auto: 'Auto Detect' };
 
@@ -1114,7 +1113,7 @@ function BatchTab({ refreshAll }) {
             Custom Batch Runner
           </CardTitle>
           <CardDescription>
-            Equivalent to: <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">node scripts/translateBatch.js --model=Product --limit=100</code>
+            Equivalent to: <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">node scripts/translateBatch.js --model=Article --limit=100</code>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -1451,7 +1450,7 @@ function QueueTab({ refreshKey, refreshAll }) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 function RequestTab({ refreshAll }) {
-  const [entityType, setEntityType] = useState('Product');
+  const [entityType, setEntityType] = useState('Article');
   const [entityId, setEntityId] = useState('');
   const [sourceLanguage, setSourceLanguage] = useState('en');
   const [sampleText, setSampleText] = useState('');

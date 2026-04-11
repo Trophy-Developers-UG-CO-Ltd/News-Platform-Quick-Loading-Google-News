@@ -6,13 +6,12 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, Navigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchPublicArticle, clearArticle } from '../features/articles/articleSlice';
 import ArticleBlockRenderer from '../features/articles/ArticleBlockRenderer';
 import Spinner from '../components/ui/Spinner';
-import resolveImageUrl from '../utils/resolveImageUrl';
 import MonetizedAdSlot from '../components/ads/MonetizedAdSlot';
 import {
   FiArrowLeft,
@@ -28,6 +27,7 @@ import { buildArticleSchema, buildArticleVideoSchema, buildBreadcrumbSchema } fr
 import Reveal from '../components/ui/Reveal';
 import ArticleVideoBlock from '../features/articles/blocks/ArticleVideoBlock';
 import { trackArticleView } from '../utils/articleTracking';
+import { buildArticlePath, buildArticlePathFromParts } from '../features/articles/articleUrls';
 
 const CATEGORY_LABELS = {
   blog: 'Blog',
@@ -48,16 +48,11 @@ const CATEGORY_COLORS = {
 const SUPPORTED_LANGUAGES = ['en', 'sw', 'zh'];
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://mukonotalks.ug';
 
-const ArticlePage = () => {
-  const { lang = 'en', slug } = useParams();
+const ArticlePage = ({ legacyPath = false }) => {
+  const { category: routeCategory, slug } = useParams();
   const dispatch = useDispatch();
   const { currentArticle: article, isLoading, error } = useSelector((state) => state.articles);
-
-  /* Validate language parameter */
-  const validLang = useMemo(
-    () => (SUPPORTED_LANGUAGES.includes(lang) ? lang : 'en'),
-    [lang]
-  );
+  const validLang = 'en';
 
   useEffect(() => {
     if (slug) {
@@ -73,10 +68,19 @@ const ArticlePage = () => {
     trackArticleView(article._id);
   }, [article?._id]);
 
+  const canonicalPath = useMemo(() => (article ? buildArticlePath(article) : ''), [article]);
+  const normalizedRoutePath = useMemo(
+    () => buildArticlePathFromParts({ category: routeCategory, slug }),
+    [routeCategory, slug]
+  );
+
+  if (!isLoading && article && (legacyPath || normalizedRoutePath !== canonicalPath)) {
+    return <Navigate to={canonicalPath} replace />;
+  }
+
   /* Share handler */
   const handleShare = async () => {
-    const localizedShareSlug = article?.localizedSlug?.en || slug;
-    const shareUrl = `${BASE_URL}/blog/${localizedShareSlug}`;
+    const shareUrl = `${BASE_URL}${canonicalPath || buildArticlePathFromParts({ category: routeCategory, slug })}`;
     if (navigator.share) {
       try {
         await navigator.share({
@@ -164,7 +168,7 @@ const ArticlePage = () => {
       <Helmet>
         <title>{seoTitle} | MukonoTalks</title>
         <meta name="description" content={seoDescription} />
-        <link rel="canonical" href={`${BASE_URL}/blog/${slug}`} />
+        <link rel="canonical" href={`${BASE_URL}${canonicalPath}`} />
 
         {/* hreflang */}
         {SUPPORTED_LANGUAGES.map((l) => (
@@ -172,20 +176,26 @@ const ArticlePage = () => {
             key={l}
             rel="alternate"
             hrefLang={l}
-            href={`${BASE_URL}/${l}/blog/${article.localizedSlug?.[l] || slug}`}
+            href={`${BASE_URL}${buildArticlePathFromParts({
+              category: article.category,
+              slug: article.localizedSlug?.[l] || article.availableSlugs?.[l] || slug,
+            })}`}
           />
         ))}
         <link
           rel="alternate"
           hrefLang="x-default"
-          href={`${BASE_URL}/en/blog/${article.localizedSlug?.en || slug}`}
+          href={`${BASE_URL}${buildArticlePathFromParts({
+            category: article.category,
+            slug: article.localizedSlug?.en || article.availableSlugs?.en || slug,
+          })}`}
         />
 
         {/* Open Graph */}
         <meta property="og:title" content={seoTitle} />
         <meta property="og:description" content={seoDescription} />
         <meta property="og:type" content="article" />
-        <meta property="og:url" content={`${BASE_URL}/blog/${slug}`} />
+        <meta property="og:url" content={`${BASE_URL}${canonicalPath}`} />
         {article.featuredImage && (
           <meta property="og:image" content={article.featuredImage} />
         )}
@@ -348,11 +358,9 @@ const ArticlePage = () => {
         )}
 
         {/* Content Blocks */}
-        <Reveal variant="fade-up" delay={150}>
         <div className="prose prose-lg max-w-none">
           <ArticleBlockRenderer blocks={article.contentBlocks} injectMidArticleAd />
         </div>
-        </Reveal>
 
         <MonetizedAdSlot slotKey="articleFooter" className="mt-10" />
 
@@ -368,35 +376,6 @@ const ArticlePage = () => {
                   className="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-primary-100 hover:text-primary-700 transition-colors"
                 >
                   #{tag}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Related Products (Knowledge Base only) */}
-        {category === 'knowledge-base' && article.relatedProducts && article.relatedProducts.length > 0 && (
-          <div className="mt-10 pt-6 border-t border-gray-200">
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">Related Products</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {article.relatedProducts.map((product) => (
-                <Link
-                  key={product._id || product.slug}
-                  to={`/${validLang}/products/${product.slug}`}
-                  className="card p-4 hover:shadow-md transition-shadow flex items-center gap-4"
-                >
-                  {product.images?.[0] && (
-                    <img
-                      src={resolveImageUrl(product.images[0]?.url || product.images[0])}
-                      alt={product.title}
-                      className="w-16 h-16 rounded-lg object-cover"
-                      loading="lazy"
-                    />
-                  )}
-                  <div>
-                    <p className="font-semibold text-gray-800">{product.title}</p>
-                    <p className="text-sm text-gray-500">{product.category}</p>
-                  </div>
                 </Link>
               ))}
             </div>

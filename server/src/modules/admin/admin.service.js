@@ -5,7 +5,6 @@
  */
 
 const User = require('../auth/auth.model');
-const Product = require('../products/product.model');
 const Order = require('../orders/order.model');
 
 /**
@@ -14,7 +13,6 @@ const Order = require('../orders/order.model');
 const getDashboardStats = async () => {
   const [
     totalUsers,
-    totalProducts,
     totalOrders,
     pendingOrders,
     totalRevenue,
@@ -22,7 +20,6 @@ const getDashboardStats = async () => {
     pendingApprovals,
   ] = await Promise.all([
     User.countDocuments({ role: 'customer' }),
-    Product.countDocuments({ isActive: true }),
     Order.countDocuments(),
     Order.countDocuments({ status: 'pending' }),
     Order.aggregate([
@@ -38,7 +35,6 @@ const getDashboardStats = async () => {
 
   return {
     totalUsers,
-    totalProducts,
     totalOrders,
     pendingOrders,
     totalRevenue: totalRevenue[0]?.total || 0,

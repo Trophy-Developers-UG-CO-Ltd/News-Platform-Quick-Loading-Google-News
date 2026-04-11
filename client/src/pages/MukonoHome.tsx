@@ -104,6 +104,7 @@ import { Search } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "../app/axios";
 import SafeImage from "../components/common/SafeImage";
+import { buildArticlePathFromParts } from "../features/articles/articleUrls";
 
 
 
@@ -207,7 +208,7 @@ export default function MukonoHome() {
             {results.map((r) => (
               <Link
                 key={r._id}
-                to={`/news/${r.slug}`}
+                to={buildArticlePathFromParts({ category: r.category?.slug || r.category?.name, slug: r.slug })}
                 className="flex gap-3 p-3 hover:bg-gray-100"
               >
                 <SafeImage
@@ -225,7 +226,7 @@ export default function MukonoHome() {
       {/* 📰 HERO */}
       <section className="grid md:grid-cols-2 gap-6 mb-10">
         {hero.map((a) => (
-          <Link key={a._id} to={`/news/${a.slug}`} className="relative">
+          <Link key={a._id} to={buildArticlePathFromParts({ category: a.category?.slug || a.category?.name, slug: a.slug })} className="relative">
             <SafeImage
               src={a.featuredImage}
               alt={a.title ? `Image for ${a.title}` : "Article image"}
@@ -259,7 +260,7 @@ export default function MukonoHome() {
 
             <div className="grid md:grid-cols-3 gap-6">
               {section.articles.slice(0, 2).map((a) => (
-                <Link key={a._id} to={`/news/${a.slug}`}>
+                <Link key={a._id} to={buildArticlePathFromParts({ category: a.category?.slug || a.category?.name, slug: a.slug })}>
                   <SafeImage
                     src={a.featuredImage}
                     alt={a.title ? `Image for ${a.title}` : "Article image"}
@@ -287,7 +288,7 @@ export default function MukonoHome() {
 
         <div className="grid md:grid-cols-3 gap-6">
           {trending.map((a) => (
-            <Link key={a._id} to={`/news/${a.slug}`}>
+            <Link key={a._id} to={buildArticlePathFromParts({ category: a.category?.slug || a.category?.name, slug: a.slug })}>
               <SafeImage
                 src={a.featuredImage}
                 alt={a.title ? `Image for ${a.title}` : "Article image"}

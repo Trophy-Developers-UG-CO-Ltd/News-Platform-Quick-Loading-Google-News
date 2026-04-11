@@ -10,9 +10,8 @@ import api from '../../../app/axios';
 const SITEMAPS = [
   { name: 'Sitemap Index', path: '/sitemap.xml', desc: 'Root index pointing to all sub-sitemaps' },
   { name: 'Pages Sitemap', path: '/sitemap-pages.xml', desc: 'Static CMS pages' },
-  { name: 'Products Sitemap', path: '/sitemap-products.xml', desc: 'All active products with image extensions' },
-  { name: 'Articles Sitemap', path: '/sitemap-articles.xml', desc: 'Blog articles with hreflang tags' },
-  { name: 'Categories Sitemap', path: '/sitemap-categories.xml', desc: 'Product categories' },
+  { name: 'Articles Sitemap', path: '/sitemap-articles.xml', desc: 'News and editorial articles with hreflang tags' },
+  { name: 'Categories Sitemap', path: '/sitemap-categories.xml', desc: 'Site content categories' },
   { name: 'News Sitemap', path: '/news-sitemap.xml', desc: 'Articles published in past 48 hours' },
   { name: 'Video Sitemap', path: '/video-sitemap.xml', desc: 'Video content structured data' },
 ];
@@ -82,7 +81,7 @@ export default function SitemapManager() {
         <h3 className="font-semibold text-indigo-800 dark:text-indigo-200 mb-2">How sitemaps are generated</h3>
         <ul className="text-sm text-indigo-700 dark:text-indigo-300 space-y-1 list-disc list-inside">
           <li>Sitemaps are generated dynamically from the database on each request.</li>
-          <li>Product and article sitemaps include lastmod based on document updatedAt.</li>
+          <li>Article and category sitemaps include lastmod based on document updatedAt.</li>
           <li>The articles sitemap includes hreflang tags for en/zh/sw languages.</li>
           <li>The news sitemap only includes articles published in the last 48 hours.</li>
           <li>A 30-second debounce queue auto-notifies after any content change.</li>

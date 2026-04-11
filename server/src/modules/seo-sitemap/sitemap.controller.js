@@ -4,7 +4,6 @@
  * @module modules/sitemap/sitemap.controller
  */
 
-const Product = require('../products/product.model');
 const Category = require('../categories/category.model');
 const Page = require('../pages/page.model');
 const Article = require('../articles/article.model');
@@ -49,11 +48,10 @@ const getLanguageSitemap = asyncHandler(async (req, res) => {
       return res.status(404).json({ success: false, message: 'Language not supported' });
     }
 
-    const [products, categories, pages, articles] = await Promise.all([
-      Product.find({ isActive: true }).select('slug updatedAt').lean(),
+    const [categories, pages, articles] = await Promise.all([
       Category.find({ isActive: true }).select('slug updatedAt').lean(),
       Page.find({ publishStatus: 'published' }).select('localizedSlug seo updatedAt').lean(),
-      Article.find({ status: 'published' }).select('localizedSlug updatedAt').lean(),
+      Article.find({ publishStatus: 'published' }).select('localizedSlug category updatedAt').lean(),
     ]);
 
     let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
@@ -80,17 +78,12 @@ const getLanguageSitemap = asyncHandler(async (req, res) => {
     // Static pages
     const now = new Date().toISOString();
     addUrl('/', now, '1.0', 'daily');
-    addUrl('/products', now, '0.9', 'daily');
-    addUrl('/blog', now, '0.8', 'daily');
+    addUrl('/news', now, '0.9', 'hourly');
+    addUrl('/blog', now, '0.7', 'daily');
     addUrl('/login', now, '0.3', 'monthly');
     addUrl('/register', now, '0.3', 'monthly');
     addUrl('/privacy', now, '0.2', 'yearly');
     addUrl('/terms', now, '0.2', 'yearly');
-
-    // Products
-    for (const product of products) {
-      addUrl(`/products/${product.slug}`, product.updatedAt.toISOString(), '0.8', 'weekly');
-    }
 
     // CMS Pages
     for (const page of pages) {
@@ -116,7 +109,7 @@ const getLanguageSitemap = asyncHandler(async (req, res) => {
     for (const article of articles) {
       const slug = article.localizedSlug?.[lang] || article.localizedSlug?.en;
       if (slug) {
-        addUrl(`/blog/${slug}`, article.updatedAt.toISOString(), '0.7', 'weekly');
+        addUrl(`/${String(article.category || 'general').trim().toLowerCase()}/${slug}`, article.updatedAt.toISOString(), '0.8', 'daily');
       }
     }
 

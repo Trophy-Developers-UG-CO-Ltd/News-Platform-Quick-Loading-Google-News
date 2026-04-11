@@ -6,7 +6,7 @@
  * @module components/seo/MetaPreview
  */
 
-import SafeImage from 'components/common/SafeImage';
+import SafeImage from '../../components/common/SafeImage';
 import React from 'react';
 
 interface MetaPreviewProps {
@@ -135,4 +135,3 @@ const MetaPreview: React.FC<MetaPreviewProps> = ({
 export default MetaPreview;
 
 // MukonoTalks
-

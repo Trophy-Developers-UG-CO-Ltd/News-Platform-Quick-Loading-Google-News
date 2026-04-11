@@ -9,7 +9,7 @@ import { useSchemaList, useUpsertSchema, useDeleteSchema } from '../../../seo/ho
 import SchemaEditorModal from '../components/SchemaEditorModal';
 
 const SCHEMA_TYPES = [
-  '', 'Product', 'Article', 'Organization', 'LocalBusiness', 'FAQPage',
+  '', 'Article', 'Organization', 'LocalBusiness', 'FAQPage',
   'VideoObject', 'NewsArticle', 'BreadcrumbList', 'CollectionPage',
   'JobPosting', 'Event', 'WebPage', 'WebSite', 'Person', 'HowTo',
   'Review', 'AggregateRating', 'Recipe', 'Course', 'Service',

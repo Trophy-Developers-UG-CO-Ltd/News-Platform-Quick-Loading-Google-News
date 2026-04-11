@@ -4,6 +4,7 @@ import { Search, X, Flame } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { FiUser } from 'react-icons/fi';
 import api from '../../app/axios';
+import { buildArticlePath } from '../../features/articles/articleUrls';
 import ThemeToggle from '../ui/ThemeToggle';
 import useThemeMode from '../../hooks/useThemeMode';
 import { getLucideIcon } from '../../utils/getLucideIcon';
@@ -22,7 +23,6 @@ const stripHtml = (value = '') =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const getArticleSlug = (article) => article?.localizedSlug?.en || '';
 const getArticleTitle = (article) => getLocalized(article?.title) || 'Untitled story';
 const getArticleExcerpt = (article) => stripHtml(getLocalized(article?.excerpt)) || 'No summary available.';
 
@@ -500,7 +500,7 @@ const PremiumSiteHeader = () => {
                       {articleSearchResults.map((story) => (
                         <Link
                           key={story._id}
-                          to={`/news/${getArticleSlug(story)}`}
+                          to={buildArticlePath(story)}
                           onClick={closeMobilePanel}
                           className="block rounded-xl border border-black/10 bg-white px-3 py-2 transition hover:bg-black hover:text-brand-white"
                         >

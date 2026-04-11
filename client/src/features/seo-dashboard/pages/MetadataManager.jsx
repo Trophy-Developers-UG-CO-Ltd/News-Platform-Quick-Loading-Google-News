@@ -14,7 +14,7 @@ import { setMetadataFilters } from '../seoDashboardSlice';
 import MetadataDrawer from '../components/MetadataDrawer';
 import { ScoreChip, RobotsBadge } from '../components/MetadataHelpers';
 
-const PAGE_TYPES = ['', 'product', 'article', 'category', 'home', 'job', 'event', 'location', 'page', 'other'];
+const PAGE_TYPES = ['', 'article', 'category', 'home', 'job', 'event', 'location', 'page', 'other'];
 
 export default function MetadataManager() {
   const dispatch = useDispatch();

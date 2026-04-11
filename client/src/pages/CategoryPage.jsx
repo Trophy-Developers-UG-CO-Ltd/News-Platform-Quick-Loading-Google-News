@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../app/axios';
 import Spinner from '../components/ui/Spinner';
 import { Helmet } from 'react-helmet-async';
+import { buildArticlePath } from '../features/articles/articleUrls';
 
 const resolveText = (value) => {
   if (!value) return '';
@@ -62,7 +63,7 @@ const CategoryPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {articles.map((article) => (
-            <Link key={article._id} to={"/news/" + (article.localizedSlug?.en || article.localizedSlug)} className="block border rounded-lg p-4 hover:shadow-md transition">
+            <Link key={article._id} to={buildArticlePath(article)} className="block border rounded-lg p-4 hover:shadow-md transition">
               <div className="font-semibold text-lg mb-2">{resolveText(article.title)}</div>
               <div className="text-gray-600 text-sm mb-1">{article.author?.name}</div>
               <div className="text-gray-500 text-xs">{new Date(article.publishedAt).toLocaleDateString()}</div>

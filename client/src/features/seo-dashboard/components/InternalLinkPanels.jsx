@@ -97,7 +97,7 @@ export function RuleModal({ initial, onClose, onSave, saving }) {
           </div>
           <div>
             <label className="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Target URL</label>
-            <input value={form.targetURL} onChange={(e) => set('targetURL', e.target.value)} placeholder="/products/industrial-coatings"
+            <input value={form.targetURL} onChange={(e) => set('targetURL', e.target.value)} placeholder="/news/local-elections"
               className="w-full rounded-[48px] border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono" />
           </div>
           <div className="grid grid-cols-2 gap-4">

@@ -74,14 +74,14 @@ router.post('/batch', runBatch);
 /**
  * POST /api/translation/document
  * Translate a single document by model + _id
- * Body: { model: 'Product', docId: '...', force?: true }
+ * Body: { model: 'Article', docId: '...', force?: true }
  */
 router.post('/document', translateDocument);
 
 /**
  * GET /api/translation/document-status
  * Get translation status for a specific document
- * Query: { model: 'Product', docId: '...' }
+ * Query: { model: 'Article', docId: '...' }
  */
 router.get('/document-status', getDocumentTranslationStatus);
 

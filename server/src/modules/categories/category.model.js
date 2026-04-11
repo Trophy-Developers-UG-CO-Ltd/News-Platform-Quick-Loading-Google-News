@@ -131,14 +131,6 @@ categorySchema.pre('save', function (next) {
   next();
 });
 
-// Virtual: product count
-categorySchema.virtual('products', {
-  ref: 'Product',
-  localField: '_id',
-  foreignField: 'category',
-  count: true,
-});
-
 // ─── Indexes ───────────────────────────────────────────────────
 categorySchema.index({ parent: 1 }); // Tree queries (children of parent)
 categorySchema.index({ isActive: 1 }); // Filter active categories

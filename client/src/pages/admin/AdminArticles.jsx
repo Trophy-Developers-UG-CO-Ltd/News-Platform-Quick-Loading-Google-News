@@ -13,6 +13,7 @@ import articleService from '../../features/articles/articleService';
 import categoryService from '../../features/articles/categoryService';
 import Spinner from '../../components/ui/Spinner';
 import toast from 'react-hot-toast';
+import { buildArticlePath } from '../../features/articles/articleUrls';
 import {
   FiPlus,
   FiEdit2,
@@ -255,7 +256,7 @@ const AdminArticles = () => {
                     </button>
                     {article.publishStatus === 'published' && (
                       <Link
-                        to={`/blog/${article.localizedSlug?.en}`}
+                        to={buildArticlePath(article)}
                         className="p-2 text-gray-400 hover:text-primary-600 transition-colors"
                         title="View"
                       >

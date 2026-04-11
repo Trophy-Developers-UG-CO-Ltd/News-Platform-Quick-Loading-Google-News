@@ -97,8 +97,9 @@ const AppRoutes = () => {
         <Route path="/news" element={<NewsPage />} />
         <Route path="/news/:slug" element={<NewsArticlePage />} />
         <Route path="/blog" element={<ArticlesPage />} />
-        <Route path="/blog/:slug" element={<ArticlePage />} />
         <Route path="/category/:slug" element={<CategoryPage />} />
+        <Route path="/blog/:slug" element={<ArticlePage legacyPath />} />
+        <Route path="/:category/:slug" element={<ArticlePage />} />
         <Route path="/local" element={<LocalUpdatesPage />} />
         <Route path="/entertainment" element={<EntertainmentPage />} />
         <Route path="/videos" element={<VideosPage />} />
