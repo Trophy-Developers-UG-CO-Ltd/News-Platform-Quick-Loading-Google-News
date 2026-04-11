@@ -8,6 +8,7 @@ import ThemeToggle from '../ui/ThemeToggle';
 import useThemeMode from '../../hooks/useThemeMode';
 import { getLucideIcon } from '../../utils/getLucideIcon';
 import { SOCIAL_LINKS } from './socialLinks';
+import { getLanguageFromPath, stripLanguagePrefix } from '../../i18n';
 
 const getLocalized = (value) => {
   if (!value) return '';
@@ -25,16 +26,13 @@ const getArticleSlug = (article) => article?.localizedSlug?.en || '';
 const getArticleTitle = (article) => getLocalized(article?.title) || 'Untitled story';
 const getArticleExcerpt = (article) => stripHtml(getLocalized(article?.excerpt)) || 'No summary available.';
 
-const MOBILE_MENU_LINKS = [
-  { label: 'Home', to: '/' },
-  { label: 'News', to: '/news' },
-  { label: 'Entertainment', to: '/entertainment' },
-  { label: 'Politics', to: '/local' },
-  { label: 'Lifestyle', to: '/entertainment' },
-  { label: 'Videos', to: '/videos' },
-  { label: 'About', to: '/about' },
-  { label: 'Advertise', to: '/advertise' },
-  { label: 'Contact', to: '/contact' },
+const DEFAULT_HEADER_NAV_ITEMS = [
+  { label: 'Home', href: '/', isExternal: false, openInNewTab: false, icon: '', iconPosition: 'before', textWeight: 'bold' },
+  { label: 'News', href: '/news', isExternal: false, openInNewTab: false, icon: '', iconPosition: 'before', textWeight: 'bold' },
+  { label: 'Entertainment', href: '/entertainment', isExternal: false, openInNewTab: false, icon: '', iconPosition: 'before', textWeight: 'bold' },
+  { label: 'Politics', href: '/local', isExternal: false, openInNewTab: false, icon: '', iconPosition: 'before', textWeight: 'bold' },
+  { label: 'Lifestyle', href: '/entertainment', isExternal: false, openInNewTab: false, icon: '', iconPosition: 'before', textWeight: 'bold' },
+  { label: 'Videos', href: '/videos', isExternal: false, openInNewTab: false, icon: '', iconPosition: 'before', textWeight: 'bold' },
 ];
 
 const DEFAULT_TICKER_ITEMS = [
@@ -77,6 +75,21 @@ const TEXT_WEIGHT_CLASS = {
   bold: 'font-bold',
 };
 
+const getLocalizedNavLabel = (item, lang) =>
+  item?.localizedLabel?.[lang] ||
+  item?.localizedLabel?.en ||
+  item?.label ||
+  '';
+
+const normalizeInternalPath = (path = '/') => {
+  if (!path || /^(https?:)?\/\//.test(path)) return path;
+
+  const withSlash = path.startsWith('/') ? path : `/${path}`;
+  const stripped = stripLanguagePrefix(withSlash) || '/';
+  const trimmed = stripped.replace(/\/+$/, '');
+  return trimmed || '/';
+};
+
 const PremiumSiteHeader = () => {
   const { isDarkMode, toggleTheme } = useThemeMode();
   const { pathname } = useLocation();
@@ -90,9 +103,24 @@ const PremiumSiteHeader = () => {
   const [searchError, setSearchError] = useState('');
   const [articleSearchResults, setArticleSearchResults] = useState([]);
   const [pageSearchResults, setPageSearchResults] = useState([]);
+  const [navItems, setNavItems] = useState(DEFAULT_HEADER_NAV_ITEMS);
   const [tickerItems, setTickerItems] = useState(DEFAULT_TICKER_ITEMS);
 
-  const isHomePage = pathname === '/';
+  const currentLanguage = useMemo(() => getLanguageFromPath(pathname), [pathname]);
+  const normalizedPathname = useMemo(() => normalizeInternalPath(pathname), [pathname]);
+  const isHomePage = normalizedPathname === '/';
+
+  const primaryNavItems = useMemo(() => {
+    const source = Array.isArray(navItems) && navItems.length > 0 ? navItems : DEFAULT_HEADER_NAV_ITEMS;
+
+    return source
+      .filter((item) => item?.href)
+      .map((item) => ({
+        ...item,
+        label: getLocalizedNavLabel(item, currentLanguage),
+      }))
+      .filter((item) => item.label);
+  }, [currentLanguage, navItems]);
 
   useEffect(() => {
     if (!mobilePanelOpen) return;
@@ -140,6 +168,30 @@ const PremiumSiteHeader = () => {
 
     return () => window.clearTimeout(requestId);
   }, [searchTerm, mobilePanelOpen]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchPrimaryNavItems = async () => {
+      try {
+        const response = await api.get('/navigation');
+        const items = Array.isArray(response?.data?.data) ? response.data.data : [];
+
+        if (!isMounted || items.length === 0) return;
+        setNavItems(items);
+      } catch (_error) {
+        if (isMounted) {
+          setNavItems(DEFAULT_HEADER_NAV_ITEMS);
+        }
+      }
+    };
+
+    fetchPrimaryNavItems();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -195,6 +247,68 @@ const PremiumSiteHeader = () => {
 
   const desktopSearchHref = useMemo(() => '/news', []);
 
+  const renderPrimaryNavItem = (item, { mobile = false } = {}) => {
+    const key = `${item.href}-${item.label}`;
+    const Icon = item.icon ? getLucideIcon(item.icon, 'Circle') : null;
+    const weightClass = TEXT_WEIGHT_CLASS[item.textWeight] || TEXT_WEIGHT_CLASS.bold;
+    const isActive = !item.isExternal && normalizeInternalPath(item.href) === normalizedPathname;
+    const itemClasses = mobile
+      ? `rounded-xl border px-3 py-2.5 text-sm transition ${
+          isActive
+            ? 'border-black bg-black text-brand-white'
+            : 'border-black/10 bg-white text-black hover:bg-black hover:text-brand-white'
+        } ${weightClass}`
+      : `transition hover:text-white/70 ${weightClass} ${isActive ? 'text-white/80' : ''}`;
+
+    const content = (
+      <>
+        {Icon && item.iconPosition !== 'after' ? <Icon className={mobile ? 'mb-1 h-4 w-4' : 'h-3.5 w-3.5'} aria-hidden="true" /> : null}
+        <span>{item.label}</span>
+        {Icon && item.iconPosition === 'after' ? <Icon className={mobile ? 'mt-1 h-4 w-4' : 'h-3.5 w-3.5'} aria-hidden="true" /> : null}
+      </>
+    );
+
+    if (item.isExternal) {
+      return (
+        <a
+          key={key}
+          href={item.href}
+          target={item.openInNewTab ? '_blank' : '_self'}
+          rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
+          onClick={mobile ? closeMobilePanel : undefined}
+          className={mobile ? `flex flex-col ${itemClasses}` : `inline-flex items-center gap-2 ${itemClasses}`}
+        >
+          {content}
+        </a>
+      );
+    }
+
+    if (isActive && !mobile) {
+      return (
+        <span
+          key={key}
+          aria-current="page"
+          className={`inline-flex items-center gap-2 ${itemClasses}`}
+        >
+          {content}
+        </span>
+      );
+    }
+
+    return (
+      <Link
+        key={key}
+        to={item.href}
+        target={item.openInNewTab ? '_blank' : undefined}
+        rel={item.openInNewTab ? 'noopener noreferrer' : undefined}
+        onClick={mobile ? closeMobilePanel : undefined}
+        className={mobile ? `flex flex-col ${itemClasses}` : `inline-flex items-center gap-2 ${itemClasses}`}
+      >
+        {content}
+      </Link>
+    );
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-black bg-black/95 text-white backdrop-blur">
       <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-4 py-4">
@@ -208,17 +322,8 @@ const PremiumSiteHeader = () => {
           </Link>
         )}
 
-        <nav className="hidden gap-6 text-sm font-bold text-white md:flex" aria-label="Primary">
-          {isHomePage ? (
-            <span aria-current="page" className="text-white/80">Home</span>
-          ) : (
-            <Link to="/" className="transition hover:text-white/70">Home</Link>
-          )}
-          <Link to="/news" className="transition hover:text-white/70">News</Link>
-          <Link to="/entertainment" className="transition hover:text-white/70">Entertainment</Link>
-          <Link to="/local" className="transition hover:text-white/70">Politics</Link>
-          <Link to="/entertainment" className="transition hover:text-white/70">Lifestyle</Link>
-          <Link to="/videos" className="transition hover:text-white/70">Videos</Link>
+        <nav className="hidden gap-6 text-sm text-white md:flex" aria-label="Primary">
+          {primaryNavItems.map((item) => renderPrimaryNavItem(item))}
         </nav>
 
         <div className="flex items-center gap-2 text-white md:gap-4">
@@ -324,16 +429,7 @@ const PremiumSiteHeader = () => {
               </div>
 
               <div className="mt-2 grid grid-cols-2 gap-2">
-                {MOBILE_MENU_LINKS.map((item) => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    onClick={closeMobilePanel}
-                    className="rounded-xl border border-black/10 bg-white px-3 py-2.5 text-sm font-semibold text-black transition hover:bg-black hover:text-brand-white"
-                  >
-                    {item.label}
-                  </Link>
-                ))}
+                {primaryNavItems.map((item) => renderPrimaryNavItem(item, { mobile: true }))}
               </div>
 
               {searchTerm.trim().length >= 2 && (

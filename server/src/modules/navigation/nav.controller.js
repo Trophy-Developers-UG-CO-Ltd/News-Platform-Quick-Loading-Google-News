@@ -8,10 +8,12 @@ const NavItem = require('./nav.model');
 
 /* ─── Default seed data ─────────────────────────────────────── */
 const DEFAULT_NAV = [
-  { label: 'Home',      href: '/',         order: 0, isVisible: true,  isExternal: false, icon: 'Home', iconPosition: 'before', textWeight: 'medium' },
-  { label: 'Products',  href: '/products', order: 1, isVisible: true,  isExternal: false, icon: 'Package', iconPosition: 'before', textWeight: 'medium' },
-  { label: 'About Us',  href: '/about',    order: 2, isVisible: true,  isExternal: false, icon: 'Info', iconPosition: 'before', textWeight: 'medium' },
-  { label: 'Blog',      href: '/blog',     order: 3, isVisible: true,  isExternal: false, icon: 'BookOpen', iconPosition: 'before', textWeight: 'medium' },
+  { label: 'Home',          href: '/',              order: 0, isVisible: true, isExternal: false, icon: 'Home',        iconPosition: 'before', textWeight: 'bold' },
+  { label: 'News',          href: '/news',          order: 1, isVisible: true, isExternal: false, icon: 'Newspaper',   iconPosition: 'before', textWeight: 'bold' },
+  { label: 'Entertainment', href: '/entertainment', order: 2, isVisible: true, isExternal: false, icon: 'Sparkles',    iconPosition: 'before', textWeight: 'bold' },
+  { label: 'Politics',      href: '/local',         order: 3, isVisible: true, isExternal: false, icon: 'Landmark',    iconPosition: 'before', textWeight: 'bold' },
+  { label: 'Lifestyle',     href: '/entertainment', order: 4, isVisible: true, isExternal: false, icon: 'Coffee',      iconPosition: 'before', textWeight: 'bold' },
+  { label: 'Videos',        href: '/videos',        order: 5, isVisible: true, isExternal: false, icon: 'Clapperboard', iconPosition: 'before', textWeight: 'bold' },
 ];
 
 /* ─── GET /api/navigation — public visible items ───────────── */
@@ -60,6 +62,11 @@ exports.bulkUpdate = async (req, res, next) => {
     await NavItem.deleteMany({});
     const payload = items.map((item, i) => ({
       label:       item.label      || '',
+      localizedLabel: {
+        en: item.localizedLabel?.en || null,
+        zh: item.localizedLabel?.zh || null,
+        sw: item.localizedLabel?.sw || null,
+      },
       href:        item.href       || '/',
       order:       i,
       isVisible:   item.isVisible  !== undefined ? item.isVisible  : true,
@@ -68,6 +75,9 @@ exports.bulkUpdate = async (req, res, next) => {
       icon:        item.icon       || '',
       iconPosition: item.iconPosition === 'after' ? 'after' : 'before',
       textWeight: ['normal', 'medium', 'semibold', 'bold'].includes(item.textWeight) ? item.textWeight : 'medium',
+      translationStatus: item.translationStatus || undefined,
+      translationMeta: item.translationMeta || undefined,
+      translationHash: item.translationHash || undefined,
     }));
 
     const created = await NavItem.insertMany(payload);
@@ -123,4 +133,3 @@ exports.deleteNavItem = async (req, res, next) => {
 };
 
 // MukonoTalks
-

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { Suspense, lazy, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useLocation } from 'react-router-dom';
 
@@ -9,9 +9,9 @@ import PremiumSiteFooter from './components/layout/PremiumSiteFooter';
 import Spinner from './components/ui/Spinner';
 import { loadUser } from './features/auth/authSlice';
 import { fetchMaintenanceStatus } from './features/maintenance/maintenanceSlice';
-import MaintenancePage from './pages/MaintenancePage';
 
 const MAINTENANCE_BYPASS_PATHS = new Set(['/login', '/mukono11login', '/maintenance']);
+const MaintenancePage = lazy(() => import('./pages/MaintenancePage'));
 
 const App = () => {
   const dispatch = useDispatch();
@@ -40,7 +40,17 @@ const App = () => {
   const isBypassedPath = MAINTENANCE_BYPASS_PATHS.has(location.pathname);
 
   if (isMaintenanceEnabled && !isDeveloper && !isBypassedPath) {
-    return <MaintenancePage />;
+    return (
+      <Suspense
+        fallback={(
+          <div className="flex min-h-screen items-center justify-center bg-light-body text-text-light-primary dark:bg-dark-charcoal dark:text-text-dark-primary">
+            <Spinner size="lg" />
+          </div>
+        )}
+      >
+        <MaintenancePage />
+      </Suspense>
+    );
   }
 
   return (
