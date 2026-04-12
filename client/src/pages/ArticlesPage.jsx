@@ -187,11 +187,15 @@ const ArticlesPage = () => {
     const loadBlogSummary = async () => {
       setLoading(true);
       setError('');
+      const noCacheHeaders = {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      };
 
       const [categoriesResult, articlesResult, videoResult] = await Promise.allSettled([
-        api.get('/categories'),
-        api.get('/articles', { params: { page: 1, limit: 120, sort: 'publishedAt' } }),
-        api.get('/homepage-sections/video'),
+        api.get('/categories', { headers: noCacheHeaders }),
+        api.get('/articles', { params: { page: 1, limit: 100, sort: 'publishedAt' }, headers: noCacheHeaders }),
+        api.get('/homepage-sections/video', { headers: noCacheHeaders }),
       ]);
 
       if (!mounted) return;
@@ -201,12 +205,33 @@ const ArticlesPage = () => {
           ? categoriesResult.value.data.categories.filter((category) => category?.isActive !== false)
           : [];
 
-      const articleData =
+      let articleData =
         articlesResult.status === 'fulfilled' && Array.isArray(articlesResult.value?.data?.articles)
           ? [...articlesResult.value.data.articles].sort(
               (left, right) => getTimestamp(right?.publishedAt) - getTimestamp(left?.publishedAt)
             )
           : [];
+
+      if (articleData.length === 0) {
+        try {
+          const retry = await api.get('/articles', {
+            params: {
+              page: 1,
+              limit: 100,
+              sort: 'publishedAt',
+            },
+            headers: noCacheHeaders,
+          });
+
+          if (Array.isArray(retry.data?.articles)) {
+            articleData = [...retry.data.articles].sort(
+              (left, right) => getTimestamp(right?.publishedAt) - getTimestamp(left?.publishedAt)
+            );
+          }
+        } catch (_) {
+          // Keep the original result if the uncached retry fails.
+        }
+      }
 
       const resolvedVideoUrl =
         videoResult.status === 'fulfilled' ? videoResult.value?.data?.videoUrl || '' : '';

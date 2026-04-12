@@ -47,6 +47,11 @@ const CATEGORY_COLORS = {
 
 const SUPPORTED_LANGUAGES = ['en', 'sw', 'zh'];
 const BASE_URL = import.meta.env.VITE_BASE_URL || 'https://mukonotalks.ug';
+const stripHtml = (value = '') =>
+  String(value)
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
 const ArticlePage = ({ legacyPath = false }) => {
   const { category: routeCategory, slug } = useParams();
@@ -148,9 +153,9 @@ const ArticlePage = ({ legacyPath = false }) => {
 
   /* Resolved localized fields */
   const title = article.title || 'Untitled';
-  const excerpt = article.excerpt || '';
+  const excerpt = stripHtml(article.excerpt || '');
   const seoTitle = article.seo?.title || title;
-  const seoDescription = article.seo?.description || excerpt;
+  const seoDescription = stripHtml(article.seo?.description || excerpt);
   const category = article.category;
   const categoryLabel = CATEGORY_LABELS[category] || category;
   const categoryColor = CATEGORY_COLORS[category] || 'bg-gray-100 text-gray-600';
