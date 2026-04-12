@@ -8,6 +8,7 @@ import React, { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import { FiMail, FiPhone, FiMapPin } from 'react-icons/fi';
+import SafeImage from '../common/SafeImage';
 import LocalizedLink from '../i18n/LocalizedLink';
 import { fetchFooter } from '../../features/footer/footerSlice';
 
@@ -149,16 +150,7 @@ const Footer = () => {
           </div>
         </div>
 
-        {/* Bottom bar */}
-       <div className="mt-10 flex flex-col items-center justify-between border-t border-dark-border pt-6 text-sm md:flex-row">
-  <p>&copy; {currentYear} {copyrightName || 'MukonoTalks'}. {t('footer.allRights', 'All rights reserved.')}</p>
-  <p className="mt-2 text-text-muted md:mt-0">
-    Developed and Designed by{' '}
-      <span className="font-medium text-accent-orange" title="TrophyDevelopers">
-        Trophy Developers
-      </span>
-  </p>
-</div>
+       
       </div>
     </footer>
   );
@@ -167,4 +159,3 @@ const Footer = () => {
 export default Footer;
 
 // MukonoTalks
-

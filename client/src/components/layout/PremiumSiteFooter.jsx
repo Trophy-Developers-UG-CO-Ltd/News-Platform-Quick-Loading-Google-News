@@ -39,11 +39,11 @@ const SOCIAL_LINKS = [
 ];
 
 const PremiumSiteFooter = () => {
+  const currentYear = new Date().getFullYear();
+
   return (
     <footer className="mt-10 border-t border-white/10 bg-black text-white">
       <div className="mx-auto flex w-full max-w-7xl flex-col gap-4 px-4 py-6 text-sm md:flex-row md:items-center md:justify-between">
-        <p className="text-white/90">© Mukono Talks</p>
-
         <div className="flex flex-wrap items-center gap-4 text-white/90">
           <Link to="/about" className="transition hover:text-white">About</Link>
           <Link to="/advertise" className="transition hover:text-white">Advertise</Link>
@@ -65,6 +65,16 @@ const PremiumSiteFooter = () => {
             </a>
           ))}
         </div>
+      </div>
+       {/* Bottom bar */}
+      <div className="mt-10 flex flex-col items-center justify-between border-t border-dark-border pt-6 text-sm md:flex-row">
+        <p className="p-[12px] text-base">&copy; {currentYear} Mukono Talks. All rights reserved.</p>
+        <p className="mt-2 p-[12px] text-base text-text-muted md:mt-0">
+          Developed and Designed by{' '}
+          <span className="font-medium text-accent-orange" title="TrophyDevelopers">
+            Trophy Developers
+          </span>
+        </p>
       </div>
     </footer>
   );

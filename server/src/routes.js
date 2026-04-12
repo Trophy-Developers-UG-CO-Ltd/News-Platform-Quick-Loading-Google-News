@@ -30,6 +30,9 @@ const maintenanceRoutes   = require('./modules/maintenance/maintenance.routes');
 const uploadRoutes        = require('./modules/upload/upload.routes');
 const usersRoutes = require('./modules/users/users.routes');
 const adOrderRoutes = require('./modules/ad-orders/adOrder.routes');
+const brandingRoutes = require('./modules/branding/branding.routes');
+const auditRoutes = require('./modules/audit/audit.routes');
+const documentRoutes = require('./modules/documents/document.routes');
 
 const adminRoutes = require('./modules/admin/admin.routes');
 
@@ -73,6 +76,9 @@ router.use('/i18n',            i18nRoutes);
 router.use('/admin', adminRoutes);
 router.use('/users', usersRoutes);
 router.use('/v1/ad-orders', adOrderRoutes);
+router.use('/branding', brandingRoutes);
+router.use('/audit', auditRoutes);
+router.use('/documents', documentRoutes);
 
 router.use('/', personalizationRoutes);
 router.use('/', analyticsRoutes);

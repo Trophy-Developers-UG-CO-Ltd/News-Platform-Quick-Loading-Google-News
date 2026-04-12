@@ -129,6 +129,8 @@ const AdminAnalytics = () => {
     }
   };
 
+  const { data: interactionData, loading: loadingInteractions, error: errorInteractions } = useInteractionAnalytics();
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
@@ -143,8 +145,6 @@ const AdminAnalytics = () => {
     { label: 'View Trend',    value: traffic.length.toLocaleString(), icon: TrendingUp,    color: 'bg-purple-100 text-purple-600' },
     { label: 'Zero-result',  value: zeroResults.length,                                    icon: AlertTriangle, color: 'bg-red-100 text-red-600' },
   ];
-
-  const { data: interactionData, loading: loadingInteractions, error: errorInteractions } = useInteractionAnalytics();
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">

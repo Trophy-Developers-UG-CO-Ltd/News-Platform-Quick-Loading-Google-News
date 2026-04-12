@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchBranding, saveBranding } from '../../features/branding/brandingSlice';
 import { Palette, Save, RefreshCw, Globe, Mail, Type, Image } from 'lucide-react';
 import MediaUploadField from '../../components/admin/MediaUploadField';
+import SafeImage from '../../components/common/SafeImage';
 import toast from 'react-hot-toast';
 
 const Field = ({ label, hint, children }) => (
@@ -243,4 +244,3 @@ const AdminBranding = () => {
 export default AdminBranding;
 
 // MukonoTalks
-

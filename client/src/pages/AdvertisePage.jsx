@@ -6,6 +6,49 @@ import api from '../app/axios';
 import useDocTitle from '../hooks/useDocTitle';
 
 const DEFAULT_USD_TO_UGX_RATE = 3800;
+const DEFAULT_SLOTS = [
+  { key: 'news_top', label: 'News Top Feature', cpmUsd: 14, minBudgetUsd: 35, defaultCta: 'Read more' },
+  { key: 'news_in_feed', label: 'News Feed Sponsored Card', cpmUsd: 12, minBudgetUsd: 25, defaultCta: 'Discover' },
+  { key: 'article_inline', label: 'Article Inline Spotlight', cpmUsd: 16, minBudgetUsd: 40, defaultCta: 'Visit sponsor' },
+  { key: 'article_footer', label: 'Article Footer Follow-up', cpmUsd: 10, minBudgetUsd: 25, defaultCta: 'Learn more' },
+  { key: 'hero', label: 'Hero Spotlight', cpmUsd: 20, minBudgetUsd: 60, defaultCta: 'Explore' },
+  { key: 'sidebar', label: 'Sidebar Sponsored Card', cpmUsd: 9, minBudgetUsd: 20, defaultCta: 'Learn more' },
+  { key: 'inline', label: 'Inline Sponsored Card', cpmUsd: 12, minBudgetUsd: 25, defaultCta: 'Learn more' },
+];
+const DEFAULT_PAYMENT_METHODS = [
+  {
+    key: 'mtn_momo',
+    label: 'MTN Mobile Money',
+    provider: 'flutterwave',
+    currency: 'UGX',
+    requiresPhone: true,
+    description: 'Collect payment from an MTN MoMo line in Uganda.',
+  },
+  {
+    key: 'airtel_money',
+    label: 'Airtel Mobile Money',
+    provider: 'flutterwave',
+    currency: 'UGX',
+    requiresPhone: true,
+    description: 'Collect payment from an Airtel Money line in Uganda.',
+  },
+  {
+    key: 'stripe',
+    label: 'Stripe',
+    provider: 'stripe',
+    currency: 'USD',
+    requiresPhone: false,
+    description: 'Hosted card checkout through Stripe.',
+  },
+  {
+    key: 'flutterwave',
+    label: 'Flutterwave',
+    provider: 'flutterwave',
+    currency: 'UGX',
+    requiresPhone: false,
+    description: 'Hosted checkout with card, bank transfer, and Uganda mobile money options.',
+  },
+];
 
 const initialForm = {
   clientName: '',
@@ -99,7 +142,28 @@ const AdvertisePage = () => {
             : methods[0]?.key || prev.paymentMethod,
         }));
       } catch (err) {
-        toast.error(err?.response?.data?.message || 'Failed to load advertising plans.');
+        if (!mounted) return;
+        const fallbackSlots = DEFAULT_SLOTS;
+        const fallbackMethods = DEFAULT_PAYMENT_METHODS;
+        setSlotConfig(fallbackSlots);
+        setPaymentMethods(fallbackMethods);
+        setUsdToUgxRate(DEFAULT_USD_TO_UGX_RATE);
+        setForm((prev) => ({
+          ...prev,
+          slot: fallbackSlots.some((slot) => slot.key === prev.slot) ? prev.slot : fallbackSlots[0].key,
+          paymentMethod: fallbackMethods.some((method) => method.key === prev.paymentMethod)
+            ? prev.paymentMethod
+            : fallbackMethods[0].key,
+        }));
+
+        const status = err?.response?.status;
+        const reason = err?.response?.data?.message || err?.message || 'Network error';
+        toast.error(
+          `Could not load live ad plans${status ? ` (${status})` : ''}. Using fallback pricing.`
+        );
+        // Keep a concise but useful trace in the console for diagnosis.
+        // eslint-disable-next-line no-console
+        console.error('[AdvertisePage] Config load failed:', reason);
       } finally {
         if (mounted) setLoadingConfig(false);
       }

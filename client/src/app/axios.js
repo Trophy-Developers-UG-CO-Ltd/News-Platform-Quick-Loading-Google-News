@@ -20,6 +20,7 @@ const normalizeApiUrl = (url) => {
   if (!url) return '/api';
 
   const cleaned = url.replace(/\/+$/, '');
+  if (cleaned.endsWith('/api/v1')) return cleaned.slice(0, -3);
 
   // If already relative
   if (cleaned.startsWith('/')) {

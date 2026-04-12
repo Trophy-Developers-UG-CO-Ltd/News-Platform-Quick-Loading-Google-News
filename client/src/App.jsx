@@ -4,8 +4,10 @@ import { useLocation } from 'react-router-dom';
 
 import AppRoutes from './app/routes';
 import AdSenseScript from './components/ads/AdSenseScript';
+import Footer from './components/layout/Footer';
 import PremiumSiteHeader from './components/layout/PremiumSiteHeader';
 import PremiumSiteFooter from './components/layout/PremiumSiteFooter';
+import CookieConsent from './components/ui/CookieConsent';
 import Spinner from './components/ui/Spinner';
 import { loadUser } from './features/auth/authSlice';
 import { fetchMaintenanceStatus } from './features/maintenance/maintenanceSlice';
@@ -64,7 +66,9 @@ const App = () => {
       <main className="flex-grow">
         <AppRoutes />
       </main>
+      {!isAdminRoute ? <Footer /> : null}
       {!isAdminRoute ? <PremiumSiteFooter /> : null}
+      {!isAdminRoute ? <CookieConsent /> : null}
     </div>
   );
 };
