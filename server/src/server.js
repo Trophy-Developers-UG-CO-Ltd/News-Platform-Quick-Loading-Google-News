@@ -16,6 +16,7 @@ const { globalLimiter } = require("./middlewares/rateLimit.middleware");
 const {
   handleStripeWebhook: handleAdOrderStripeWebhook,
   handleFlutterwaveWebhook: handleAdOrderFlutterwaveWebhook,
+  getAdOrderConfig,
 } = require("./modules/ad-orders/adOrder.controller");
 const {
   blockDirectFileAccess,
@@ -187,6 +188,10 @@ app.post(
   express.raw({ type: "application/json" }),
   handleAdOrderFlutterwaveWebhook
 );
+
+// Keep this public config endpoint directly mounted to avoid 404s if modular
+// route registration changes.
+app.get("/api/v1/ad-orders/config", getAdOrderConfig);
 
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
